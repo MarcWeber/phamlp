@@ -70,6 +70,9 @@ class HamlRenderer {
 	  return $output;
 	}
 
+	/**
+	 * Renders element attributes
+	 */
 	private function renderAttributes($attributes) {
 		$output = '';
 		foreach ($attributes as $name => $value) {
@@ -98,14 +101,14 @@ class HamlRenderer {
 	 * Renders the opening of a comment
 	 */
 	public function renderOpenComment($node) {
-		return "<!-- {$node->content}" . ($node->isConditional ? '>' : '');
+		return ($node->isConditional ? "\n\n" : '') . "<!--{$node->content}" . ($node->isConditional ? ">\n" : ' ');
 	}
 
 	/**
 	 * Renders the closing of a comment
 	 */
 	public function renderCloseComment($node) {
-		return ($node->isConditional ? '<![endif]' : '') .  ' -->';
+		return ($node->isConditional ? "\n<![endif]" : ' ') .  '-->' . ($node->isConditional ? "\n" : '');
 	}
 
 	/**

@@ -19,7 +19,7 @@ class HamlCommentNode extends HamlNode {
 
 	public function __construct($content) {
 	  $this->content = $content;
-		$this->isConditional = (bool)preg_match('/^\[.+]$/', $line[HamlParser::HAML_CONTENT], $matches);
+		$this->isConditional = (bool)preg_match('/^\[.+\]$/', $content, $matches);
 	}
 
 	public function getIsConditional() {
