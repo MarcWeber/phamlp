@@ -4,7 +4,7 @@
  * SassRootNode class file.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 require_once(dirname(__FILE__).'/../script/SassScriptParser.php');
@@ -15,7 +15,7 @@ require_once(dirname(__FILE__).'/../renderers/SassRenderer.php');
  * Also the root node of a document.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassRootNode extends SassNode {
 	/**

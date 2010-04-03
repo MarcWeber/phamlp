@@ -8,7 +8,7 @@
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 require_once('SassFile.php');
@@ -56,7 +56,7 @@ class SassParser {
 	 * style: string Sets the style of the CSS output. Value can be:
 	 * nested - Nested is the default Sass style, because it reflects the
 	 * structure of the document in much the same way Sass does. Each selector
-	 * and rul has its own line with indentation is based on how deeply the rule
+	 * and rule has its own line with indentation is based on how deeply the rule
 	 * is nested. Nested style is very useful when looking at large CSS files for
 	 * the same reason Sass is useful for making them: it allows you to very
 	 * easily grasp the structure of the file without actually reading anything.
@@ -67,10 +67,10 @@ class SassParser {
 	 * on that line. Nested rules are placed with each other while groups of rules
 	 * are separated by a blank line.
 	 * compressed - Compressed has no whitespace except that necessary to separate
-	 * selectors and properties. It’s not meant to be human-readable.
+	 * selectors and properties. It's not meant to be human-readable.
 	 *
 	 * property_syntax: string Forces the document to use one syntax for
-	 * properties. If the correct syntax isn’t used, an error is thrown.
+	 * properties. If the correct syntax isn't used, an error is thrown.
 	 * Value can be:
 	 * new - forces the use of a colon or equals sign after the property name.
 	 * For example	 color: #0f3 or width = !main_width.
@@ -371,7 +371,7 @@ class SassParser {
 	 */
 	private function parseComment($line, &$lines) {
 		switch ($line['source'][1]) {
-			case SassCommentNode::SASS_COMMENT:
+			case SassCommentNode::Sass_COMMENT:
 				$node = null;
 				while ($this->hasChild($line, $lines, true)) {
 					array_shift($lines);

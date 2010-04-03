@@ -4,7 +4,7 @@
  * SassPropertyNode class file.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 /**
@@ -12,7 +12,7 @@
  * Represents a CSS property.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassPropertyNode extends SassNode {
 	const MATCH_PROPERTY_NEW = '/^([^\s=:"]+)(?:\s*(=)|:)(?:\s+|$)(.*?)(;)?$/';

@@ -4,7 +4,7 @@
  * SassIfNode class file.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 /**
@@ -13,7 +13,7 @@
  * Else If and Else statement nodes are chained below the If statement node.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassIfNode extends SassNode {
 	const MATCH_IF = '/^@if\s+(.+)$/';

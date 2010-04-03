@@ -6,7 +6,7 @@
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 /**
@@ -16,8 +16,8 @@
  */
 class SassFile {
 	const CSS = '.css';
-	const SASS = '.sass';
-	const SASSC = '.sassc';
+	const Sass = '.sass';
+	const SassC = '.sassc';
 
 	/**
 	 * Returns the parse tree for a file.
@@ -54,8 +54,8 @@ class SassFile {
 	 * @throws SassException if file not found
 	 */
 	static public function getFile($filename, $options) {
-		if (substr($filename, -5) !== self::SASS) {
-			$filename .= self::SASS;
+		if (substr($filename, -5) !== self::Sass) {
+			$filename .= self::Sass;
 		}
 
 		if (file_exists($filename)) {
@@ -113,7 +113,7 @@ class SassFile {
 	 */
 	static public function getCachedFile($filename, $options) {
 		$cached = realpath($options['cache_location']) . DIRECTORY_SEPARATOR .
-			md5($filename) . self::SASSC;
+			md5($filename) . self::SassC;
 
 		if ($cached && file_exists($cached) &&
 				filemtime($cached) >= filemtime($filename)) {
@@ -138,7 +138,7 @@ class SassFile {
 			$cacheDir = realpath($options['cache_location']);
 		}
 
-		$cached = $cacheDir . DIRECTORY_SEPARATOR . md5($filename) . self::SASSC;
+		$cached = $cacheDir . DIRECTORY_SEPARATOR . md5($filename) . self::SassC;
 
 		return file_put_contents($cached, serialize($sassc));
 	}

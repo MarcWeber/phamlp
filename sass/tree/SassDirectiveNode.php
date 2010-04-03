@@ -4,7 +4,7 @@
  * SassDirectiveNode class file.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 /**
@@ -12,7 +12,7 @@
  * Represents a CSS directive.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassDirectiveNode extends SassNode {
 	const IDENTIFIER = '@';

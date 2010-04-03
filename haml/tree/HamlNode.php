@@ -4,7 +4,7 @@
  * HamlNode class file.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 require_once('HamlRootNode.php');
@@ -20,7 +20,7 @@ require_once('HamlNodeExceptions.php');
  * Base class for all Haml nodes.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class HamlNode {
 	/**
@@ -239,6 +239,6 @@ class HamlNode {
 	 * @param array source line(s) that generated the ouput
 	 */
 	protected function showSource($output) {
-		return "<!--\n  ({$this->line['file']} {$this->line['number']}:{$this->line['indentLevel']})\n  {$this->line[HamlParser::HAML_SOURCE]}\n-->\n$output";
+		return "<!--\n  ({$this->line['file']} {$this->line['number']}:{$this->line['indentLevel']})\n  {$this->line[HamlParser::Haml_SOURCE]}\n-->\n$output";
 	}
 }

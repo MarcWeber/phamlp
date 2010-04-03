@@ -4,7 +4,7 @@
  * SassWhileNode class file.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 /**
@@ -12,7 +12,7 @@
  * Represents a Sass @while loop and a Sass @do loop.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassWhileNode extends SassNode {
 	const MATCH = '/^@(do|while)\s+(.+)$/';

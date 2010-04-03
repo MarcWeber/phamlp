@@ -1,22 +1,22 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * Escaped Filter for {@link HAML http://haml-lang.com/} class file.
+ * Escaped Filter for {@link Haml http://haml-lang.com/} class file.
  * @author			Chris Yates
- * @copyright		Copyright &copy; 2009 PBM Web Development
- * @license			http://www.yiiframework.com/license/
- * @package			HAML
+ * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			Haml
  * @subpackage	filters
  */
 
 /**
- * Escaped Filter for {@link HAML http://haml-lang.com/} class.
+ * Escaped Filter for {@link Haml http://haml-lang.com/} class.
  * Escapes the text.
  * Code to be interpolated can be included by wrapping it in #().
- * @package			HAML
+ * @package			Haml
  * @subpackage	filters
  */
-Class HamlEscapedFilter extends HamlBaseFilter {
+class HamlEscapedFilter extends HamlBaseFilter {
 	/**
 	 * Run the filter
 	 * @param string text to filter

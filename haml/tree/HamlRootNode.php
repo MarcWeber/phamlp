@@ -4,7 +4,7 @@
  * HamlRootNode class file.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 require_once(dirname(__FILE__).'/../renderers/HamlRenderer.php');
@@ -14,7 +14,7 @@ require_once(dirname(__FILE__).'/../renderers/HamlRenderer.php');
  * Also the root node of a document.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class HamlRootNode extends HamlNode {
 	/**

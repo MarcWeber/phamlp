@@ -1,12 +1,12 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * {@link SASS http://sass-lang.com/} Filter for
- * {@link HAML http://haml-lang.com/} class file.
+ * {@link Sass http://sass-lang.com/} Filter for
+ * {@link Haml http://haml-lang.com/} class file.
  * @author			Chris Yates
- * @copyright		Copyright &copy; 2009 PBM Web Development
- * @license			http://www.yiiframework.com/license/
- * @package			HAML
+ * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			Haml
  * @subpackage	filters
  */
 
@@ -14,14 +14,14 @@ require_once('HamlCssFilter.php');
 require_once(dirname(__FILE__).'/../../sass/SassParser.php');
 
 /**
- * {@link SASS http://sass-lang.com/} Filter for
- * {@link HAML http://haml-lang.com/} class.
+ * {@link Sass http://sass-lang.com/} Filter for
+ * {@link Haml http://haml-lang.com/} class.
  * Parses the text as Sass then calls the CSS filter.
- * Useful for including inline SASS.
- * @package			HAML
+ * Useful for including inline Sass.
+ * @package			Haml
  * @subpackage	filters
  */
-Class HamlSassFilter extends HamlBaseFilter {
+class HamlSassFilter extends HamlBaseFilter {
 	/**
 	 * Run the filter
 	 * @param string text to filter

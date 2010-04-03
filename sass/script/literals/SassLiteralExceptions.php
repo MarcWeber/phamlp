@@ -4,7 +4,7 @@
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 require_once(dirname(__FILE__).'/../SassScriptParserExceptions.php');
@@ -15,7 +15,7 @@ require_once(dirname(__FILE__).'/../SassScriptParserExceptions.php');
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassLiteralException extends SassScriptParserException {}
 
@@ -25,7 +25,7 @@ class SassLiteralException extends SassScriptParserException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassBooleanException extends SassLiteralException {}
 
@@ -35,7 +35,7 @@ class SassBooleanException extends SassLiteralException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassColourException extends SassLiteralException {}
 
@@ -45,7 +45,7 @@ class SassColourException extends SassLiteralException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassNumberException extends SassLiteralException {}
 
@@ -55,6 +55,6 @@ class SassNumberException extends SassLiteralException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassStringException extends SassLiteralException {}

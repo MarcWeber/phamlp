@@ -1,22 +1,22 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * CSS Filter for {@link HAML http://haml-lang.com/} class file.
+ * CSS Filter for {@link Haml http://haml-lang.com/} class file.
  * @author			Chris Yates
- * @copyright		Copyright &copy; 2009 PBM Web Development
- * @license			http://www.yiiframework.com/license/
- * @package			HAML
+ * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			Haml
  * @subpackage	filters
  */
 
 /**
- * CSS Filter for {@link HAML http://haml-lang.com/} class.
+ * CSS Filter for {@link Haml http://haml-lang.com/} class.
  * Surrounds the filtered text with <style> and CDATA tags.
  * Useful for including inline CSS.
- * @package			HAML
+ * @package			Haml
  * @subpackage	filters
  */
-Class HamlCssFilter extends HamlBaseFilter {
+class HamlCssFilter extends HamlBaseFilter {
 	/**
 	 * Run the filter
 	 * @param string text to filter

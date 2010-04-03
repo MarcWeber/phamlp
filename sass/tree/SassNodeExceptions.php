@@ -5,7 +5,7 @@
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 require_once(dirname(__FILE__).'/../SassException.php');
@@ -15,7 +15,7 @@ require_once(dirname(__FILE__).'/../SassException.php');
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassNodeException extends SassException {}
 
@@ -24,7 +24,7 @@ class SassNodeException extends SassException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassContextException extends SassNodeException {}
 /**
@@ -32,7 +32,7 @@ class SassContextException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassCommentNodeException extends SassNodeException {}
 
@@ -41,7 +41,7 @@ class SassCommentNodeException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassDirectiveNodeException extends SassNodeException {}
 
@@ -50,7 +50,7 @@ class SassDirectiveNodeException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassForNodeException extends SassNodeException {}
 
@@ -59,7 +59,7 @@ class SassForNodeException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassIfNodeException extends SassNodeException {}
 
@@ -68,7 +68,7 @@ class SassIfNodeException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassImportNodeException extends SassNodeException {}
 
@@ -77,7 +77,7 @@ class SassImportNodeException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassMixinDefinitionNodeException extends SassNodeException {}
 
@@ -86,7 +86,7 @@ class SassMixinDefinitionNodeException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassMixinNodeException extends SassNodeException {}
 
@@ -95,7 +95,7 @@ class SassMixinNodeException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassPropertyNodeException extends SassNodeException {}
 
@@ -104,7 +104,7 @@ class SassPropertyNodeException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassRuleNodeException extends SassNodeException {}
 
@@ -113,7 +113,7 @@ class SassRuleNodeException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassVariableNodeException extends SassNodeException {}
 
@@ -122,6 +122,6 @@ class SassVariableNodeException extends SassNodeException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassWhileNodeException extends SassNodeException {}

@@ -4,7 +4,7 @@
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 require_once(dirname(__FILE__).'/../SassException.php');
@@ -14,7 +14,7 @@ require_once(dirname(__FILE__).'/../SassException.php');
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassScriptParserException extends SassException {}
 
@@ -23,7 +23,7 @@ class SassScriptParserException extends SassException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassScriptLexerException extends SassScriptParserException {}
 
@@ -32,7 +32,7 @@ class SassScriptLexerException extends SassScriptParserException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassScriptOperationException extends SassScriptParserException {}
 
@@ -41,6 +41,6 @@ class SassScriptOperationException extends SassScriptParserException {}
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassScriptFunctionException extends SassScriptParserException {}

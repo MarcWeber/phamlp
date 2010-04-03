@@ -4,7 +4,7 @@
  * SassCommentNode class file.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 /**
@@ -12,14 +12,14 @@
  * Represents a CSS comment.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 class SassCommentNode extends SassNode {
 	const MATCH = '%^/\*\s*(.*)$%';
 	const COMMENT = 1;
 	const IDENTIFIER = '/';
 	const CSS_COMMENT = '*';
-	const SASS_COMMENT = '/';
+	const Sass_COMMENT = '/';
 
 	/**
 	 * CommentNode constructor.

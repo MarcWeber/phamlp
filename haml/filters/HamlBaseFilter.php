@@ -1,26 +1,21 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * Base Filter for {@link HAML http://haml-lang.com/} class file.
+ * Base Filter for {@link Haml http://haml-lang.com/} class file.
  * @author			Chris Yates
- * @copyright		Copyright &copy; 2009 PBM Web Development
- * @license			http://www.yiiframework.com/license/
- * @package			HAML
+ * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			Haml
  * @subpackage	filters
  */
 
 /**
- * Base Filter for {@link HAML http://haml-lang.com/} class.
+ * Base Filter for {@link Haml http://haml-lang.com/} class.
  * This class must be extended and the filter method overridden.
- * @package			HAML
+ * @package			Haml
  * @subpackage	filters
  */
 abstract class HamlBaseFilter {
-	/**
-	 * @var integer the indent level at which the filter was loaded
-	 */
-	public $indentLevel;
-
 	/**
 	 * Initialise the filter.
 	 */

@@ -2,13 +2,13 @@
 /* SVN FILE: $Id$ */
 /**
  * Sass class file.
- * Parses {@link SASS http://sass-lang.com/} files.
- * Please see the {@link SASS documentation http://sass-lang.com/docs} for
- * details of SASS.
+ * Parses {@link Sass http://sass-lang.com/} files.
+ * Please see the {@link Sass documentation http://sass-lang.com/docs} for
+ * details of Sass.
  *
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
  // Do NOT use Yii::import. Doing so causes conflict with HamlSassFilter
@@ -28,7 +28,7 @@ class Sass {
 
 	/**
 	 * Constructor
-	 * @param array SASS options
+	 * @param array Sass options
 	 * @return Sass
 	 */
 	public function __construct($options) {
@@ -36,7 +36,7 @@ class Sass {
 	}
 
 	/**
-	 * Parse a SASS file to CSS
+	 * Parse a Sass file to CSS
 	 * @param string path to file
 	 * @return string CSS
 	 */

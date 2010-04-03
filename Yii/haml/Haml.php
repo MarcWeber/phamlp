@@ -2,8 +2,8 @@
 /* SVN FILE: $Id$ */
 /**
  * HamlViewRenderer class file.
- * Renders {@link HAML http://haml-lang.com/} view files.
- * Please see the {@link HAML documentation http://haml-lang.com/docs/yardoc/file.HAML_REFERENCE.html#plain_text} for the syntax.
+ * Renders {@link Haml http://haml-lang.com/} view files.
+ * Please see the {@link Haml documentation http://haml-lang.com/docs/yardoc/file.Haml_REFERENCE.html#plain_text} for the syntax.
  *
  * To use HamlViewRenderer, configure it as an application component named
  * ""viewRenderer" in the application configuration:
@@ -21,14 +21,14 @@
  *
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 Yii::import('application.vendors.haml.haml.HamlParser');
 
 /**
  * HamlViewRenderer allows you to write view files in
- * {@link HAML http://haml-lang.com/}
+ * {@link Haml http://haml-lang.com/}
  *
  * @author Chris Yates
  * @package extensions.haml

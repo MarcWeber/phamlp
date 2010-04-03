@@ -5,7 +5,7 @@
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 /**
@@ -67,7 +67,7 @@ class SassNumber extends SassLiteral {
 	private $units = '';
 
 	/**
-	 * Class constructor.
+	 * class constructor.
 	 * Sets the value and units of the number.
 	 * @param string number
 	 * @return SassNumber

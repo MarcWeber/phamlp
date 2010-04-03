@@ -4,7 +4,7 @@
  * SassNode class file.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 
 require_once('SassContext.php');
@@ -27,7 +27,7 @@ require_once('SassNodeExceptions.php');
  * Base class for all Sass nodes.
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 abstract class SassNode {
 	const MATCH_INTERPOLATION = '/(?<!\\\\)#\{(.*?)\}/';

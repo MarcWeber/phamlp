@@ -5,7 +5,7 @@
  * @package sass
  * @author Chris Yates
  * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://www.yiiframework.com/license/
+ * @license http://phamlp.googlecode.com/files/license.txt
  */
 require_once('SassBoolean.php');
 require_once('SassColour.php');
@@ -27,7 +27,7 @@ abstract class SassLiteral {
   protected $value;
 
 	/**
-	 * Class constructor
+	 * class constructor
 	 * @param string value of the literal type
 	 * @return SassLiteral
 	 */
