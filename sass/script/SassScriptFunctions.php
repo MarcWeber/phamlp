@@ -1,5 +1,7 @@
 <?php
 /**
+ * SassScript functions class file.
+ * 
  * Methods in this module are accessible from the SassScript context.
  * For example, you can write:
  *
@@ -30,6 +32,18 @@
  * Keep in mind that Sass stylesheets are only compiled once
  * and then left as static CSS files.
  * Any dynamic CSS should be left in `<style>` tags in the HTML.
+ * 
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script
+ */
+ 
+/**
+ * SassScript functions class.
+ * @package			PHamlP
+ * @subpackage	Sass.script
  */
 class SassScriptFunctions {
 	/**

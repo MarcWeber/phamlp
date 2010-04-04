@@ -2,17 +2,18 @@
 /* SVN FILE: $Id$ */
 /**
  * SassScriptOperation class file.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script
  */
 
 /**
  * SassScriptOperation class.
  * The operation to perform.
- * @package sass
- * @author Chris Yates
+ * @package			PHamlP
+ * @subpackage	Sass.script
  */
 class SassScriptOperation {
   const MATCH = '/^(\(|\)|\+|-|\*|\/|%|<=|>=|<|>|==|!=|=|#{|}|and|or|xor|not|!|&|\||\^|~)/';

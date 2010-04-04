@@ -2,18 +2,19 @@
 /* SVN FILE: $Id$ */
 /**
  * HamlFilterNode class file.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml.tree
  */
 
 /**
  * HamlFilterNode class.
  * Represent a filter in the Haml source.
  * The filter is run on the output from child nodes when the node is rendered.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml.tree
  */
 class HamlFilterNode extends HamlNode {
 	/**

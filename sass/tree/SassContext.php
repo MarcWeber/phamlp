@@ -2,9 +2,11 @@
 /* SVN FILE: $Id$ */
 /**
  * SassContext class file.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 
 /**
@@ -12,9 +14,8 @@
  * Defines the context that the parser is operating in and so allows variables
  * to be scoped.
  * A new context is created for Mixins and imported files.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassContext {
 	/**

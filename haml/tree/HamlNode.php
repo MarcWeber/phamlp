@@ -2,9 +2,11 @@
 /* SVN FILE: $Id$ */
 /**
  * HamlNode class file.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml.tree
  */
 
 require_once('HamlRootNode.php');
@@ -18,9 +20,8 @@ require_once('HamlNodeExceptions.php');
 /**
  * HamlNode class.
  * Base class for all Haml nodes.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml.tree
  */
 class HamlNode {
 	/**

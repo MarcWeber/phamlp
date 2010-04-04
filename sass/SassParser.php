@@ -5,10 +5,11 @@
  * Parses {@link Sass http://sass-lang.com/} files.
  * See the {@link Sass documentation http://sass-lang.com/docs Sass documentation}
  * for details of Sass.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass
  */
 
 require_once('SassFile.php');
@@ -16,9 +17,9 @@ require_once('tree/SassNode.php');
 require_once('SassException.php');
 
 /**
- * SassParser class
- * @author Chris Yates
- * @package sass
+ * SassParser class.
+ * @package			PHamlP
+ * @subpackage	Sass
  */
 class SassParser {
 	/**#@+

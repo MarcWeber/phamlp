@@ -2,19 +2,20 @@
 /* SVN FILE: $Id$ */
 /**
  * SassNumber class file.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 
 /**
  * SassNumber class.
  * Provides operations and type testing for Sass numbers.
  * Units are of the passed value are converted the those of the class value
- * if it has units. e.g. 2cm + 20mm = 4cm while 2 + 20mm = 22mm
- * @package sass
- * @author Chris Yates
+ * if it has units. e.g. 2cm + 20mm = 4cm while 2 + 20mm = 22mm.
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 class SassNumber extends SassLiteral {
 	/**

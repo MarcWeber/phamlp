@@ -2,17 +2,18 @@
 /* SVN FILE: $Id$ */
 /**
  * SassFile class file.
- * File handling utilites
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * File handling utilites.
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass
  */
 
 /**
- * SassFile class
- * @author Chris Yates
- * @package sass
+ * SassFile class.
+ * @package			PHamlP
+ * @subpackage	Sass
  */
 class SassFile {
 	const CSS = '.css';

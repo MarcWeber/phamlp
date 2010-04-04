@@ -2,10 +2,11 @@
 /* SVN FILE: $Id$ */
 /**
  * SassColour class file.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 
 /**
@@ -17,8 +18,8 @@
  *
  * Transparent is a SassColour. Operations on transparent return transparent.
  *
- * @package sass
- * @author Chris Yates
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 class SassColour extends SassLiteral {
 	/**@#+

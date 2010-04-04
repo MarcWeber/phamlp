@@ -1,10 +1,10 @@
 <?php
 /**
  * PBMAssetManager class file.
- * @author Chris Yates <chris.l.yates@gmail.com>
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
- * @version $Id$
+ * @author		Chris Yates <chris.l.yates@gmail.com>
+ * @copyright	Copyright &copy; 2010 PBM Web Development
+ * @license		http://phamlp.googlecode.com/files/license.txt
+ * @package		PBM
  */
 /**
  * PBMAssetManager class.
@@ -48,6 +48,8 @@
  *
  * The only difference is that parsing of files will take place during the
  * publish. Files that do not require parsing are handled exactly as before.
+ * 
+ * @package PBM
  */
 class PBMAssetManager extends CAssetManager {
 	/**

@@ -1,12 +1,12 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * SassCalculator class file.
- * Calculates values from expressions
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * SassScriptLexer class file.
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script
  */
 
 require_once('literals/SassLiteral.php');
@@ -14,9 +14,9 @@ require_once('SassScriptFunction.php');
 require_once('SassScriptOperation.php');
 
 /**
- * SassCalculator class
- * @author Chris Yates
- * @package sass
+ * SassScriptLexer class.
+ * @package			PHamlP
+ * @subpackage	Sass.script
  */
 class SassScriptLexer {
 	const MATCH_WHITESPACE = '/^\s+/';

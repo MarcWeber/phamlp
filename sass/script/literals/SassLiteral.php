@@ -2,10 +2,11 @@
 /* SVN FILE: $Id$ */
 /**
  * SassLiteral class file.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 require_once('SassBoolean.php');
 require_once('SassColour.php');
@@ -17,8 +18,8 @@ require_once('SassLiteralExceptions.php');
  * SassLiteral class.
  * Base class for all Sass literals.
  * Sass data types are extended from this class.
- * @package sass
- * @author Chris Yates
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 abstract class SassLiteral {
 	/**

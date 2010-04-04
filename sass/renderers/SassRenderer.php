@@ -2,10 +2,11 @@
 /* SVN FILE: $Id$ */
 /**
  * SassRenderer class file.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.renderers
  */
 
 require_once('SassCompactRenderer.php');
@@ -17,8 +18,8 @@ require_once('SassNestedRenderer.php');
  * SassRenderer class.
  * Provides the most common version of each method. Child classs override
  * methods to provide style specific rendering.
- * @package sass
- * @author Chris Yates
+ * @package			PHamlP
+ * @subpackage	Sass.renderers
  */
 class SassRenderer {
 	/**#@+

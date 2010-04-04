@@ -2,19 +2,19 @@
 /* SVN FILE: $Id$ */
 /**
  * Plain Filter for {@link Haml http://haml-lang.com/} class file.
- * @author			Chris Yates
+ * @author			Chris Yates <chris.l.yates@gmail.com>
  * @copyright		Copyright &copy; 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
- * @package			Haml
- * @subpackage	filters
+ * @package			PHamlP
+ * @subpackage	Haml.filters
  */
 
 /**
  * Plain Filter for {@link Haml http://haml-lang.com/} class.
  * Does not parse the filtered text. This is useful for large blocks of text
  * without HTML tags when lines are not to be parsed.
- * @package			Haml
- * @subpackage	filters
+ * @package			PHamlP
+ * @subpackage	Haml.filters
  */
 class HamlPlainFilter extends HamlBaseFilter {
 	/**

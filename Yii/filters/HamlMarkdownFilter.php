@@ -7,11 +7,11 @@
  * This file should be placed in the filterDir directory as defined in the
  * HamlParser options.
  * 
- * @author			Chris Yates
+ * @author			Chris Yates <chris.l.yates@gmail.com>
  * @copyright		Copyright &copy; 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
- * @package			Yii
- * @subpackage	filters
+ * @package			PHamlP
+ * @subpackage	Yii.filters
  */
  
 Yii::import('ext.haml.vendors.phamlp.haml.filters._HamlMarkdownFilter');
@@ -19,14 +19,15 @@ Yii::import('ext.haml.vendors.phamlp.haml.filters._HamlMarkdownFilter');
 /**
  * Markdown Filter for {@link Haml http://haml-lang.com/} class.
  * Parses the text with Markdown.
- * @package			Haml
- * @subpackage	filters
+ * @package			PHamlP
+ * @subpackage	Yii.filters
  */
-class HamlMarkdownFilter extends _HamlMarkdownFilter {	
+class HamlMarkdownFilter extends _HamlMarkdownFilter {
 	/**
-	 * Returns the parser.
-	 */
-	protected function getParser() {
-	   return new CMarkdownParser(); // Yii implementation
+	 * Initialise the filter with the $vendorClass
+	 */	
+	public function init() {
+		$this->vendorClass='CMarkdownParser';
+		parent::init();
 	}
 }

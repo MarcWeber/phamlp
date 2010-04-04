@@ -1,11 +1,12 @@
 <?php
+/* SVN FILE: $Id$ */
 /**
  * HamlViewRenderer class file.
- * Renders {@link HAML http://haml-lang.com/} view files.
- * Please see the {@link HAML documentation http://haml-lang.com/docs/yardoc/file.HAML_REFERENCE.html#plain_text} for the syntax.
+ * Renders {@link Haml http://haml-lang.com/} view files.
+ * Please see the {@link Haml documentation http://haml-lang.com/docs/yardoc/file.Haml_REFERENCE.html#plain_text} for the syntax.
  *
  * To use HamlViewRenderer, configure it as an application component named
- * "viewRenderer" in the application configuration:
+ * ""viewRenderer" in the application configuration:
  * <pre>
  * array(
  *   'components'=>array(
@@ -18,17 +19,20 @@
  * )
  * </pre>
  *
- * @author Chris Yates <chris.l.yates@gmail.com>
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Yii
  */
+
+Yii::import('application.vendors.haml.haml.HamlParser');
 
 /**
  * HamlViewRenderer allows you to write view files in
- * {@link HAML http://haml-lang.com/}
- *
- * @author Chris Yates
- * @package haml
+ * {@link Haml http://haml-lang.com/}.
+ * @package			PHamlP
+ * @subpackage	Yii
  */
 class Haml extends CViewRenderer {
 	/**#@+
@@ -141,18 +145,18 @@ class Haml extends CViewRenderer {
 	/**
 	 * @var array Haml parser option names. These are passed to the parser if set.
 	 */
-	private $hamlOptions = array('doctype', 'escapeHtml', 'suppressEval', 'attrWrapper', 'style', 'ugly', 'preserveComments', 'debug', 'filterDir', 'doctypes', 'emptyTags', 'inlineTags', 'minimizedAttributes', 'preserve');
+	private $hamlOptions = array('doctype', 'escapeHtml', 'suppressEval', 'attrWrapper', 'style', 'ugly', 'preserveComments', 'debug', 'filterPath', 'doctypes', 'emptyTags', 'inlineTags', 'minimizedAttributes', 'preserve');
 	/**
 	 * @var string Path to filters. Derived from filterPathAlias.
 	 */
-	private $filterDir;
+	private $filterPath;
 
 	/**
 	 * Do a sanity check on the options and setup alias to filters
 	 */
-	private function _init() {
+	public function init() {
 		if (isset($this->filterPathAlias)) {
-			$this->filterDir = Yii::getPathOfAlias($this->filterPathAlias);
+			$this->filterPath = Yii::getPathOfAlias($this->filterPathAlias);
 		}
 
 		$options = array();
@@ -162,8 +166,9 @@ class Haml extends CViewRenderer {
 			}
 		} // foreach
 
-		Yii::import('ext.haml.vendors.phamlp.haml.HamlParser');
 	  $this->haml = new HamlParser($options);
+
+		parent::init();
 	}
 
 	/**
@@ -173,14 +178,7 @@ class Haml extends CViewRenderer {
 	 * @param string the resulting view file path
 	 */
 	protected function generateViewFile($sourceFile, $viewFile) {
-		if (substr($sourceFile, strlen($this->fileExtension) * -1) === $this->fileExtension) {
-			if (empty($this->haml)) $this->_init();
- 			$data = $this->haml->parse($sourceFile);
-		}
-		else {
-			$data = file_get_contents($sourceFile);
-		}
-		file_put_contents($viewFile, $data);
+ 		file_put_contents($viewFile, $this->haml->parse($sourceFile));
 	}
 
 	/**
@@ -194,11 +192,8 @@ class Haml extends CViewRenderer {
 	 */
 	public function renderFile($context,$sourceFile,$data,$return)
 	{
-		$hamlSourceFile = substr($sourceFile, 0, strrpos($sourceFile, '.')).$this->fileExtension;
-
-		if(!is_file($hamlSourceFile) || ($file=realpath($hamlSourceFile))===false) {
-			return parent::renderFile($context, $sourceFile, $data, $return);
-		}
+		if(!is_file($sourceFile) || ($file=realpath($sourceFile))===false)
+			throw new CException(Yii::t('yii','View file "{file}" does not exist.',array('{file}'=>$sourceFile)));
 		$viewFile=$this->getViewFile($sourceFile);
 		if(!$this->cache||@filemtime($sourceFile)>@filemtime($viewFile))
 		{

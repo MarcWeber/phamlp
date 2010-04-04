@@ -2,17 +2,18 @@
 /* SVN FILE: $Id$ */
 /**
  * SassWhileNode class file.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 
 /**
  * SassWhileNode class.
  * Represents a Sass @while loop and a Sass @do loop.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassWhileNode extends SassNode {
 	const MATCH = '/^@(do|while)\s+(.+)$/';

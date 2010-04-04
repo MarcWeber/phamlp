@@ -29,10 +29,12 @@
  * + css - wraps the content in <style> and CDATA tags. Useful for adding inline CSS.
  * + php - wraps the content in <?php tags. The content is PHP code.
  * PHP can be used in all the filters (except php) by wrapping expressions in #().
- *
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * 
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml
  */
 
 require_once('tree/HamlNode.php');
@@ -40,11 +42,9 @@ require_once('HamlException.php');
 
 /**
  * HamlParser allows you to write view files in
- * {@link Haml http://haml-lang.com/}
- *
- * @author Chris Yates
- * @package haml
- * @subpackage haml
+ * {@link Haml http://haml-lang.com/}.
+ * @package			PHamlP
+ * @subpackage	Haml
  */
 class HamlParser {
 	/**#@+

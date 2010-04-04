@@ -13,9 +13,16 @@
  * Other controllers should extend this class, or the resolveViewFile method
  * copied into the class the other controllers do extend from.
  *
- * @author Chris Yates <chris.l.yates@gmail.com>
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Yii
+ */
+/**
+ * AppController class.
+ * @package			PHamlP
+ * @subpackage	Yii
  */
 class AppController extends CController
 {

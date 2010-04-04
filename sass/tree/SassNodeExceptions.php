@@ -1,11 +1,11 @@
 <?php
 /**
  * SassNode exception classes.
- *
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 
 require_once(dirname(__FILE__).'/../SassException.php');
@@ -13,7 +13,7 @@ require_once(dirname(__FILE__).'/../SassException.php');
 /**
  * SassNodeException class.
  * @package sass
- * @author Chris Yates
+ * @author Chris Yates <chris.l.yates@gmail.com>
  * @copyright Copyright &copy; 2010 PBM Web Development
  * @license http://phamlp.googlecode.com/files/license.txt
  */
@@ -21,107 +21,83 @@ class SassNodeException extends SassException {}
 
 /**
  * SassContextException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassContextException extends SassNodeException {}
 /**
  * SassCommentNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassCommentNodeException extends SassNodeException {}
 
 /**
  * SassDirectiveNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassDirectiveNodeException extends SassNodeException {}
 
 /**
  * SassForNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassForNodeException extends SassNodeException {}
 
 /**
  * SassIfNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassIfNodeException extends SassNodeException {}
 
 /**
  * SassImportNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassImportNodeException extends SassNodeException {}
 
 /**
  * SassMixinDefinitionNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassMixinDefinitionNodeException extends SassNodeException {}
 
 /**
  * SassMixinNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassMixinNodeException extends SassNodeException {}
 
 /**
  * SassPropertyNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassPropertyNodeException extends SassNodeException {}
 
 /**
  * SassRuleNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassRuleNodeException extends SassNodeException {}
 
 /**
  * SassVariableNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassVariableNodeException extends SassNodeException {}
 
 /**
  * SassWhileNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassWhileNodeException extends SassNodeException {}

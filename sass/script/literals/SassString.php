@@ -2,17 +2,18 @@
 /* SVN FILE: $Id$ */
 /**
  * SassString class file.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 
 /**
  * SassString class.
  * Provides operations and type testing for Sass strings.
- * @package sass
- * @author Chris Yates
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 class SassString extends SassLiteral {
   const MATCH = '/^"(.*?)"/';

@@ -6,9 +6,11 @@
  * Please see the {@link Sass documentation http://sass-lang.com/docs} for
  * details of Sass.
  *
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Yii
  */
 
  // Do NOT use Yii::import. Doing so causes conflict with HamlSassFilter
@@ -16,9 +18,8 @@ require_once(Yii::getPathOfAlias('application.vendors.haml.sass').DIRECTORY_SEPA
 
 /**
  * Sass class
- * @author Chris Yates
- * @package extensions.haml
- * @subpackage sass
+ * @package			PHamlP
+ * @subpackage	Yii
  */
 class Sass {
 	/**

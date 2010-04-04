@@ -2,17 +2,18 @@
 /* SVN FILE: $Id$ */
 /**
  * SassPropertyNode class file.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 
 /**
  * SassPropertyNode class.
  * Represents a CSS property.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassPropertyNode extends SassNode {
 	const MATCH_PROPERTY_NEW = '/^([^\s=:"]+)(?:\s*(=)|:)(?:\s+|$)(.*?)(;)?$/';

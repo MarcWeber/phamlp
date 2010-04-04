@@ -11,17 +11,19 @@
  * If the step clause is ommitted the <step> = 1.
  * <var> is available to the rest of the script following evaluation
  * and has the value that terminated the loop.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * 
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree 
  */
 
 /**
  * SassForNode class.
  * Represents a Sass @for loop.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassForNode extends SassNode {
 	const MATCH = '/@for\s+!(\w+)\s+from\s+(.+?)\s+(through|to)\s+(.+?)(?:\s+step\s+(.+))?$/';

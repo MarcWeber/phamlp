@@ -2,18 +2,18 @@
 /* SVN FILE: $Id$ */
 /**
  * CDATA Filter for {@link Haml http://haml-lang.com/} class file.
- * @author			Chris Yates
+ * @author			Chris Yates <chris.l.yates@gmail.com>
  * @copyright		Copyright &copy; 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
- * @package			Haml
- * @subpackage	filters
+ * @package			PHamlP
+ * @subpackage	Haml.filters
  */
 
 /**
  * CDATA Filter for {@link Haml http://haml-lang.com/} class.
  * Surrounds the filtered text with CDATA tags.
- * @package			Haml
- * @subpackage	filters
+ * @package			PHamlP
+ * @subpackage	Haml.filters
  */
 class HamlCdataFilter extends HamlBaseFilter {
 	/**

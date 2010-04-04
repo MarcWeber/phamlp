@@ -2,10 +2,11 @@
 /* SVN FILE: $Id$ */
 /**
  * HamlRenderer class file.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml.renderers
  */
 
 require_once('HamlCompressedRenderer.php');
@@ -17,8 +18,8 @@ require_once('HamlNestedRenderer.php');
  * HamlRenderer class.
  * Provides the most common version of each method. Child classs override
  * methods to provide style specific rendering.
- * @package sass
- * @author Chris Yates
+ * @package			PHamlP
+ * @subpackage	Haml.renderers
  */
 class HamlRenderer {
 	/**#@+

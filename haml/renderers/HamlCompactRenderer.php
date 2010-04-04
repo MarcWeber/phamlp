@@ -3,16 +3,17 @@
 /**
  * HamlCompactRenderer class file.
  * Rules are on single lines.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml.renderers
  */
 
 /**
  * HamlCompactRenderer class.
- * @package sass
- * @author Chris Yates
+ * @package			PHamlP
+ * @subpackage	Haml.renderers
  */
 class HamlCompactRenderer extends HamlRenderer {
 	/**

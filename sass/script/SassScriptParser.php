@@ -1,21 +1,21 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * SassCalculator class file.
- * Calculates values from expressions
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * SassScriptParser class file.
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script
  */
 
 require_once('SassScriptLexer.php');
 require_once('SassScriptParserExceptions.php');
 
 /**
- * SassCalculator class
- * @author Chris Yates
- * @package sass
+ * SassScriptParser class.
+ * @package			PHamlP
+ * @subpackage	Sass.script
  */
 class SassScriptParser {
 	/**

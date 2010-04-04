@@ -1,20 +1,18 @@
 <?php
 /**
  * HamlNode exception classes.
- *
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml.tree
  */
 
 require_once(dirname(__FILE__).'/../HamlException.php');
 
 /**
  * HamlNodeException class.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml.tree
  */
 class HamlNodeException extends HamlException {}

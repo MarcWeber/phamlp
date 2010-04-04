@@ -2,18 +2,19 @@
 /* SVN FILE: $Id$ */
 /**
  * HamlDoctypeNode class file.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml.tree
  */
 
 /**
  * HamlDoctypeNode class.
  * Represents a Doctype.
  * Doctypes are always rendered on a single line with a newline.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Haml.tree
  */
 class HamlDoctypeNode extends HamlNode {
 	/**

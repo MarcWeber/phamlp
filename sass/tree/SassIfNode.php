@@ -2,18 +2,19 @@
 /* SVN FILE: $Id$ */
 /**
  * SassIfNode class file.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 
 /**
  * SassIfNode class.
  * Represents Sass If, Else If and Else statements.
  * Else If and Else statement nodes are chained below the If statement node.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 class SassIfNode extends SassNode {
 	const MATCH_IF = '/^@if\s+(.+)$/';

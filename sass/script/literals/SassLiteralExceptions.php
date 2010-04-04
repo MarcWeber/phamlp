@@ -1,10 +1,11 @@
 <?php
 /**
  * Sass literal exception classes.
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 
 require_once(dirname(__FILE__).'/../SassScriptParserExceptions.php');
@@ -13,7 +14,7 @@ require_once(dirname(__FILE__).'/../SassScriptParserExceptions.php');
  * Sass literal exception.
  *
  * @package sass
- * @author Chris Yates
+ * @author Chris Yates <chris.l.yates@gmail.com>
  * @copyright Copyright &copy; 2010 PBM Web Development
  * @license http://phamlp.googlecode.com/files/license.txt
  */
@@ -21,40 +22,28 @@ class SassLiteralException extends SassScriptParserException {}
 
 /**
  * SassBooleanException class.
- *
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 class SassBooleanException extends SassLiteralException {}
 
 /**
  * SassColourException class.
- *
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 class SassColourException extends SassLiteralException {}
 
 /**
  * SassNumberException class.
- *
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 class SassNumberException extends SassLiteralException {}
 
 /**
  * SassStringException class.
- *
- * @package sass
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.script.literals
  */
 class SassStringException extends SassLiteralException {}

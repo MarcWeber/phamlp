@@ -2,9 +2,11 @@
 /* SVN FILE: $Id$ */
 /**
  * SassNode class file.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @author			Chris Yates <chris.l.yates@gmail.com>
+ * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @license			http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 
 require_once('SassContext.php');
@@ -25,9 +27,8 @@ require_once('SassNodeExceptions.php');
 /**
  * SassNode class.
  * Base class for all Sass nodes.
- * @author Chris Yates
- * @copyright Copyright &copy; 2010 PBM Web Development
- * @license http://phamlp.googlecode.com/files/license.txt
+ * @package			PHamlP
+ * @subpackage	Sass.tree
  */
 abstract class SassNode {
 	const MATCH_INTERPOLATION = '/(?<!\\\\)#\{(.*?)\}/';
