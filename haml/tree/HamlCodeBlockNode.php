@@ -1,9 +1,9 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * HamlNode class file.
+ * HamlCodeBlockNode class file.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Haml.tree
@@ -13,8 +13,8 @@ require_once('HamlRootNode.php');
 require_once('HamlNodeExceptions.php');
 
 /**
- * HamlNode class.
- * Base class for all Haml nodes.
+ * HamlCodeBlockNode class.
+ * Represents a code block - if, elseif, else, foreach, do, and while.
  * @package			PHamlP
  * @subpackage	Haml.tree
  */

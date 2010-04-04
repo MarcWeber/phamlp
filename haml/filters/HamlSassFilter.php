@@ -2,9 +2,9 @@
 /* SVN FILE: $Id$ */
 /**
  * {@link Sass http://sass-lang.com/} Filter for
- * {@link Haml http://haml-lang.com/} class file.
+ * {@link http://haml-lang.com/ Haml} class file.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @copyright		Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Haml.filters
@@ -15,7 +15,7 @@ require_once(dirname(__FILE__).'/../../sass/SassParser.php');
 
 /**
  * {@link Sass http://sass-lang.com/} Filter for
- * {@link Haml http://haml-lang.com/} class.
+ * {@link http://haml-lang.com/ Haml} class.
  * Parses the text as Sass then calls the CSS filter.
  * Useful for including inline Sass.
  * @package			PHamlP

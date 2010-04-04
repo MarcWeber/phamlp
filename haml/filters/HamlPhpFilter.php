@@ -1,16 +1,16 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * PHP Filter for {@link Haml http://haml-lang.com/} class file.
+ * PHP Filter for {@link http://haml-lang.com/ Haml} class file.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @copyright		Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Haml.filters
  */
 
 /**
- * PHP Filter for {@link Haml http://haml-lang.com/} class.
+ * PHP Filter for {@link http://haml-lang.com/ Haml} class.
  * The text will be parsed with the PHP interpreter.
  * @package			PHamlP
  * @subpackage	Haml.filters

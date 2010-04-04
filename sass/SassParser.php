@@ -2,11 +2,10 @@
 /* SVN FILE: $Id$ */
 /**
  * SassParser class file.
- * Parses {@link Sass http://sass-lang.com/} files.
- * See the {@link Sass documentation http://sass-lang.com/docs Sass documentation}
+ * See the {@link http://sass-lang.com/docs Sass documentation}
  * for details of Sass.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Sass
@@ -18,6 +17,7 @@ require_once('SassException.php');
 
 /**
  * SassParser class.
+ * Parses {@link http://sass-lang.com/ Sass} files.
  * @package			PHamlP
  * @subpackage	Sass
  */

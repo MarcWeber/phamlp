@@ -1,16 +1,16 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * Javascript Filter for {@link Haml http://haml-lang.com/} class file.
+ * Javascript Filter for {@link http://haml-lang.com/ Haml} class file.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @copyright		Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Haml.filters
  */
 
 /**
- * Javascript Filter for {@link Haml http://haml-lang.com/} class.
+ * Javascript Filter for {@link http://haml-lang.com/ Haml} class.
  * Surrounds the filtered text with <script> and CDATA tags.
  * Useful for including inline Javascript.
  * Code to be interpolated can be included by wrapping it in #().

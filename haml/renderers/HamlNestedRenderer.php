@@ -2,10 +2,8 @@
 /* SVN FILE: $Id$ */
 /**
  * HamlNestedRenderer class file.
- * Rules are expanded with selectors and properties on single lines.
- * Rules are indented according to their nesting level.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Haml.renderers
@@ -13,6 +11,7 @@
 
 /**
  * HamlNestedRenderer class.
+ * Blocks and content are indented according to their nesting level.
  * @package			PHamlP
  * @subpackage	Haml.renderers
  */

@@ -3,7 +3,7 @@
 /**
  * SassScriptParser class file.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Sass.script
@@ -14,6 +14,8 @@ require_once('SassScriptParserExceptions.php');
 
 /**
  * SassScriptParser class.
+ * Parses SassScript. SassScript is lexed into {@link http://en.wikipedia.org/wiki/Reverse_Polish_notation Reverse Polish notation} by the SassScriptLexer and
+ *  the calculated result returned.
  * @package			PHamlP
  * @subpackage	Sass.script
  */

@@ -1,22 +1,21 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * Peserve Filter for {@link Haml http://haml-lang.com/} class file.
+ * Preserve Filter for {@link http://haml-lang.com/ Haml} class file.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @copyright		Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Haml.filters
  */
 
 /**
- * Peserve Filter for {@link Haml http://haml-lang.com/} class.
- * Does not parse the filtered text. This is useful for large blocks of text
- * without HTML tags when lines are not to be parsed.
+ * Preserve Filter for {@link http://haml-lang.com/ Haml} class.
+ * Does not parse the filtered text and preserves line breaks.
  * @package			PHamlP
  * @subpackage	Haml.filters
  */
-class HamlPlainFilter extends HamlBaseFilter {
+class HamlPreserveFilter extends HamlBaseFilter {
 	/**
 	 * Run the filter
 	 * @param string text to filter

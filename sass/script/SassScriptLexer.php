@@ -3,7 +3,7 @@
 /**
  * SassScriptLexer class file.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Sass.script
@@ -15,6 +15,9 @@ require_once('SassScriptOperation.php');
 
 /**
  * SassScriptLexer class.
+ * Lexes SassSCript into tokens for the parser.
+ * 
+ * Implements a {@link http://en.wikipedia.org/wiki/Shunting-yard_algorithm Shunting-yard algorithm} to provide {@link http://en.wikipedia.org/wiki/Reverse_Polish_notation Reverse Polish notation} output.
  * @package			PHamlP
  * @subpackage	Sass.script
  */

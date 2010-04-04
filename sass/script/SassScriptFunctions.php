@@ -9,15 +9,6 @@
  *
  * and it will call SassFunctions::hsl().
  *
- * The following functions are provided:
- * hsl(): Converts an `hsl(hue, saturation, lightness)` triplet into a colour.
- * rgb(): Converts an `rgb(red, green, blue)` triplet into a colour.
- * percentage(): Converts a unitless number to a percentage.
- * round(): Rounds a number to the nearest whole number.
- * ceil(): Rounds a number up to the nearest whole number.
- * floor(): Rounds a number down to the nearest whole number.
- * abs(): Returns the absolute $value of a number.
- *
  * There are a few things to keep in mind when modifying this module.
  * First of all, the arguments passed are SassLiteral objects.
  * Literal objects are also expected to be returned.
@@ -34,7 +25,7 @@
  * Any dynamic CSS should be left in `<style>` tags in the HTML.
  * 
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Sass.script
@@ -42,6 +33,15 @@
  
 /**
  * SassScript functions class.
+ * A collection of functions for use in SassSCript.
+ * The following functions are provided:
+ * + <b>hsl()</b>: Converts an `hsl(hue, saturation, lightness)` triplet into a colour.
+ * + <b>rgb()</b>: Converts an `rgb(red, green, blue)` triplet into a colour.
+ * + <b>percentage()</b>: Converts a unitless number to a percentage.
+ * + <b>round()</b>: Rounds a number to the nearest whole number.
+ * + <b>ceil()</b>: Rounds a number up to the nearest whole number.
+ * + <b>floor()</b>: Rounds a number down to the nearest whole number.
+ * + <b>abs()</b>: Returns the absolute value of a number.
  * @package			PHamlP
  * @subpackage	Sass.script
  */
@@ -78,8 +78,8 @@ class SassScriptFunctions {
 
 	/**
 	 * Creates a SassColour object from hue, saturation, and lightness.
-	 * Uses the algorithm from
-	 * {@link the CSS3 spec http://www.w3.org/TR/css3-color/#hsl-color}.
+	 * Uses the algorithm from the
+	 * {@link http://www.w3.org/TR/css3-color/#hsl-color CSS3 spec}.
 	 *
 	 * @param float The hue of the colour in degrees.
 	 * Should be between 0 and 360 inclusive

@@ -3,7 +3,7 @@
 /**
  * SassScriptFunction class file.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Sass.script
@@ -13,6 +13,7 @@ require_once('SassScriptFunctions.php');
 
 /**
  * SassScriptFunction class.
+ * Preforms a SassScript function.
  * @package			PHamlP
  * @subpackage	Sass.script
  */

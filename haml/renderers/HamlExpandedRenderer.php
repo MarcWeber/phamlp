@@ -2,10 +2,8 @@
 /* SVN FILE: $Id$ */
 /**
  * HamlExpandedRenderer class file.
- * Rules are expanded with selectors and properties on single lines
- * and properties indented.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Haml.renderers
@@ -13,6 +11,7 @@
 
 /**
  * HamlExpandedRenderer class.
+ * Blocks are on single lines and content indented.
  * @package			PHamlP
  * @subpackage	Haml.renderers
  */

@@ -2,8 +2,9 @@
 /* SVN FILE: $Id$ */
 /**
  * HamlParser class file.
- * Parses {@link Haml http://haml-lang.com/} view files.
- * Please see the {@link Haml documentation http://haml-lang.com/docs/yardoc/file.Haml_REFERENCE.html#plain_text} for the syntax.
+ * HamlParser allows you to write view files in
+ * {@link http://haml-lang.com/ Haml}.
+ * Please see the {@link http://haml-lang.com/docs/yardoc/file.Haml_REFERENCE.html#plain_text Haml documentation} for the syntax.
  * Notes
  * <ul>
  * <li>Debug (addition)<ul>
@@ -20,18 +21,21 @@
  * <li>Switch Case statements do not end with ":"
  * <li>do-while control blocks are written as "do (expression)"</li></ul></li>
  * </ul>
- * Comes with a few ready made filters:
- * + plain - useful for large chunks of text to ensure Haml doesn't do anything.
- * + escaped - like plain but the output is x(ht)ml escaped.
- * + preserve - like plain but preserves the whitespace.
- * + cdata - wraps the content in CDATA tags.
- * + javascript - wraps the content in <script> and CDATA tags. Useful for adding inline JavaScript.
- * + css - wraps the content in <style> and CDATA tags. Useful for adding inline CSS.
- * + php - wraps the content in <?php tags. The content is PHP code.
+ * Comes with filters that run "out of the box":
+ * + <b>plain</b>: useful for large chunks of text to ensure Haml doesn't do anything.
+ * + <b>escaped</b>: like plain but the output is (x)html escaped.
+ * + <b>preserve</b>: like plain but preserves the whitespace.
+ * + <b>cdata</b>: wraps the content in CDATA tags.
+ * + <b>javascript</b>: wraps the content in <script> and CDATA tags. Useful for adding inline JavaScript.
+ * + <b>css</b>: wraps the content in <style> and CDATA tags. Useful for adding inline CSS.
+ * + <b>php</b>: wraps the content in <?php tags. The content is PHP code.
+ * There are two filters that require external classes to work. See {@link http://code.google.com/p/phamlp/wiki/PredefinedFilters PredefinedFilters on the PHamlP wiki} for details of how to use them.
+ * + <b>markdown</b>: Parses the filtered text with Markdown.
+ * + <b>textile</b>: Parses the filtered text with Textile.
  * PHP can be used in all the filters (except php) by wrapping expressions in #().
  * 
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Haml
@@ -41,8 +45,8 @@ require_once('tree/HamlNode.php');
 require_once('HamlException.php');
 
 /**
- * HamlParser allows you to write view files in
- * {@link Haml http://haml-lang.com/}.
+ * HamlParser class.
+ * Parses {@link http://haml-lang.com/ Haml} view files.
  * @package			PHamlP
  * @subpackage	Haml
  */

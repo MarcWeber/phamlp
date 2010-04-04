@@ -1,16 +1,16 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * Plain Filter for {@link Haml http://haml-lang.com/} class file.
+ * Plain Filter for {@link http://haml-lang.com/ Haml} class file.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright		Copyright &copy; 2010 PBM Web Development
+ * @copyright		Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Haml.filters
  */
 
 /**
- * Plain Filter for {@link Haml http://haml-lang.com/} class.
+ * Plain Filter for {@link http://haml-lang.com/ Haml} class.
  * Does not parse the filtered text. This is useful for large blocks of text
  * without HTML tags when lines are not to be parsed.
  * @package			PHamlP

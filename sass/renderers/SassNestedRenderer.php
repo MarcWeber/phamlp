@@ -2,10 +2,8 @@
 /* SVN FILE: $Id$ */
 /**
  * SassNestedRenderer class file.
- * Rules are expanded with selectors and properties on single lines.
- * Rules are indented according to their nesting level.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Sass.renderers
@@ -13,6 +11,8 @@
 
 /**
  * SassNestedRenderer class.
+ * Rules are expanded with selectors and properties on single lines.
+ * Rules are indented according to their nesting level.
  * @package			PHamlP
  * @subpackage	Sass.renderers
  */

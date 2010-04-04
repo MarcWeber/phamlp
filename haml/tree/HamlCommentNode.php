@@ -1,17 +1,17 @@
 <?php
 /* SVN FILE: $Id$ */
 /**
- * HamlNode class file.
+ * HamlCommentNode class file.
  * @author			Chris Yates <chris.l.yates@gmail.com>
- * @copyright 	Copyright &copy; 2010 PBM Web Development
+ * @copyright 	Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Haml.tree
  */
 
 /**
- * HamlNode class.
- * Base class for all Haml nodes.
+ * HamlCommentNode class.
+ * Represents a comment, including MSIE conditional comments.
  * @package			PHamlP
  * @subpackage	Haml.tree
  */
