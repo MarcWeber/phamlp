@@ -139,13 +139,13 @@ class Haml extends CViewRenderer {
 	/**#@-*/
 
 	/**
-	* @var HamlParser the Haml parser
-	*/
+	 * @var HamlParser the Haml parser
+	 */
 	private $haml;
 	/**
 	 * @var array Haml parser option names. These are passed to the parser if set.
 	 */
-	private $hamlOptions = array('doctype', 'escapeHtml', 'suppressEval', 'attrWrapper', 'style', 'ugly', 'preserveComments', 'debug', 'filterPath', 'doctypes', 'emptyTags', 'inlineTags', 'minimizedAttributes', 'preserve');
+	private $hamlOptions = array('format', 'doctype', 'escapeHtml', 'suppressEval', 'attrWrapper', 'style', 'ugly', 'preserveComments', 'debug', 'filterPath', 'doctypes', 'emptyTags', 'inlineTags', 'minimizedAttributes', 'preserve');
 	/**
 	 * @var string Path to filters. Derived from filterPathAlias.
 	 */

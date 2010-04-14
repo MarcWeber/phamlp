@@ -125,6 +125,7 @@ class SassParser {
 			'cache_location' => dirname(__FILE__) . DIRECTORY_SEPARATOR . self::CACHE_LOCATION,
 			'css_location'	 => dirname(__FILE__) . DIRECTORY_SEPARATOR . self::CSS_LOCATION,
 			'load_paths' 		 => array(dirname(__FILE__) . DIRECTORY_SEPARATOR . self::TEMPLATE_LOCATION),
+			'property_syntax' => 'either'
 		), $options);
 	}
 
@@ -354,7 +355,7 @@ class SassParser {
 				}
 				return $this->parseVariable($line);
 				break;
-			case SassPropertyNode::isa($line, $this->propertySyntax):
+			case SassPropertyNode::isa($line, $this->options['property_syntax']):
 				return $this->parseProperty($line);
 				break;
 			default:
@@ -431,7 +432,7 @@ class SassParser {
 	 * @return SassPropertyNode property node
 	 */
 	private function parseProperty($line) {
-		$matches = SassPropertyNode::match($line, $this->options['propertySyntax']);
+		$matches = SassPropertyNode::match($line, $this->options['property_syntax']);
 		return new SassPropertyNode(
 			$matches[SassPropertyNode::NAME],
 			$matches[SassPropertyNode::VALUE],
@@ -468,7 +469,7 @@ class SassParser {
 	 * @return SassVariableNode variable node
 	 */
 	private function parseVariable($line) {
-		$matches = SassVariableNode::match($line, $this->options['propertySyntax']);
+		$matches = SassVariableNode::match($line);
 		return new SassVariableNode(
 			$matches[SassVariableNode::NAME],
 			$matches[SassVariableNode::VALUE],

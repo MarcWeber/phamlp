@@ -367,7 +367,8 @@ class HamlParser {
 		$root = new HamlRootNode(array(
 			'format' => $this->format,
 			'style' => $this->style,
-			'attrWrapper' => $this->attrWrapper
+			'attrWrapper' => $this->attrWrapper,
+			'minimizedAttributes' => $this->minimizedAttributes
 		));
 		$this->buildTree($root, $lines);
 		return $root;

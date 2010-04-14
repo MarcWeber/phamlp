@@ -31,7 +31,7 @@ abstract class _HamlMarkdownFilter extends HamlBaseFilter {
 	 * @var string Markdown class
 	 * Override this value if the class name is different in your environment
 	 */
-	protected $vendorClass = 'Markdown_Parser';
+	protected $vendorClass = 'MarkdownExtra_Parser';
 	
 	/**
 	 * Child classes must implement this method.

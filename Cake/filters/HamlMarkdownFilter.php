@@ -2,8 +2,11 @@
 /* SVN FILE: $Id$ */
 /**
  * Markdown Filter for {@link http://haml-lang.com/ Haml} the 
- * {@link http://www.yiiframework.com/ Yii PHP framework} for use with
+ * {@link http://cakephp.org/ Yii CakePHP framework} for use with
  * {@link http://phamlp.googlecode.com PHamlP}.
+ * 
+ * Requires {@link http://www.michelf.com/projects/php-markdown/ Markdown Extra}
+ * to be installed in your APP.vendors.markdown directory.
  * 
  * This file should be placed in the filterDir directory as defined in the
  * HamlParser options.
@@ -12,10 +15,14 @@
  * @copyright		Copyright (c) 2010 PBM Web Development
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
- * @subpackage	Yii.filters
+ * @subpackage	Cake.filters
  */
- 
-Yii::import('ext.haml.vendors.phamlp.haml.filters._HamlMarkdownFilter');
+
+// Change this to the required path
+define('VENDOR_PATH', APP.'vendors'.DS.'markdown'.DS.'markdown.php');
+
+// The base filter class
+App::import('Vendor', 'HamlMarkdownFilter', array('file'=>'phamlp'.DS.'haml'.DS.'filters'.DS.'_HamlMarkdownFilter.php'));
 
 /**
  * Markdown Filter for {@link http://haml-lang.com/ Haml} class.
@@ -25,10 +32,10 @@ Yii::import('ext.haml.vendors.phamlp.haml.filters._HamlMarkdownFilter');
  */
 class HamlMarkdownFilter extends _HamlMarkdownFilter {
 	/**
-	 * Initialise the filter with the $vendorClass
-	 */	
+	 * Initialise the filter with the $vendorPath
+	 */
 	public function init() {
-		$this->vendorClass='CMarkdownParser';
+		$this->vendorPath = VENDOR_PATH;		
 		parent::init();
 	}
 }
