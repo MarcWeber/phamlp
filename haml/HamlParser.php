@@ -779,11 +779,11 @@ class HamlParser {
 	 * @return HamlNode
 	 */
 	private function parseCode($line, &$lines, $parent) {
-		if (preg_match('/^(if|foreach|for|switch|do|while)/',
+		if (preg_match('/^(if|foreach|for|switch|do|while)\b(.*)$/',
 				$line[self::Haml_CONTENT], $block)) {
-			if ($block[2] === 'do') {
+			if ($block[1] === 'do') {
 				$node = new HamlCodeBlockNode('<?php do { ?>');
-				$node->doWhile = $block[2] . ';';
+				$node->doWhile = 'while' . $block[2] . ';';
 			}
 			else {
 				$node = new HamlCodeBlockNode("<?php {$line[self::Haml_CONTENT]} { ?>");
