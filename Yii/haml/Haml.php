@@ -38,9 +38,13 @@ class Haml extends CViewRenderer {
 	 * Configurable Options - Renderer
 	 */
 	/**
-	 * @var string the extension name of the view file. Defaults to '.haml'.
+	 * @var string the extension name of the source file. Defaults to '.haml'.
 	 */
 	public $fileExtension = '.haml';
+	/**
+	 * @var string the extension name of the view file. Defaults to '.php'.
+	 */
+	public $viewFileExtension = '.php';
 	/**
 	 * @var boolean whether to cache parsed files. If false files will be parsed
 	 * every time.
@@ -203,6 +207,9 @@ class Haml extends CViewRenderer {
 			return parent::renderFile($context, $sourceFile, $data, $return);
 		}
 		$viewFile=$this->getViewFile($sourceFile);
+		
+		$viewFile = str_replace($this->fileExtension.($this->useRuntimePath?'':'c'), $this->viewFileExtension, $viewFile);
+		
 		if(!$this->cache||@filemtime($sourceFile)>@filemtime($viewFile))
 		{
 			$this->generateViewFile($sourceFile,$viewFile);

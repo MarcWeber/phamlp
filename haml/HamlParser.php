@@ -64,7 +64,7 @@ class HamlParser {
 	 * Regexes used to parse the document
 	 */
 	const REGEX_Haml = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.([-_:a-zA-Z]+[-:\w.]*))?(?:#([_:a-zA-Z]+[-_:a-zA-Z0-9]*))?(?:\[(.+)\])?(?:(\()(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\)))?)?(?:(\{)(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\}))?)?(>?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
-	const REGEX_ATTRIBUTES = '/:?(\w+(?:[-:]\w+)*)\s*=>?\s*(?(?=([\'"]))(?:[\'"](.+?)\2)|([^\s,]+))/';
+	const REGEX_ATTRIBUTES = '/:?(\w+(?:[-:]\w+)*)\s*=>?\s*(?(?=([\'"]))(?:[\'"](.*?)\2)|([^\s,]+))/';
 	const REGEX_ATTRIBUTE_FUNCTION = '/^\$?[_a-zA-Z]\w*(?(?=->)(->[_a-zA-Z]\w*)+|(::[_a-zA-Z]\w*)?)\(.+\)$/'; // Matches functions and instantiated and static object methods
 	const REGEX_WHITESPACE_CONTROL = '/(.*?)\s+$/s';
 	const REGEX_WHITESPACE_CONTROL_DEBUG = '%(.*?)(?:<br />\s)$%s'; // whitespace control when showing output
@@ -99,7 +99,7 @@ class HamlParser {
 	 * Haml tokens
 	 */
 	const DOCTYPE = '!!!';
-	const Haml_COMMENT = '-#';
+	const Haml_COMMENT = '!(-#|//)!';
 	const XML_COMMENT = '/';
 	const SELF_CLOSE_TAG = '/';
 	const ESCAPE_XML = '&=';
@@ -615,7 +615,7 @@ class HamlParser {
 	 * @return boolean true if the line is a Haml comment, false if not
 	 */
 	private function isHamlComment($line) {
-	  return $line[self::Haml_TOKEN] === self::Haml_COMMENT;
+		return preg_match(self::Haml_COMMENT, $line[self::Haml_TOKEN]) > 0;
 	}
 
 	/**
@@ -948,13 +948,24 @@ class HamlParser {
 	}
 
 	/**
-	 * Parse an element.
+	 * Parse a filter.
 	 * @param array line to parse
 	 * @param array remaining lines
 	 * @return HamlNode tag node and children
 	 */
 	private function parseFilter($line) {
-		return new HamlFilterNode($this->getFilter($line[self::Haml_FILTER]));
+		$node = new HamlFilterNode($this->getFilter($line[self::Haml_FILTER]));
+		if ($this->hasContent($line)) {
+			$child = $this->parseContent($line);
+			$child->showOutput = $this->showOutput;
+			$child->showSource = $this->showSource;
+			$child->line = array(
+				'indentLevel' => ($line['indentLevel'] + 1),
+				'number' => $line['number']
+			);
+			$node->addChild($child, $parent);
+		}
+	  return $node;
 	}
 
 	/**
