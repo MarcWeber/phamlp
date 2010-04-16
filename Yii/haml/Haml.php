@@ -1,4 +1,5 @@
 <?php
+/* SVN FILE: $Id$ */
 /**
  * HamlViewRenderer class file.
  * Renders {@link HAML http://haml-lang.com/} view files.

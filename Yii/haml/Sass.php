@@ -14,7 +14,7 @@
  */
 
  // Do NOT use Yii::import. Doing so causes conflict with HamlSassFilter
-require_once(Yii::getPathOfAlias('application.vendors.haml.sass').DIRECTORY_SEPARATOR.'SassParser.php');
+require_once(Yii::getPathOfAlias('ext.haml.vendors.phamlp.sass').DIRECTORY_SEPARATOR.'SassParser.php');
 
 /**
  * Sass class

@@ -1,4 +1,5 @@
 <?php
+/* SVN FILE: $Id$ */
 /**
  * AppController class file.
  * 

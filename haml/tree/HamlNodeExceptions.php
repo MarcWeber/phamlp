@@ -1,4 +1,5 @@
 <?php
+/* SVN FILE: $Id$ */
 /**
  * HamlNode exception classes.
  * @author			Chris Yates <chris.l.yates@gmail.com>

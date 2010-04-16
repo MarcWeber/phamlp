@@ -1,4 +1,5 @@
 <?php
+/* SVN FILE: $Id$ */
 /**
  * Haml exception.
  * @author			Chris Yates <chris.l.yates@gmail.com>
@@ -7,7 +8,6 @@
  * @package			PHamlP
  * @subpackage	Haml
  */
-
 /**
  * Haml exception class.
  * @package			PHamlP

@@ -24,7 +24,8 @@ class SassString extends SassLiteral {
 	 * @return SassString
 	 */
 	public function __construct($value = null) {
-		$this->value = substr($value, 1, -1);
+		// Strip start and end quotes if present
+		$this->value = (self::isa($value)?substr($value, 1, -1):$value);
 	}
 
 	/**
