@@ -26,8 +26,6 @@
  * @subpackage	Yii
  */
 
-Yii::import('ext.phamlp.vendors.phamlp.haml.HamlParser');
-
 /**
  * HamlViewRenderer allows you to write view files in
  * {@link Haml http://haml-lang.com/}.
@@ -170,7 +168,7 @@ class Haml extends CViewRenderer {
 			}
 		} // foreach
 
-		Yii::import('ext.haml.vendors.phamlp.haml.HamlParser');
+		Yii::import('ext.phamlp.vendors.phamlp.haml.HamlParser');
 	  $this->haml = new HamlParser($options);
 	}
 

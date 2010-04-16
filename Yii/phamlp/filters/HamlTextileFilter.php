@@ -22,7 +22,7 @@
 define('VENDOR_PATH', 'application.vendors.textile.classTextile');
 
 // The base filter class
-Yii::import('ext.haml.vendors.phamlp.haml.filters._HamlTextileFilter');
+Yii::import('ext.phamlp.vendors.phamlp.haml.filters._HamlTextileFilter');
 
 /**
  * Textile Filter for {@link http://haml-lang.com/ Haml} class.

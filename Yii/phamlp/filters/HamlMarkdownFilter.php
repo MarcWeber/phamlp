@@ -15,7 +15,7 @@
  * @subpackage	Yii.filters
  */
  
-Yii::import('ext.haml.vendors.phamlp.haml.filters._HamlMarkdownFilter');
+Yii::import('ext.phamlp.vendors.phamlp.haml.filters._HamlMarkdownFilter');
 
 /**
  * Markdown Filter for {@link http://haml-lang.com/ Haml} class.
