@@ -26,7 +26,7 @@
  * @subpackage	Yii
  */
 
-Yii::import('ext.haml.vendors.phamlp.haml.HamlParser');
+Yii::import('ext.phamlp.vendors.phamlp.haml.HamlParser');
 
 /**
  * HamlViewRenderer allows you to write view files in
