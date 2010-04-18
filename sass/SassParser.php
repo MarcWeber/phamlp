@@ -82,9 +82,6 @@ class SassParser {
 	 * cache: boolean Whether parsed Sass files should be cached, allowing greater
 	 * speed. Defaults to true.
 	 *
-	 * always_update: boolean Whether the CSS files should be updated every time,
-	 * as opposed to only when the template has been modified. Defaults to false.
-	 *
 	 * template_location: string Path to the root sass template directory for your
 	 * application.
 	 *

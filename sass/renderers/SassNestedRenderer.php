@@ -9,14 +9,26 @@
  * @subpackage	Sass.renderers
  */
 
+require_once('SassExpandedRenderer.php');
+
 /**
  * SassNestedRenderer class.
- * Rules are expanded with selectors and properties on single lines.
- * Rules are indented according to their nesting level.
+ * Nested style is the default Sass style, because it reflects the structure of
+ * the document in much the same way Sass does. Each rule is indented based on
+ * how deeply it's nested. Each property has its own line and is indented
+ * within the rule. 
  * @package			PHamlP
  * @subpackage	Sass.renderers
  */
-class SassNestedRenderer extends SassRenderer {
+class SassNestedRenderer extends SassExpandedRenderer {	
+	/**
+	 * Renders the brace at the end of the rule
+	 * @return string the brace between the rule and its properties
+	 */
+	protected function end() {
+	  return " }\n";
+	}
+	
 	/**
 	 * Returns the indent string for the node
 	 * @param SassNode the node being rendered
@@ -24,24 +36,12 @@ class SassNestedRenderer extends SassRenderer {
 	 */
 	protected function getIndent($node) {
 		$indentLevel = $node->indentLevel;
-
-		if ($node instanceof SassPropertyNode && $node->inNamespace()) {
-			$indentLevel--;
-		}
-		if ($node->inSassScriptDirective()) {
+		if (($node instanceof SassPropertyNode && $node->inNamespace()) ||
+				$node->parent instanceof SassMixinNode ||
+				$node->inSassScriptDirective()) {
 			$indentLevel--;
 		}
 		return str_repeat(self::INDENT, $indentLevel);
-	}
-
-	/**
-	 * Renders a comment.
-	 * @param SassNode the node being rendered
-	 * @return string the rendered commnt
-	 */
-	public function renderComment($node) {
-		$comment = join("\n" . $this->getIndent($node) . ' * ', $node->children);
-	  return $this->getIndent($node) . "/* $comment */";
 	}
 
 	/**
@@ -56,11 +56,11 @@ class SassNestedRenderer extends SassRenderer {
 	}
 
 	/**
-	 * Renders a property.
+	 * Renders rule selectors.
 	 * @param SassNode the node being rendered
-	 * @return string the rendered property
+	 * @return string the rendered selectors
 	 */
-	public function renderProperty($node) {
-		return $this->getIndent($node) . parent::renderProperty($node);
+	protected function renderSelectors($node) {
+	  return $this->getIndent($node) . parent::renderSelectors($node);
 	}
 }

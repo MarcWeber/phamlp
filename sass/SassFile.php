@@ -17,8 +17,8 @@
  */
 class SassFile {
 	const CSS = '.css';
-	const Sass = '.sass';
-	const SassC = '.sassc';
+	const SASS = '.sass';
+	const SASSC = '.sassc';
 
 	/**
 	 * Returns the parse tree for a file.
@@ -55,8 +55,8 @@ class SassFile {
 	 * @throws SassException if file not found
 	 */
 	static public function getFile($filename, $options) {
-		if (substr($filename, -5) !== self::Sass) {
-			$filename .= self::Sass;
+		if (substr($filename, -5) !== self::SASS) {
+			$filename .= self::SASS;
 		}
 
 		if (file_exists($filename)) {
@@ -114,7 +114,7 @@ class SassFile {
 	 */
 	static public function getCachedFile($filename, $options) {
 		$cached = realpath($options['cache_location']) . DIRECTORY_SEPARATOR .
-			md5($filename) . self::SassC;
+			md5($filename) . self::SASSC;
 
 		if ($cached && file_exists($cached) &&
 				filemtime($cached) >= filemtime($filename)) {
@@ -139,7 +139,7 @@ class SassFile {
 			$cacheDir = realpath($options['cache_location']);
 		}
 
-		$cached = $cacheDir . DIRECTORY_SEPARATOR . md5($filename) . self::SassC;
+		$cached = $cacheDir . DIRECTORY_SEPARATOR . md5($filename) . self::SASSC;
 
 		return file_put_contents($cached, serialize($sassc));
 	}
