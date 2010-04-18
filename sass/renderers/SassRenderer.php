@@ -7,7 +7,13 @@
  * @license			http://phamlp.googlecode.com/files/license.txt
  * @package			PHamlP
  * @subpackage	Sass.renderers
- */			
+ */
+
+require_once('SassCompactRenderer.php');
+require_once('SassCompressedRenderer.php');
+require_once('SassExpandedRenderer.php');
+require_once('SassNestedRenderer.php');
+
 /**
  * SassRenderer class.
  * @package			PHamlP
@@ -32,17 +38,13 @@ class SassRenderer {
 	 */
 	static public function getRenderer($style = null) {
 		switch ($style) {
-			case self::STYLE_COMPACT: 
-				require_once('SassCompactRenderer.php');
+			case self::STYLE_COMPACT:
 		  	return new SassCompactRenderer();
 			case self::STYLE_COMPRESSED:
-				require_once('SassCompressedRenderer.php');
 		  	return new SassCompressedRenderer();
 			case self::STYLE_EXPANDED:
-				require_once('SassExpandedRenderer.php');
 		  	return new SassExpandedRenderer();
 			case self::STYLE_NESTED:
-				require_once('SassNestedRenderer.php');
 		  	return new SassNestedRenderer();
 		} // switch
 	}
