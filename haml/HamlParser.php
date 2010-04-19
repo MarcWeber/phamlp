@@ -63,7 +63,7 @@ class HamlParser {
 	/**#@+
 	 * Regexes used to parse the document
 	 */
-	const REGEX_Haml = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.([-_:a-zA-Z]+[-:\w.]*))?(?:#([_:a-zA-Z]+[-_:a-zA-Z0-9]*))?(?:\[(.+)\])?(?:(\()(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\)))?)?(?:(\{)(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\}))?)?(>?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
+	const REGEX_Haml = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-_:a-zA-Z0-9]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\)))?)?(?:(\{)(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\}))?)?(>?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
 	const REGEX_ATTRIBUTES = '/:?(\w+(?:[-:]\w+)*)\s*=>?\s*(?(?=([\'"]))(?:[\'"](.*?)\2)|([^\s,]+))/';
 	const REGEX_ATTRIBUTE_FUNCTION = '/^\$?[_a-zA-Z]\w*(?(?=->)(->[_a-zA-Z]\w*)+|(::[_a-zA-Z]\w*)?)\(.+\)$/'; // Matches functions and instantiated and static object methods
 	const REGEX_WHITESPACE_CONTROL = '/(.*?)\s+$/s';
@@ -730,10 +730,18 @@ class HamlParser {
 		}
 		else {
 			if (!empty($line[self::Haml_CLASS])) {
-				$attributes['class'] = str_replace('.', ' ', $line[self::Haml_CLASS]);
+				$classes = explode('.', $line[self::Haml_CLASS]);
+				foreach ($classes as &$class) {
+					if (preg_match(self::MATCH_INTERPOLATION, $class)) {
+						$class = $this->interpolate($class);
+					}
+				} // foreach
+				$attributes['class'] = join(' ', $classes);
 			}
 			if (!empty($line[self::Haml_ID])) {
-				$attributes['id'] = $line[self::Haml_ID];
+				$attributes['id'] =
+						(preg_match(self::MATCH_INTERPOLATION, $line[self::Haml_ID]) ?
+						$this->interpolate($line[self::Haml_ID]) : $line[self::Haml_ID]);
 			}
 		}
 
@@ -767,7 +775,7 @@ class HamlParser {
 				}
 			}
 			else {
-				$attributes[$attr[1]] = preg_replace(self::MATCH_INTERPOLATION, '<?php echo \1; ?>', $attr[3]);
+				$attributes[$attr[1]] = $this->interpolate($attr[3]);
 			}
 		} // foreach
 		return $attributes;
@@ -837,9 +845,7 @@ class HamlParser {
 		    break;
 		} // switch
 
-	  return new HamlNode(
-	  	preg_replace(self::MATCH_INTERPOLATION, self::INTERPOLATE, $content)
-	  );
+	  return new HamlNode($this->interpolate($content));
 	}
 
 	/**
@@ -997,10 +1003,6 @@ class HamlParser {
 	 * @return string the interpolated text
 	 */
 	protected function interpolate($string) {
-		for ($i = 0, $n = preg_match_all(self::MATCH_INTERPOLATION, $string, $matches);
-				$i < $n; $i++) {
-			$matches[1][$i] = $this->evaluate($matches[1][$i], $context);
-		}
-	  return str_replace($matches[0], $matches[1], $string);
+	  return preg_replace(self::MATCH_INTERPOLATION, self::INTERPOLATE, $string);
 	}
 }
