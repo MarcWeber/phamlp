@@ -722,7 +722,7 @@ class HamlParser {
 			);
 		}
 		if (!empty($line[self::Haml_OBJECT_REFERENCE])) {
-			$objectRef = explode(',', str_replace(', ', ', ', $line[self::Haml_OBJECT_REFERENCE]));
+			$objectRef = explode(',', preg_replace('/,\s*/', ',', $line[self::Haml_OBJECT_REFERENCE]));
 			$prefix = (isset($objectRef[1]) ? $objectRef[1] . '_' : '');
 			$class = "strtolower(str_replace(' ',	'_', preg_replace('/(?<=\w)([ A-Z])/', '_\1', get_class(" . $objectRef[0] . '))))';
 			$attributes['class'] = "<?php echo '$prefix' . $class; ?>";
