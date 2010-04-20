@@ -26,18 +26,20 @@ class HamlElementNode extends HamlNode {
 	public $escapeHTML;
 
 	public function render() {
+		$renderer = $this->renderer;
+		$this->output = $renderer->renderOpeningTag($this);
+		$close = $renderer->renderClosingTag($this);
+		
 		if ($this->whitespaceControl['outer']) {
 			$this->parent->output = preg_replace('/(?-m)(?s)(.+?)\s*$/', '\1', $this->parent->output);
 		}
 
-		$output = '';
 		foreach ($this->children as $child) {
-			$output .= $child->render();
+			$output = $child->render();
+			$this->output .= ($this->whitespaceControl['inner'] ?
+				preg_replace('/(?-m)(?s)^\s*(.+?)\s*$/', '\1', $output) : $output);
 		} // foreach
 
-	  return $this->debug($this->renderer->renderOpeningTag($this) .
-			($this->whitespaceControl['inner'] ?
-				preg_replace('/(?-m)(?s)^\s*(.+?)\s*$/', '\1', $output) : $output) .
-			$this->renderer->renderClosingTag($this));
+	  return $this->debug($this->output .	($child instanceof HamlElementNode && $child->whitespaceControl['outer'] ? preg_replace('/(?-m)(?s)\s*(.+?)$/', '\1', $close) : $close));
 	}
 }

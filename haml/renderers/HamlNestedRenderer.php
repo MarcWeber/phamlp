@@ -20,8 +20,8 @@ class HamlNestedRenderer extends HamlRenderer {
 	 * Renders the opening tag of an element
 	 */
 	public function renderOpeningTag($node) {
-	  return $this->getIndent($node) . parent::renderOpeningTag($node) .
-	  	($node->whitespaceControl['inner'] ? '' :
+	  return ($node->whitespaceControl['outer'] ? '' : $this->getIndent($node)) .
+	  	parent::renderOpeningTag($node) .	($node->whitespaceControl['inner'] ? '' :
 	  	($node->isSelfClosing && $node->whitespaceControl['outer'] ? '' : "\n"));
 	}
 
@@ -29,8 +29,8 @@ class HamlNestedRenderer extends HamlRenderer {
 	 * Renders the closing tag of an element
 	 */
 	public function renderClosingTag($node) {
-	  return ($node->isSelfClosing ? '' : $this->getIndent($node) .
-	  	parent::renderClosingTag($node) .
+	  return ($node->isSelfClosing ? '' : ($node->whitespaceControl['inner'] ? '' :
+	  	$this->getIndent($node)) . parent::renderClosingTag($node) .
 	  	($node->whitespaceControl['outer'] ? '' : "\n"));
 	}
 
