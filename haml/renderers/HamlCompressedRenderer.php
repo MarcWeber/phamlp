@@ -31,4 +31,18 @@ class HamlCompressedRenderer extends HamlRenderer {
 	public function renderCloseComment($node) {
 		if ($node->isConditional) return parent::renderCloseComment($node);
 	}
+	
+	/**
+	 * Renders the opening tag of an element
+	 */
+	public function renderOpeningTag($node) {
+	  return ($node->isBlock ? '' : ' ') . parent::renderOpeningTag($node);
+	}
+	
+	/**
+	 * Renders the closing tag of an element
+	 */
+	public function renderClosingTag($node) {
+	  return parent::renderClosingTag($node) . ($node->isBlock ? '' : ' ');
+	}
 }

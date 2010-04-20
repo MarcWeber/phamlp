@@ -62,16 +62,6 @@ class HamlRenderer {
 	}
 
 	/**
-	 * Renders the opening tag of an element
-	 */
-	public function renderOpeningTag($node) {
-		$output  = "<{$node->content}";
-		$output .= $this->renderAttributes($node->attributes);
-		$output .= ($node->isSelfClosing ? ' /' : '') . '>';
-	  return $output;
-	}
-
-	/**
 	 * Renders element attributes
 	 */
 	private function renderAttributes($attributes) {
@@ -89,6 +79,16 @@ class HamlRenderer {
 			}
 		}
 		return $output;
+	}
+
+	/**
+	 * Renders the opening tag of an element
+	 */
+	public function renderOpeningTag($node) {
+		$output  = "<{$node->content}";
+		$output .= $this->renderAttributes($node->attributes);
+		$output .= ($node->isSelfClosing ? ' /' : '') . '>';
+	  return $output;
 	}
 
 	/**

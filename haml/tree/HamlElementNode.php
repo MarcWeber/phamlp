@@ -19,6 +19,10 @@ require_once('HamlNodeExceptions.php');
  * @subpackage	Haml.tree
  */
 class HamlElementNode extends HamlNode {
+	const STRIP_PRECEEDING_WHITESPACE = '/(?-m)(?s)\s*(.+?)$/';
+	const STRIP_SURROUNDING_WHITESPACE = '/(?-m)(?s)^\s*(.+?)\s*$/';
+	const STRIP_TRAILING_WHITESPACE = '/(?-m)(?s)(.+?)\s*$/';
+
 	public $isBlock;
 	public $isSelfClosing;
 	public $attributes;
@@ -31,15 +35,22 @@ class HamlElementNode extends HamlNode {
 		$close = $renderer->renderClosingTag($this);
 		
 		if ($this->whitespaceControl['outer']) {
-			$this->parent->output = preg_replace('/(?-m)(?s)(.+?)\s*$/', '\1', $this->parent->output);
+			$this->output =
+				preg_replace(self::STRIP_PRECEEDING_WHITESPACE, '\1', $this->output);
+			$close = preg_replace(self::STRIP_TRAILING_WHITESPACE, '\1', $close);
+			$this->parent->output =
+				preg_replace(self::STRIP_TRAILING_WHITESPACE, '\1', $this->parent->output);
 		}
 
 		foreach ($this->children as $child) {
 			$output = $child->render();
 			$this->output .= ($this->whitespaceControl['inner'] ?
-				preg_replace('/(?-m)(?s)^\s*(.+?)\s*$/', '\1', $output) : $output);
+				preg_replace(self::STRIP_SURROUNDING_WHITESPACE, '\1', $output) :
+				$output);
 		} // foreach
 
-	  return $this->debug($this->output .	($child instanceof HamlElementNode && $child->whitespaceControl['outer'] ? preg_replace('/(?-m)(?s)\s*(.+?)$/', '\1', $close) : $close));
+		return $this->debug($this->output .	($child instanceof HamlElementNode &&
+			$child->whitespaceControl['outer'] ?
+			preg_replace(self::STRIP_PRECEEDING_WHITESPACE, '\1', $close) : $close));
 	}
 }
