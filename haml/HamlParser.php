@@ -274,7 +274,7 @@ class HamlParser {
 	/**
 	 * @var boolean whether line is in a filter
 	 */
-	private $inFilter;
+	private $inFilter = false;
 	/**
 	 * @var boolean whether to show the output in the browser for debug
 	 */
@@ -405,10 +405,10 @@ class HamlParser {
 	 * @param array remaing in source lines
 	 */
 	private function addChildren($node, $line, &$lines) {
-		if ($this->hasChild($line, $lines)) {
-			if ($node instanceof HamlFilterNode) {
-				$this->inFilter = true;
-			}
+		if ($node instanceof HamlFilterNode) {
+			$this->inFilter = true;
+		}
+		if ($this->hasChild($line, $lines, $this->inFilter)) {
 			$this->buildTree($node, $lines);
 			if ($node instanceof HamlFilterNode) {
 				$this->inFilter = false;
@@ -420,13 +420,14 @@ class HamlParser {
 	 * Returns a value indicating if the next line is a child of the parent line
 	 * @param array parent line
 	 * @param array remaing in source lines
-	 * @param boolean whether the source line is a comment.
-	 * If it is all indented lines are regarded as children; if not the child line
-	 * must only be indented by 1 or blank
+	 * @param boolean whether to all greater than the current indent
+	 * Used if the source line is a comment or a filter.
+	 * If true all indented lines are regarded as children; if not the child line
+	 * must only be indented by 1 or blank. Defaults to false.
 	 * @return boolean true if the next line is a child of the parent line
 	 * @throws Exception if the indent is invalid
 	 */
-	private function hasChild($line, &$lines, $isComment = false) {
+	private function hasChild($line, &$lines, $allowGreater = false) {
 		if (!empty($lines)) {
 			$i = 0;
 			$c = count($lines);
@@ -437,7 +438,7 @@ class HamlParser {
 			$indentLevel = $this->getIndentLevel($nextLine, $line['number'] + $i);
 
 			if (($indentLevel == $line['indentLevel'] + 1) ||
-					($isComment && $indentLevel > $line['indentLevel'])) {
+					($allowGreater && $indentLevel > $line['indentLevel'])) {
 				return true;
 			}
 			elseif ($indentLevel <= $line['indentLevel']) {
