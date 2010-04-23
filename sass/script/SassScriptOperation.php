@@ -78,9 +78,12 @@ class SassScriptOperation {
 	 */
 	public function __construct($operation) {
 		$this->operator			 = self::$operators[$operation][0];
-		$this->associativity = self::$operators[$operation][1];
-		$this->precedence		 = self::$operators[$operation][2];
-		$this->operandCount	 = self::$operators[$operation][3];
+		if (isset(self::$operators[$operation][1])) {
+			$this->associativity = self::$operators[$operation][1];
+			$this->precedence		 = self::$operators[$operation][2];
+			$this->operandCount	 = (isset(self::$operators[$operation][3]) ?
+					self::$operators[$operation][3] : null);
+		}
 	}
 
 	/**

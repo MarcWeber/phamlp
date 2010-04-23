@@ -308,7 +308,7 @@ class SassParser {
 	 */
 	private function setIndentChar($lines) {
 		foreach ($lines as $line) {
-			if (in_array($line[0], $this->indentChars)) {
+			if (!empty($line) && in_array($line[0], $this->indentChars)) {
 				$i = 0;
 				$this->indentChar = $line[$i];
 				while	($line[++$i] == $this->indentChar) {}

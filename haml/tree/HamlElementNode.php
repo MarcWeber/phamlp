@@ -49,7 +49,8 @@ class HamlElementNode extends HamlNode {
 				$output);
 		} // foreach
 
-		return $this->debug($this->output .	($child instanceof HamlElementNode &&
+		return $this->debug($this->output .	(isset($child) &&
+			$child instanceof HamlElementNode &&
 			$child->whitespaceControl['outer'] ?
 			preg_replace(self::STRIP_PRECEEDING_WHITESPACE, '\1', $close) : $close));
 	}
