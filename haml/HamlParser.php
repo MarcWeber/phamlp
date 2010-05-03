@@ -64,7 +64,7 @@ class HamlParser {
 	 * Regexes used to parse the document
 	 */
 	const REGEX_HAML = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*(?:#\{.+?\})?[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-_:a-zA-Z0-9]*(?:#\{.+?\})?[-_:a-zA-Z0-9]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\)))?)?(?:(\{)(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\}))?)?(>?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
-	const REGEX_ATTRIBUTES = '/:?(\w+(?:[-:]\w+)*)\s*=>?\s*(?(?=([\'"]))(?:[\'"](.*?)\2)|([^\s,]+))/';
+	const REGEX_ATTRIBUTES = '/:?"?(\w+(?:[-:]\w+)*)"?\s*=>?\s*(?(?=([\'"]))(?:[\'"](.*?)\2)|([^\s,]+))/';
 	const REGEX_ATTRIBUTE_FUNCTION = '/^\$?[_a-zA-Z]\w*(?(?=->)(->[_a-zA-Z]\w*)+|(::[_a-zA-Z]\w*)?)\(.+\)$/'; // Matches functions and instantiated and static object methods
 	const REGEX_WHITESPACE_CONTROL = '/(.*?)\s+$/s';
 	const REGEX_WHITESPACE_CONTROL_DEBUG = '%(.*?)(?:<br />\s)$%s'; // whitespace control when showing output

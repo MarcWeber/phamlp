@@ -564,7 +564,7 @@ class SassParser {
 	 */
 	private function parseElse($line, &$lines, $parent) {
 		$matches = SassIfNode::matchElse($line);
-		$node = (sizeof($matches==1) ? new SassIfNode() :
+		$node = (sizeof($matches)==1 ? new SassIfNode() :
 			new SassIfNode($matches[SassIfNode::ELSE_EXPRESSION]));
 		$parent->lastChild->addElse($node);
 		$this->addChildren($node, $line, $lines);

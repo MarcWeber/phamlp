@@ -187,7 +187,6 @@ abstract class SassNode {
 	 * @return array the options
 	 */
 	public function getOptions() {
-	  $o = $this->root->options;
 	  return $this->root->options;
 	}
 
