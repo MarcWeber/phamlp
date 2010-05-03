@@ -63,7 +63,7 @@ class HamlParser {
 	/**#@+
 	 * Regexes used to parse the document
 	 */
-	const REGEX_Haml = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*(?:#\{.+?\})?[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-_:a-zA-Z0-9]*(?:#\{.+?\})?[-_:a-zA-Z0-9]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\)))?)?(?:(\{)(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\}))?)?(>?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
+	const REGEX_HAML = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*(?:#\{.+?\})?[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-_:a-zA-Z0-9]*(?:#\{.+?\})?[-_:a-zA-Z0-9]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\)))?)?(?:(\{)(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\}))?)?(>?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
 	const REGEX_ATTRIBUTES = '/:?(\w+(?:[-:]\w+)*)\s*=>?\s*(?(?=([\'"]))(?:[\'"](.*?)\2)|([^\s,]+))/';
 	const REGEX_ATTRIBUTE_FUNCTION = '/^\$?[_a-zA-Z]\w*(?(?=->)(->[_a-zA-Z]\w*)+|(::[_a-zA-Z]\w*)?)\(.+\)$/'; // Matches functions and instantiated and static object methods
 	const REGEX_WHITESPACE_CONTROL = '/(.*?)\s+$/s';
@@ -77,29 +77,29 @@ class HamlParser {
 	/**#@+
 	 * Haml regex match positions
 	 */
-	const Haml_Haml									=  0;
-	const Haml_INDENT								=  1;
-	const Haml_SOURCE								=  2;
-	const Haml_FILTER								=  3;
-	const Haml_TAG									=  4;
-	const Haml_CLASS								=  5;
-	const Haml_ID										=  6;
-	const Haml_OBJECT_REFERENCE			=  7;
-	const Haml_OPEN_XML_ATTRIBUTES	=  8;
-	const Haml_XML_ATTRIBUTES 			=  9;
-	const Haml_OPEN_RUBY_ATTRIBUTES = 10;
-	const Haml_RUBY_ATTRIBUTES			= 11;
-	const Haml_WHITESPACE_CONTROL		= 12;
-	const Haml_TOKEN								= 13;
-	const Haml_CONTENT							= 14;
-	const Haml_MULTILINE						= 15;
+	const HAML_HAML									=  0;
+	const HAML_INDENT								=  1;
+	const HAML_SOURCE								=  2;
+	const HAML_FILTER								=  3;
+	const HAML_TAG									=  4;
+	const HAML_CLASS								=  5;
+	const HAML_ID										=  6;
+	const HAML_OBJECT_REFERENCE			=  7;
+	const HAML_OPEN_XML_ATTRIBUTES	=  8;
+	const HAML_XML_ATTRIBUTES 			=  9;
+	const HAML_OPEN_RUBY_ATTRIBUTES = 10;
+	const HAML_RUBY_ATTRIBUTES			= 11;
+	const HAML_WHITESPACE_CONTROL		= 12;
+	const HAML_TOKEN								= 13;
+	const HAML_CONTENT							= 14;
+	const HAML_MULTILINE						= 15;
 	/**#@-*/
 
 	/**#@+
 	 * Haml tokens
 	 */
 	const DOCTYPE = '!!!';
-	const Haml_COMMENT = '!(-#|//)!';
+	const HAML_COMMENT = '!(-#|//)!';
 	const XML_COMMENT = '/';
 	const SELF_CLOSE_TAG = '/';
 	const ESCAPE_XML = '&=';
@@ -335,23 +335,24 @@ class HamlParser {
 	 * The first character of the first indented line determines the character.
 	 * If this is a space the number of spaces determines the indentSpaces; this
 	 * is always 1 if the indent character is a tab.
-	 * @throws HamlException if the indent is mixed or
-	 * the indent character can not be determined
+	 * @throws HamlException if the indent is mixed
 	 */
 	private function setIndentChar($lines) {
-		foreach ($lines as $line) {
+		foreach ($lines as $l=>$line) {
 			if (!empty($line) && in_array($line[0], $this->indentChars)) {
-				$i = 0;
-				$this->indentChar = $line[$i];
-				while	($line[++$i] == $this->indentChar) {}
-				if (in_array($line[$i], $this->indentChars)) {
-					throw new HamlException("Mixed indentation not allowed.\nLine $i: {$this->filename}");
+				$this->indentChar = $line[0];
+				$len=strlen($line);
+				for	($i=0; $i<$len&&$line[$i]==$this->indentChar; $i++) {}			
+				if ($i<$len&&in_array($line[$i], $this->indentChars)) {
+					throw new HamlException("Mixed indentation not allowed.\nLine ".++$l.": {$this->filename}");
 				}
+				
 				$this->indentSpaces = ($this->indentChar == ' ' ? $i : 1);
 				return;
 			}
 		} // foreach
-		throw new HamlException("Unable to determine indent character.\nLine $i: {$this->filename}");
+		$this->indentChar = ' ';
+		$this->indentSpaces = 2;
 	}
 
 	/**
@@ -363,7 +364,7 @@ class HamlParser {
 	private function toTree($source) {
 		$this->setIndentChar(explode("\n", $source));
 
-		preg_match_all(self::REGEX_Haml, $source, $lines, PREG_SET_ORDER);
+		preg_match_all(self::REGEX_HAML, $source, $lines, PREG_SET_ORDER);
 		$root = new HamlRootNode(array(
 			'format' => $this->format,
 			'style' => $this->style,
@@ -384,7 +385,7 @@ class HamlParser {
 			$line = $this->getLine($lines);
 			if (!empty($line)) {
 				$node = ($this->inFilter ?
-					new HamlNode($line[self::Haml_SOURCE]) :
+					new HamlNode($line[self::HAML_SOURCE]) :
 					$this->parseLine($line, $lines, $parent));
 
 				if (!empty($node)) {
@@ -431,7 +432,7 @@ class HamlParser {
 		if (!empty($lines)) {
 			$i = 0;
 			$c = count($lines);
-			while (empty($nextLine[self::Haml_SOURCE]) && $i <= $c) {
+			while (empty($nextLine[self::HAML_SOURCE]) && $i <= $c) {
 				$nextLine = $lines[$i++];
 			}
 
@@ -461,7 +462,7 @@ class HamlParser {
 	 * @return boolean true if the line is a child of the node, false if not
 	 */
 	private function isChildOf($node, $line) {
-		$haml = trim($line[self::Haml_Haml]);
+		$haml = trim($line[self::HAML_HAML]);
 		return empty($haml) || $this->getIndentLevel($line, $this->lineNumber) >
 			$node->indentLevel;
 	}
@@ -474,19 +475,22 @@ class HamlParser {
 	private function getLine(&$lines) {
 		$line = array_shift($lines);
 		// Blank lines ore OK
-		$haml =  trim($line[self::Haml_Haml]);
+		$haml =  trim($line[self::HAML_HAML]);
 		if (empty($haml)) {
 			$this->lineNumber++;
 			return null;
 		}
 		// The regex will strip off a '<' at the start of a line
-		if (empty($line[self::Haml_TAG])) {
-			$line[self::Haml_CONTENT] =
-				$line[self::Haml_WHITESPACE_CONTROL].$line[self::Haml_CONTENT];
+		if (empty($line[self::HAML_TAG])) {
+			$line[self::HAML_CONTENT] =
+				$line[self::HAML_WHITESPACE_CONTROL].$line[self::HAML_CONTENT];
 		}
 		$line['number'] = $this->lineNumber++;
 		$line['indentLevel'] = $this->getIndentLevel($line, $this->lineNumber);
 		$line['file'] = $this->filename;
+		if ($this->isMultiline($line)) {
+			$line = $this->getMultiline($line, $lines);
+		}
 		return $line;
 	}
 
@@ -498,15 +502,15 @@ class HamlParser {
 	 * @throws Exception if the indent level is invalid
 	 */
 	private function getIndentLevel($line, $n) {
-		if ($line[self::Haml_INDENT] && $this->indentChar === ' ') {
-			$indent = strlen($line[self::Haml_INDENT]) / $this->indentSpaces;
+		if ($line[self::HAML_INDENT] && $this->indentChar === ' ') {
+			$indent = strlen($line[self::HAML_INDENT]) / $this->indentSpaces;
 		}
 		else {
-			$indent = strlen($line[self::Haml_INDENT]);
+			$indent = strlen($line[self::HAML_INDENT]);
 		}
 
 		if (!is_integer($indent) ||
-				preg_match("/[^{$this->indentChar}]/", $line[self::Haml_INDENT])) {
+				preg_match("/[^{$this->indentChar}]/", $line[self::HAML_INDENT])) {
 			throw new HamlException("Invalid indentation\nLine " . ++$n . ": {$this->filename}");
 		}
 		return $indent;
@@ -551,7 +555,7 @@ class HamlParser {
 	 * @return boolean true if the line has a content, false if not
 	 */
 	private function hasContent($line) {
-	  return !empty($line[self::Haml_CONTENT]);
+	  return !empty($line[self::HAML_CONTENT]);
 	}
 
 	/**
@@ -560,7 +564,7 @@ class HamlParser {
 	 * @return boolean true if the line is code to be run, false if not
 	 */
 	private function isCode($line) {
-		return $line[self::Haml_TOKEN] === self::RUN_CODE;
+		return $line[self::HAML_TOKEN] === self::RUN_CODE;
 	}
 
 	/**
@@ -569,7 +573,7 @@ class HamlParser {
 	 * @return boolean true if the line is a directive, false if not
 	 */
 	private function isDirective($line) {
-		return $line[self::Haml_TOKEN] === self::DIRECTIVE;
+		return $line[self::HAML_TOKEN] === self::DIRECTIVE;
 	}
 
 	/**
@@ -578,7 +582,7 @@ class HamlParser {
 	 * @return boolean true if the line is a doctype, false if not
 	 */
 	private function isDoctype($line) {
-		return $line[self::Haml_TOKEN] === self::DOCTYPE;
+		return $line[self::HAML_TOKEN] === self::DOCTYPE;
 	}
 
 	/**
@@ -588,17 +592,17 @@ class HamlParser {
 	 * @return boolean true if the line is an element, false if not
 	 */
 	private function isElement(&$line) {
-		if (empty($line[self::Haml_TAG]) && (
-				!empty($line[self::Haml_CLASS]) ||
-				!empty($line[self::Haml_ID]) ||
-				!empty($line[self::Haml_XML_ATTRIBUTES]) ||
-				!empty($line[self::Haml_RUBY_ATTRIBUTES]) ||
-				!empty($line[self::Haml_OBJECT_REFERENCE])
+		if (empty($line[self::HAML_TAG]) && (
+				!empty($line[self::HAML_CLASS]) ||
+				!empty($line[self::HAML_ID]) ||
+				!empty($line[self::HAML_XML_ATTRIBUTES]) ||
+				!empty($line[self::HAML_RUBY_ATTRIBUTES]) ||
+				!empty($line[self::HAML_OBJECT_REFERENCE])
 		)) {
-			$line[self::Haml_TAG] = 'div';
+			$line[self::HAML_TAG] = 'div';
 		}
 
-	  return !empty($line[self::Haml_TAG]);
+	  return !empty($line[self::HAML_TAG]);
 	}
 
 	/**
@@ -607,7 +611,7 @@ class HamlParser {
 	 * @return boolean true if the line starts a filter, false if not
 	 */
 	private function isFilter($line) {
-	  return !empty($line[self::Haml_FILTER]);
+	  return !empty($line[self::HAML_FILTER]);
 	}
 
 	/**
@@ -616,7 +620,7 @@ class HamlParser {
 	 * @return boolean true if the line is a Haml comment, false if not
 	 */
 	private function isHamlComment($line) {
-		return preg_match(self::Haml_COMMENT, $line[self::Haml_TOKEN]) > 0;
+		return preg_match(self::HAML_COMMENT, $line[self::HAML_TOKEN]) > 0;
 	}
 
 	/**
@@ -625,7 +629,7 @@ class HamlParser {
 	 * @return boolean true if theline is an XML comment, false if not
 	 */
 	private function isXmlComment($line) {
-	  return $line[self::Haml_SOURCE][0] === self::XML_COMMENT;
+	  return $line[self::HAML_SOURCE][0] === self::XML_COMMENT;
 	}
 
 	/**
@@ -634,7 +638,7 @@ class HamlParser {
 	 * @return boolean true if the line os part of a multiline group, false if not
 	 */
 	private function isMultiline($line) {
-	  return isset($line[self::Haml_MULTILINE]);
+	  return isset($line[self::HAML_MULTILINE]);
 	}
 
 	/**
@@ -643,7 +647,7 @@ class HamlParser {
 	 * @return boolean true if the line's tag is is a block level tag, false if not
 	 */
 	private function isBlock($line) {
-	  return (!in_array($line[self::Haml_TAG], $this->inlineTags));
+	  return (!in_array($line[self::HAML_TAG], $this->inlineTags));
 	}
 
 	/**
@@ -652,8 +656,8 @@ class HamlParser {
 	 * @return boolean true if the line's tag is self-closing, false if not
 	 */
 	private function isSelfClosing($line) {
-	  return (in_array($line[self::Haml_TAG], $this->emptyTags) ||
-	  	$line[self::Haml_TOKEN] == self::SELF_CLOSE_TAG);
+	  return (in_array($line[self::HAML_TAG], $this->emptyTags) ||
+	  	$line[self::HAML_TOKEN] == self::SELF_CLOSE_TAG);
 	}
 
 	/**
@@ -703,6 +707,19 @@ class HamlParser {
 	}
 
 	/**
+	 * Gets the next line.
+	 * @param array remaining source lines
+	 * @return array the next line
+	 */
+	private function getMultiline($line, &$lines) {
+		do {
+			$multiLine = array_shift($lines);
+			$line[self::HAML_CONTENT] .= $multiLine[self::HAML_CONTENT];
+		} while(!empty($lines) && $this->isMultiline($lines[0]));
+	  return $line;
+	}
+
+	/**
 	 * Parse attributes.
 	 * @param array line to parse
 	 * @param array remaining lines
@@ -710,28 +727,46 @@ class HamlParser {
 	 */
 	private function parseAttributes($line, &$lines) {
 		$attributes = array();
-		if (!empty($line[self::Haml_XML_ATTRIBUTES])) {
+		if (!empty($line[self::HAML_OPEN_XML_ATTRIBUTES])) {
+			if (empty($line[self::HAML_XML_ATTRIBUTES])) {
+				$line[self::HAML_XML_ATTRIBUTES] = $line[self::HAML_CONTENT];
+				unset($line[self::HAML_CONTENT]);
+				do {
+					$multiLine = array_shift($lines);
+					$line[self::HAML_XML_ATTRIBUTES] .= $multiLine[self::HAML_CONTENT];
+				}	while (substr($line[self::HAML_XML_ATTRIBUTES], -1) !==
+						self::CLOSE_XML_ATTRIBUTES);		
+			}
 			$attributes = array_merge(
 					$attributes,
-					$this->parseAttributeHash($line[self::Haml_XML_ATTRIBUTES])
+					$this->parseAttributeHash($line[self::HAML_XML_ATTRIBUTES])
 			);
 		}
-		if (!empty($line[self::Haml_RUBY_ATTRIBUTES])) {
+		if (!empty($line[self::HAML_OPEN_RUBY_ATTRIBUTES])) {
+			if (empty($line[self::HAML_RUBY_ATTRIBUTES])) {
+				$line[self::HAML_RUBY_ATTRIBUTES] = $line[self::HAML_CONTENT];
+				unset($line[self::HAML_CONTENT]);
+				do {
+					$multiLine = array_shift($lines);
+					$line[self::HAML_RUBY_ATTRIBUTES] .= $multiLine[self::HAML_CONTENT];
+				}	while (substr($line[self::HAML_RUBY_ATTRIBUTES], -1) !==
+						self::CLOSE_RUBY_ATTRIBUTES);		
+			}
 			$attributes = array_merge(
 					$attributes,
-					$this->parseAttributeHash($line[self::Haml_RUBY_ATTRIBUTES])
+					$this->parseAttributeHash($line[self::HAML_RUBY_ATTRIBUTES])
 			);
 		}
-		if (!empty($line[self::Haml_OBJECT_REFERENCE])) {
-			$objectRef = explode(',', preg_replace('/,\s*/', ',', $line[self::Haml_OBJECT_REFERENCE]));
+		if (!empty($line[self::HAML_OBJECT_REFERENCE])) {
+			$objectRef = explode(',', preg_replace('/,\s*/', ',', $line[self::HAML_OBJECT_REFERENCE]));
 			$prefix = (isset($objectRef[1]) ? $objectRef[1] . '_' : '');
 			$class = "strtolower(str_replace(' ',	'_', preg_replace('/(?<=\w)([ A-Z])/', '_\1', get_class(" . $objectRef[0] . '))))';
 			$attributes['class'] = "<?php echo '$prefix' . $class; ?>";
 			$attributes['id'] = "<?php echo '$prefix' . $class . '_' . {$objectRef[0]}->id; ?>";
 		}
 		else {
-			if (!empty($line[self::Haml_CLASS])) {
-				$classes = explode('.', $line[self::Haml_CLASS]);
+			if (!empty($line[self::HAML_CLASS])) {
+				$classes = explode('.', $line[self::HAML_CLASS]);
 				foreach ($classes as &$class) {
 					if (preg_match(self::MATCH_INTERPOLATION, $class)) {
 						$class = $this->interpolate($class);
@@ -739,10 +774,10 @@ class HamlParser {
 				} // foreach
 				$attributes['class'] = join(' ', $classes);
 			}
-			if (!empty($line[self::Haml_ID])) {
+			if (!empty($line[self::HAML_ID])) {
 				$attributes['id'] =
-						(preg_match(self::MATCH_INTERPOLATION, $line[self::Haml_ID]) ?
-						$this->interpolate($line[self::Haml_ID]) : $line[self::Haml_ID]);
+						(preg_match(self::MATCH_INTERPOLATION, $line[self::HAML_ID]) ?
+						$this->interpolate($line[self::HAML_ID]) : $line[self::HAML_ID]);
 			}
 		}
 
@@ -789,17 +824,17 @@ class HamlParser {
 	 */
 	private function parseCode($line, &$lines, $parent) {
 		if (preg_match('/^(if|foreach|for|switch|do|while)\b(.*)$/',
-				$line[self::Haml_CONTENT], $block)) {
+				$line[self::HAML_CONTENT], $block)) {
 			if ($block[1] === 'do') {
 				$node = new HamlCodeBlockNode('<?php do { ?>');
 				$node->doWhile = 'while' . $block[2] . ';';
 			}
 			else {
-				$node = new HamlCodeBlockNode("<?php {$line[self::Haml_CONTENT]} { ?>");
+				$node = new HamlCodeBlockNode("<?php {$line[self::HAML_CONTENT]} { ?>");
 			}
 		}
-		elseif (strpos($line[self::Haml_CONTENT], 'else') === 0) {
-			$node = new HamlCodeBlockNode("{$line[self::Haml_CONTENT]} { ?>");
+		elseif (strpos($line[self::HAML_CONTENT], 'else') === 0) {
+			$node = new HamlCodeBlockNode("{$line[self::HAML_CONTENT]} { ?>");
 			$node->line = $line;
 			$node->showOutput = $this->showOutput;
 			$node->showSource = $this->showSource;
@@ -807,11 +842,11 @@ class HamlParser {
 			$this->addChildren($node, $line, $lines);
 			$node = null;
 		}
-		elseif (strpos($line[self::Haml_CONTENT], 'case') === 0) {
-			$node = new HamlNode("{$line[self::Haml_CONTENT]}:");
+		elseif (strpos($line[self::HAML_CONTENT], 'case') === 0) {
+			$node = new HamlNode("{$line[self::HAML_CONTENT]}:");
 		}
 		else {
-			$node = new HamlNode("<?php {$line[self::Haml_CONTENT]}; ?>");
+			$node = new HamlNode("<?php {$line[self::HAML_CONTENT]}; ?>");
 		}
 		return $node;
 	}
@@ -822,12 +857,12 @@ class HamlParser {
 	 * @return HamlNode
 	 */
 	private function parseContent($line) {
-		switch ($line[self::Haml_TOKEN]) {
+		switch ($line[self::HAML_TOKEN]) {
 		  case self::INSERT_CODE:
 		  	$content = ($this->suppressEval ? '' :
 						'<?php echo ' . ($this->escapeHtml ?
-						'htmlentities(' . $line[self::Haml_CONTENT] . ')' :
-						$line[self::Haml_CONTENT]) .
+						'htmlentities(' . $line[self::HAML_CONTENT] . ')' :
+						$line[self::HAML_CONTENT]) .
 						"; ?>" .
 						($this->style == HamlRenderer::STYLE_EXPANDED ||
 							$this->style == HamlRenderer::STYLE_NESTED ? "\n" : ''));
@@ -835,14 +870,14 @@ class HamlParser {
 		  case self::INSERT_CODE_PRESERVE_WHITESPACE:
 				$content = ($this->suppressEval ? '' :
 						'<?php echo str_replace("\n", \'&#x000a\', ' . ($this->escapeHtml ?
-						'htmlentities(' . $line[self::Haml_CONTENT] . ')' :
-						$line[self::Haml_CONTENT]) .
+						'htmlentities(' . $line[self::HAML_CONTENT] . ')' :
+						$line[self::HAML_CONTENT]) .
 						"; ?>" .
 						($this->style == HamlRenderer::STYLE_EXPANDED ||
 							$this->style == HamlRenderer::STYLE_NESTED ? "\n" : ''));
 		    break;
 		  default:
-		  	$content = $line[self::Haml_CONTENT];
+		  	$content = $line[self::HAML_CONTENT];
 		    break;
 		} // switch
 
@@ -856,7 +891,7 @@ class HamlParser {
 	 * @return null
 	 */
 	private function parseDirective($line) {
-		preg_match('/(\w+)(\+|-)?/', $line[self::Haml_CONTENT], $matches);
+		preg_match('/(\w+)(\+|-)?/', $line[self::HAML_CONTENT], $matches);
 		switch ($matches[1]) {
 		  case 's':
 		  	$this->showSource = ($matches[2] == '+' ? true :
@@ -888,7 +923,7 @@ class HamlParser {
 	 * @return HamlDoctypeNode
 	 */
 	private function parseDoctype($line) {
-		$content = explode(' ', $line[self::Haml_CONTENT]);
+		$content = explode(' ', $line[self::HAML_CONTENT]);
 		if (!empty($content)) {
 			if ($content[0] === self::IS_XML_PROLOG) {
 				$encoding = isset($content[1]) ? $content[1] : self::DEFAULT_XML_ENCODING;
@@ -936,7 +971,7 @@ class HamlParser {
 	 * @return HamlNode tag node and children
 	 */
 	private function parseElement($line, &$lines, $parent) {
-		$node = new HamlElementNode($line[self::Haml_TAG]);
+		$node = new HamlElementNode($line[self::HAML_TAG]);
 		$node->isSelfClosing = $this->isSelfClosing($line);
 		$node->isBlock = $this->isBlock($line);
 		$node->attributes = $this->parseAttributes($line, $lines);
@@ -961,7 +996,7 @@ class HamlParser {
 	 * @return HamlNode tag node and children
 	 */
 	private function parseFilter($line) {
-		$node = new HamlFilterNode($this->getFilter($line[self::Haml_FILTER]));
+		$node = new HamlFilterNode($this->getFilter($line[self::HAML_FILTER]));
 		if ($this->hasContent($line)) {
 			$child = $this->parseContent($line);
 			$child->showOutput = $this->showOutput;
@@ -981,17 +1016,17 @@ class HamlParser {
 	 * @param array remaining lines
 	 */
 	private function parseXmlComment($line, &$lines) {
-		return new HamlCommentNode($line[self::Haml_CONTENT]);
+		return new HamlCommentNode($line[self::HAML_CONTENT]);
 	}
 
 	private function parseWhitespaceControl($line) {
 		$whitespaceControl = array('inner' => false, 'outer' => false);
 
-		if (!empty($line[self::Haml_WHITESPACE_CONTROL])) {
-			if (strpos($line[self::Haml_WHITESPACE_CONTROL], self::REMOVE_INNER_WHITESPACE) !== false) {
+		if (!empty($line[self::HAML_WHITESPACE_CONTROL])) {
+			if (strpos($line[self::HAML_WHITESPACE_CONTROL], self::REMOVE_INNER_WHITESPACE) !== false) {
 				$whitespaceControl['inner'] = true;
 			}
-			if (strpos($line[self::Haml_WHITESPACE_CONTROL], self::REMOVE_OUTER_WHITESPACE) !== false) {
+			if (strpos($line[self::HAML_WHITESPACE_CONTROL], self::REMOVE_OUTER_WHITESPACE) !== false) {
 				$whitespaceControl['outer'] = true;
 			}
 		}

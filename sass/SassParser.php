@@ -158,7 +158,7 @@ class SassParser {
 				}
 			}
 
-			$tree = $this->toTree(file($filename, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES));
+			$tree = $this->toTree(file($filename, FILE_IGNORE_NEW_LINES));
 
 			if ($this->options['cache']) {
 				SassFile::setCachedFile($tree, $filename, $this->options);
@@ -307,19 +307,20 @@ class SassParser {
 	 * the indent character can not be determined
 	 */
 	private function setIndentChar($lines) {
-		foreach ($lines as $line) {
+		foreach ($lines as $l=>$line) {
 			if (!empty($line) && in_array($line[0], $this->indentChars)) {
-				$i = 0;
-				$this->indentChar = $line[$i];
-				while	($line[++$i] == $this->indentChar) {}
-				if (in_array($line[$i], $this->indentChars)) {
+				$this->indentChar = $line[0];
+				$len=strlen($line);
+				for	($i=0; $i<$len&&$line[$i]==$this->indentChar; $i++) {}			
+				if ($i<$len&&in_array($line[$i], $this->indentChars)) {
 					throw new SassException("Mixed indentation not allowed.\nLine $i:" . (is_array($this->options['file']) ? join(DIRECTORY_SEPARATOR, $this->options['file']) : ''));
 				}
 				$this->indentSpaces = ($this->indentChar == ' ' ? $i : 1);
 				return;
 			}
 		} // foreach
-		throw new SassException("Unable to determine indent character.\n" . (is_array($this->options['file']) ? join(DIRECTORY_SEPARATOR, $this->options['file']) : ''));
+		$this->indentChar = ' ';
+		$this->indentSpaces = 2;
 	}
 
 	/**
@@ -404,9 +405,12 @@ class SassParser {
 	 	}
 
 	 	$matches = SassMixinDefinitionNode::match($line);
-		return new SassMixinDefinitionNode(
-			$matches[SassMixinDefinitionNode::NAME],
-			$matches[SassMixinDefinitionNode::ARGUMENTS]
+		return (sizeof($matches)==2 ?
+			new SassMixinDefinitionNode($matches[SassMixinDefinitionNode::NAME]) :
+			new SassMixinDefinitionNode(
+				$matches[SassMixinDefinitionNode::NAME],
+				$matches[SassMixinDefinitionNode::ARGUMENTS]
+			)
 		);
 	}
 
@@ -417,9 +421,12 @@ class SassParser {
 	 */
 	private function parseMixin($line) {
 	 	$matches = SassMixinNode::match($line);
-		return new SassMixinNode(
-			$matches[SassMixinNode::NAME],
-			$matches[SassMixinNode::ARGUMENTS]
+		return (sizeof($matches)==2 ?
+			new SassMixinNode($matches[SassMixinNode::NAME]) :
+			new SassMixinNode(
+				$matches[SassMixinNode::NAME],
+				$matches[SassMixinNode::ARGUMENTS]
+			)
 		);
 	}
 
@@ -557,7 +564,8 @@ class SassParser {
 	 */
 	private function parseElse($line, &$lines, $parent) {
 		$matches = SassIfNode::matchElse($line);
-		$node = new SassIfNode($matches[SassIfNode::ELSE_EXPRESSION]);
+		$node = (sizeof($matches==1) ? new SassIfNode() :
+			new SassIfNode($matches[SassIfNode::ELSE_EXPRESSION]));
 		$parent->lastChild->addElse($node);
 		$this->addChildren($node, $line, $lines);
 	}

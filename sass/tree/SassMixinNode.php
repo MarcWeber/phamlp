@@ -17,7 +17,7 @@
  */
 class SassMixinNode extends SassNode {
 	const IDENTIFIER = '+';
-	const MATCH = '/^\+([-\w]+)(?:\((.+?)\))?$/';
+	const MATCH = '/^\+([-\w]+)(?:\((.*?)\))?$/';
 	const NAME = 1;
 	const ARGUMENTS = 2;
 
@@ -65,7 +65,7 @@ class SassMixinNode extends SassNode {
 				$context->setVariable($name, $this->evaluate($mixin->getDefault($name), $context));
 			}
 			else {
-				throw new SassMixinNodeException("Required variable $name not given when using Mixin::{$this->name}\nLine {$line['number']}: " . (is_array($line['file']) ? join(DIRECTORY_SEPARATOR, $line['file']) : ''));
+				throw new SassMixinNodeException("Required variable - $name - not given when using Mixin::{$this->name}\nMixin used at Line {$this->line['number']}: " . (is_array($this->line['file']) ? join(DIRECTORY_SEPARATOR, $this->line['file']) : '')."\nMixin defined at Line {$mixin->line['number']}: " . (is_array($mixin->line['file']) ? join(DIRECTORY_SEPARATOR, $mixin->line['file']) : ''));
 			}
 		} // foreach
 
