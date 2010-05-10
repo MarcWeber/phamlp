@@ -331,8 +331,8 @@ class HamlParser {
 	 * boolean: false if the output file could not be written.
 	 */
 	public function parse($sourceFile, $cacheDir=null, $permission=0755, $sourceExtension='.haml', $outputExtension='.php') {
-		if (is_string($cacheDir) || is_boolean($cacheDir)) {
-			if (is_boolean($cacheDir)) {
+		if (is_string($cacheDir) || is_bool($cacheDir)) {
+			if (is_bool($cacheDir)) {
 				$cacheDir =
 						($cacheDir ? dirname(__FILE__).DIRECTORY_SEPARATOR.'haml-cache' :
 						dirname($sourceFile));
