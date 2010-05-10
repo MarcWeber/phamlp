@@ -319,15 +319,55 @@ class HamlParser {
 
 	/**
 	 * Parses a Haml file.
+	 * If an output directory is given the resulting PHP is cached.
 	 * @param string path to file to parse
-	 * @return string parsed file
+	 * @param mixed boolean: true to use the default cache directory, false to use
+	 * the source file directory. string: path to the cache directory.
+	 * null: disable caching
+	 * @param string output file extension
+	 * @param integer permission for the output directory and file
+	 * @return mixed string: the resulting PHP if no output directory is specified
+	 * or the output filename if the output directory is specified.
+	 * boolean: false if the output file could not be written.
 	 */
-	public function parse($filename) {
-		$this->lineNumber = 0;
-		$this->filename = $filename;
-		$source = file_get_contents($filename);
-		return $this->toTree($source)->render();
+	public function parse($sourceFile, $cacheDir=null, $permission=0755, $sourceExtension='.haml', $outputExtension='.php') {
+		if (is_string($cacheDir) || is_boolean($cacheDir)) {
+			if (is_boolean($cacheDir)) {
+				$cacheDir =
+						($cacheDir ? dirname(__FILE__).DIRECTORY_SEPARATOR.'haml-cache' :
+						dirname($sourceFile));
+			}
+			$outputFile = $cacheDir.DIRECTORY_SEPARATOR.
+					basename($sourceFile, $sourceExtension).$outputExtension;
+			if (@filemtime($sourceFile) > @filemtime($outputFile)) {
+				if (!is_dir($cacheDir)) {
+					@mkdir($cacheDir, $permission);
+				}
+				$return = (file_put_contents($outputFile, $this->haml2PHP($sourceFile))
+						=== false ? false : $outputFile);
+				if ($return !== false) {
+					@chmod($outputFile, $permission);
+				}
+			}
+			else {
+				$return = $outputFile;
+			}
+		}
+		else {
+			$return = $this->haml2PHP($sourceFile);
+		}
+		return $return;
+	}
 
+	/**
+	 * Parses a Haml file into PHP.  
+	 * @param string path to file to parse
+	 * @return string the resulting PHP
+	 */
+	public function haml2PHP($sourceFile) {
+		$this->lineNumber = 0;
+		$this->filename = $sourceFile;
+		return $this->toTree(file_get_contents($sourceFile))->render();
 	}
 
 	/**
