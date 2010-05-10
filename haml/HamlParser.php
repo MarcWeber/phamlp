@@ -110,6 +110,8 @@ class HamlParser {
 	const REMOVE_INNER_WHITESPACE = '<';
 	const REMOVE_OUTER_WHITESPACE = '>';
 	/**#@-*/
+	
+	const MULTILINE= ' |';
 
 	/**#@+
 	 * Attribute tokens
@@ -678,7 +680,7 @@ class HamlParser {
 	 * @return boolean true if the line os part of a multiline group, false if not
 	 */
 	private function isMultiline($line) {
-	  return isset($line[self::HAML_MULTILINE]);
+	  return substr($line[self::HAML_SOURCE], -2) === self::MULTILINE;
 	}
 
 	/**
@@ -754,7 +756,7 @@ class HamlParser {
 	private function getMultiline($line, &$lines) {
 		do {
 			$multiLine = array_shift($lines);
-			$line[self::HAML_CONTENT] .= $multiLine[self::HAML_CONTENT];
+			$line[self::HAML_CONTENT] .= substr($multiLine[self::HAML_SOURCE], 0, -2);
 		} while(!empty($lines) && $this->isMultiline($lines[0]));
 	  return $line;
 	}
