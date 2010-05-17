@@ -63,11 +63,11 @@ class HamlParser {
 	/**#@+
 	 * Regexes used to parse the document
 	 */
-	const REGEX_HAML = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*(?:#\{.+?\})?[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-_:a-zA-Z0-9]*(?:#\{.+?\})?[-_:a-zA-Z0-9]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\)))?)?(?:(\{)(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\}))?)?(>?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
+	const REGEX_HAML = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*(?:#\{.+?\})?[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-_:a-zA-Z0-9]*(?:#\{.+?\})?[-_:a-zA-Z0-9]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\)))?)?(?:(\{)(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\}))?)?(\|?>?\|?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
 	const REGEX_ATTRIBUTES = '/:?"?(\w+(?:[-:]\w+)*)"?\s*=>?\s*(?(?=([\'"]))(?:[\'"](.*?)\2)|([^\s,]+))/';
 	const REGEX_ATTRIBUTE_FUNCTION = '/^\$?[_a-zA-Z]\w*(?(?=->)(->[_a-zA-Z]\w*)+|(::[_a-zA-Z]\w*)?)\(.+\)$/'; // Matches functions and instantiated and static object methods
-	const REGEX_WHITESPACE_CONTROL = '/(.*?)\s+$/s';
-	const REGEX_WHITESPACE_CONTROL_DEBUG = '%(.*?)(?:<br />\s)$%s'; // whitespace control when showing output
+	const REGEX_WHITESPACE_REMOVAL = '/(.*?)\s+$/s';
+	const REGEX_WHITESPACE_REMOVAL_DEBUG = '%(.*?)(?:<br />\s)$%s'; // whitespace control when showing output
 	//const REGEX_CODE_INTERPOLATION = '/(?:(?<!\\\\)#{(.+?(?:\(.*?\).*?)*)})/';
 	/**#@-*/
 	const MATCH_INTERPOLATION = '/(?<!\\\\)#\{(.*?)\}/';
@@ -89,7 +89,7 @@ class HamlParser {
 	const HAML_XML_ATTRIBUTES 			=  9;
 	const HAML_OPEN_RUBY_ATTRIBUTES = 10;
 	const HAML_RUBY_ATTRIBUTES			= 11;
-	const HAML_WHITESPACE_CONTROL		= 12;
+	const HAML_WHITESPACE_REMOVAL		= 12;
 	const HAML_TOKEN								= 13;
 	const HAML_CONTENT							= 14;
 	const HAML_MULTILINE						= 15;
@@ -107,8 +107,10 @@ class HamlParser {
 	const INSERT_CODE = '=';
 	const INSERT_CODE_PRESERVE_WHITESPACE = '~';
 	const RUN_CODE = '-';
-	const REMOVE_INNER_WHITESPACE = '<';
-	const REMOVE_OUTER_WHITESPACE = '>';
+	const INNER_WHITESPACE_REMOVAL = '<';
+	const OUTER_WHITESPACE_REMOVAL = '>';
+	const BLOCK_LEFT_OUTER_WHITESPACE_REMOVAL = '|>';
+	const BLOCK_RIGHT_OUTER_WHITESPACE_REMOVAL = '>|';
 	/**#@-*/
 	
 	const MULTILINE= ' |';
@@ -525,7 +527,7 @@ class HamlParser {
 		// The regex will strip off a '<' at the start of a line
 		if (empty($line[self::HAML_TAG])) {
 			$line[self::HAML_CONTENT] =
-				$line[self::HAML_WHITESPACE_CONTROL].$line[self::HAML_CONTENT];
+				$line[self::HAML_WHITESPACE_REMOVAL].$line[self::HAML_CONTENT];
 		}
 		$line['number'] = $this->lineNumber++;
 		$line['indentLevel'] = $this->getIndentLevel($line, $this->lineNumber);
@@ -1062,7 +1064,7 @@ class HamlParser {
 	}
 
 	private function parseWhitespaceControl($line) {
-		$whitespaceControl = array('inner' => false, 'outer' => false);
+		$whitespaceControl = array('inner' => false, 'outer' => array('left' => false, 'right' => false));
 
 		if (!empty($line[self::HAML_WHITESPACE_CONTROL])) {
 			if (strpos($line[self::HAML_WHITESPACE_CONTROL], self::REMOVE_INNER_WHITESPACE) !== false) {
