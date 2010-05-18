@@ -240,6 +240,6 @@ class HamlNode {
 	 * @param array source line(s) that generated the ouput
 	 */
 	protected function showSource($output) {
-		return "<!--\n  ({$this->line['file']} {$this->line['number']}:{$this->line['indentLevel']})\n  {$this->line[HamlParser::Haml_SOURCE]}\n-->\n$output";
+		return "<!--\n  ({$this->line['file']} {$this->line['number']}:{$this->line['indentLevel']})\n  {$this->line[HamlParser::HAML_SOURCE]}\n-->\n$output";
 	}
 }

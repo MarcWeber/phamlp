@@ -878,7 +878,7 @@ class HamlParser {
 			}
 		}
 		elseif (strpos($line[self::HAML_CONTENT], 'else') === 0) {
-			$node = new HamlCodeBlockNode("{$line[self::HAML_CONTENT]} { ?>");
+			$node = new HamlCodeBlockNode("<?php } {$line[self::HAML_CONTENT]} { ?>");
 			$node->line = $line;
 			$node->showOutput = $this->showOutput;
 			$node->showSource = $this->showSource;
