@@ -123,7 +123,7 @@ class HamlRenderer {
 	 * Renders the end of a code block
 	 */
 	public function renderEndCodeBlock($node) {
-		return "<?php } {$node->doWhile} ?>";
+		return '<?php }' . (!empty($node->doWhile) ? " {$node->doWhile}" : '') . ' ?>';
 	}
 
 	/**

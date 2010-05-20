@@ -138,6 +138,10 @@ class Haml extends CViewRenderer {
 	 * @var array A list of tag names that should automatically have their newlines preserved.
 	 */
 	public $preserve;
+	/**
+	 * @var string Path to a file containing user defined Haml helpers.
+	 */
+	public $helperFile;
 	/**#@-*/
 
 	/**
@@ -147,7 +151,7 @@ class Haml extends CViewRenderer {
 	/**
 	 * @var array Haml parser option names. These are passed to the parser if set.
 	 */
-	private $hamlOptions = array('format', 'doctype', 'escapeHtml', 'suppressEval', 'attrWrapper', 'style', 'ugly', 'preserveComments', 'debug', 'filterDir', 'doctypes', 'emptyTags', 'inlineTags', 'minimizedAttributes', 'preserve');
+	private $hamlOptions = array('format', 'doctype', 'escapeHtml', 'suppressEval', 'attrWrapper', 'style', 'ugly', 'preserveComments', 'debug', 'filterDir', 'doctypes', 'emptyTags', 'inlineTags', 'minimizedAttributes', 'preserve', 'helperFile');
 	/**
 	 * @var string Path to filters. Derived from filterPathAlias.
 	 */
@@ -159,6 +163,9 @@ class Haml extends CViewRenderer {
 	private function _init() {
 		if (isset($this->filterPathAlias)) {
 			$this->filterDir = Yii::getPathOfAlias($this->filterPathAlias);
+		}
+		if (isset($this->helperFile)) {
+			$this->helperFile = Yii::getPathOfAlias($this->helperFile).'.php';
 		}
 
 		$options = array();
@@ -198,8 +205,7 @@ class Haml extends CViewRenderer {
 	 * @param boolean whether the rendering result should be returned
 	 * @return mixed the rendering result, or null if the rendering result is not needed.
 	 */
-	public function renderFile($context,$sourceFile,$data,$return)
-	{
+	public function renderFile($context,$sourceFile,$data,$return) {
 		$hamlSourceFile = substr($sourceFile, 0, strrpos($sourceFile, '.')).$this->fileExtension;
 
 		if(!is_file($hamlSourceFile) || ($file=realpath($hamlSourceFile))===false) {
@@ -209,8 +215,7 @@ class Haml extends CViewRenderer {
 		
 		$viewFile = str_replace($this->fileExtension.($this->useRuntimePath?'':'c'), $this->viewFileExtension, $viewFile);
 		
-		if(!$this->cache||@filemtime($sourceFile)>@filemtime($viewFile))
-		{
+		if(!$this->cache||@filemtime($sourceFile)>@filemtime($viewFile)) {
 			$this->generateViewFile($sourceFile,$viewFile);
 			@chmod($viewFile,$this->filePermission);
 		}

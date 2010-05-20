@@ -42,6 +42,7 @@
  */
 
 require_once('tree/HamlNode.php');
+require_once('HamlHelpers.php');
 require_once('HamlException.php');
 
 /**
@@ -63,8 +64,8 @@ class HamlParser {
 	/**#@+
 	 * Regexes used to parse the document
 	 */
-	const REGEX_HAML = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*(?:#\{.+?\})?[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-_:a-zA-Z0-9]*(?:#\{.+?\})?[-_:a-zA-Z0-9]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\)))?)?(?:(\{)(?:(.*?(?:(?<!\\\\)#\{(?:.+\}?)\}.*?)*\}))?)?(\|?>?\|?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
-	const REGEX_ATTRIBUTES = '/:?"?(\w+(?:[-:]\w+)*)"?\s*=>?\s*(?(?=([\'"]))(?:[\'"](.*?)\2)|([^\s,]+))/';
+	const REGEX_HAML = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-_:a-zA-Z0-9]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()((?:(?:data[\t ]*=[\t ]*\{.+?\}|\w+[\t ]*=[\t ]*.+)[\t ]*)+\)))?(?:(\{)((?::(?:data[\t ]*=>[\t ]*\{.+?\}|\w+[\t ]*=>?[\t ]*.+)(?:,?[\t ]*)?)+\}))?(\|?>?\|?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
+	const REGEX_ATTRIBUTES = '/:?(?:(data)\s*=>?\s*([({].*?[})]))|(\w+(?:[-:]\w*)*)\s*=>?\s*(?(?=\[)(?:\[(.+?)\])|(?(?=([\'"]))(?:[\'"](.*?)\5)|([^\s,]+)))/';
 	const REGEX_ATTRIBUTE_FUNCTION = '/^\$?[_a-zA-Z]\w*(?(?=->)(->[_a-zA-Z]\w*)+|(::[_a-zA-Z]\w*)?)\(.+\)$/'; // Matches functions and instantiated and static object methods
 	const REGEX_WHITESPACE_REMOVAL = '/(.*?)\s+$/s';
 	const REGEX_WHITESPACE_REMOVAL_DEBUG = '%(.*?)(?:<br />\s)$%s'; // whitespace control when showing output
@@ -212,6 +213,14 @@ class HamlParser {
 	 * new filters to be installed. Note: No trailing directory separator.
 	 */
 	private $filterDir;
+	/**
+	 * @var string Path to the file containing user defined Haml helpers.
+	 */
+	private $helperFile;
+	/**
+	 * @var string Haml helper class. This must be an instance of HamlHelpers.
+	 */
+	private $helperClass = 'HamlHelpers';
 
 	/**
 	 * @var array built in Doctypes
@@ -319,6 +328,15 @@ class HamlParser {
 
 		$this->showSource = $this->debug & HamlParser::DEBUG_SHOW_SOURCE;
 		$this->showOutput = $this->debug & HamlParser::DEBUG_SHOW_OUTPUT;
+		
+		require_once dirname(__FILE__).DIRECTORY_SEPARATOR.'HamlHelpers.php';
+		if (isset($this->helperFile)) {
+			require_once $this->helperFile;
+			$this->helperClass = basename($this->helperFile, ".php"); 
+			if (!is_subclass_of($this->helperClass, 'HamlHelpers')) {
+				throw new HamlException("{$this->helperClass} must extend HamlHelpers");
+			}
+		} 
 	}
 
 	/**
@@ -371,7 +389,12 @@ class HamlParser {
 	public function haml2PHP($sourceFile) {
 		$this->lineNumber = 0;
 		$this->filename = $sourceFile;
-		return $this->toTree(file_get_contents($sourceFile))->render();
+		$helpers = "<?php\nrequire_once '".dirname(__FILE__).DIRECTORY_SEPARATOR."HamlHelpers.php';\n";
+		if (isset($this->helperFile)) {
+			$helpers .= "require_once '{$this->helperFile}';\n";
+		}
+		$helpers .= "?>";
+		return $helpers . $this->toTree(file_get_contents($sourceFile))->render();
 	}
 
 	/**
@@ -576,6 +599,9 @@ class HamlParser {
 		elseif ($this->isElement($line)) {
 			return $this->parseElement($line, $lines, $parent);
 		}
+		elseif ($this->isHelper($line)) {
+			return $this->parseHelper($line);
+		}
 		elseif ($this->isCode($line)) {
 			return $this->parseCode($line, $lines, $parent);
 		}
@@ -665,6 +691,16 @@ class HamlParser {
 	 */
 	private function isHamlComment($line) {
 		return preg_match(self::HAML_COMMENT, $line[self::HAML_TOKEN]) > 0;
+	}
+
+	/**
+	 * Return a value indicating if the line is a HamlHelper.
+	 * @param array line to test
+	 * @return boolean true if the line is a HamlHelper, false if not
+	 */
+	private function isHelper($line) {
+		return (preg_match(HamlHelperNode::REGEX_HELPER, $line[self::HAML_CONTENT], $matches)
+			? method_exists($this->helperClass, $matches[2]) : false);
 	}
 
 	/**
@@ -816,12 +852,14 @@ class HamlParser {
 						$class = $this->interpolate($class);
 					}
 				} // foreach
-				$attributes['class'] = join(' ', $classes);
+				$attributes['class'] = join(' ', $classes) .
+						(isset($attributes['class']) ? " {$attributes['class']}" : '');
 			}
 			if (!empty($line[self::HAML_ID])) {
 				$attributes['id'] =
 						(preg_match(self::MATCH_INTERPOLATION, $line[self::HAML_ID]) ?
-						$this->interpolate($line[self::HAML_ID]) : $line[self::HAML_ID]);
+						$this->interpolate($line[self::HAML_ID]) : $line[self::HAML_ID]) .
+						(isset($attributes['id']) ? "_{$attributes['id']}" : '');
 			}
 		}
 
@@ -840,22 +878,39 @@ class HamlParser {
 			$attributes[0] = "<?php echo $subject; ?>";
 			return $attributes;
 		}
+		
 		preg_match_all(self::REGEX_ATTRIBUTES, $subject, $attrs, PREG_SET_ORDER);
 		foreach ($attrs as $attr) {
-			if (empty($attr[2])) {
-				switch ($attr[4]) {
+			if (!empty($attr[1])) { // HTML5 Custom Data Attributes
+				$dataAttributes = $this->parseAttributeHash(substr($attr[2], 1));
+				foreach ($dataAttributes as $key=>$value) {
+					$attributes["data-$key"] = $value;				
+				} // foreach
+			}
+			elseif (!empty($attr[4])) {
+				$values = explode(',', $attr[4]);
+				foreach ($values as &$value) {
+					$value = trim($value);
+				} // foreach
+				if ($attr[3] !== 'class' && $attr[3] !== 'id') {
+					throw new HamlException('Attribute must be "class" or "id" with array value');
+				}
+				$attributes[$attr[3]] = '<?php echo ' . join(($attr[3] === 'id' ? ".'_'." : ".' '."), $values) . '; ?>';
+			}
+			elseif (!empty($attr[6])) {
+				$attributes[$attr[3]] = $this->interpolate($attr[6]);
+			}
+			else {
+				switch ($attr[7]) {
 					case 'true':
-						$attributes[$attr[1]] = $attr[1];
+						$attributes[$attr[3]] = $attr[3];
 						break;
 					case 'false':
 						break;
 					default:
-						$attributes[$attr[1]] = "<?php echo {$attr[4]}; ?>";
+						$attributes[$attr[3]] = "<?php echo {$attr[7]}; ?>";
 						break;
 				}
-			}
-			else {
-				$attributes[$attr[1]] = $this->interpolate($attr[3]);
 			}
 		} // foreach
 		return $attributes;
@@ -1009,6 +1064,16 @@ class HamlParser {
 	}
 
 	/**
+	 * Parse a HamlHelper.
+	 * @param array line to parse
+	 * @param array remaining lines
+	 */
+	private function parseHelper($line) {
+		return new HamlHelperNode($this->helperClass, $line[self::HAML_CONTENT],
+				$line[self::HAML_TOKEN] === self::RUN_CODE);
+	}
+
+	/**
 	 * Parse an element.
 	 * @param array line to parse
 	 * @param array remaining lines
@@ -1024,8 +1089,10 @@ class HamlParser {
 			$child->showOutput = $this->showOutput;
 			$child->showSource = $this->showSource;
 			$child->line = array(
-				'indentLevel' => ($line['indentLevel'] + 1),
-				'number' => $line['number']
+				self::HAML_SOURCE => $line[self::HAML_SOURCE],
+				'file' => $line['file'],
+				'number' => $line['number'],
+				'indentLevel' => ($line['indentLevel'] + 1)
 			);
 			$node->addChild($child, $parent);
 		}
@@ -1066,12 +1133,19 @@ class HamlParser {
 	private function parseWhitespaceControl($line) {
 		$whitespaceControl = array('inner' => false, 'outer' => array('left' => false, 'right' => false));
 
-		if (!empty($line[self::HAML_WHITESPACE_CONTROL])) {
-			if (strpos($line[self::HAML_WHITESPACE_CONTROL], self::REMOVE_INNER_WHITESPACE) !== false) {
-				$whitespaceControl['inner'] = true;
-			}
-			if (strpos($line[self::HAML_WHITESPACE_CONTROL], self::REMOVE_OUTER_WHITESPACE) !== false) {
-				$whitespaceControl['outer'] = true;
+		if (!empty($line[self::HAML_WHITESPACE_REMOVAL])) {
+			$whitespaceControl['inner'] =
+					(strpos($line[self::HAML_WHITESPACE_REMOVAL],
+					self::INNER_WHITESPACE_REMOVAL) !== false);
+
+			if (strpos($line[self::HAML_WHITESPACE_REMOVAL],
+					self::OUTER_WHITESPACE_REMOVAL) !== false) {
+				$whitespaceControl['outer']['left'] =
+						(strpos($line[self::HAML_WHITESPACE_REMOVAL],
+						self::BLOCK_LEFT_OUTER_WHITESPACE_REMOVAL) === false);
+				$whitespaceControl['outer']['right'] =
+						(strpos($line[self::HAML_WHITESPACE_REMOVAL],
+						self::BLOCK_RIGHT_OUTER_WHITESPACE_REMOVAL) === false);
 			}
 		}
 	  return $whitespaceControl;

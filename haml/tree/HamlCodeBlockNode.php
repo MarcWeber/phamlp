@@ -51,8 +51,7 @@ class HamlCodeBlockNode extends HamlNode {
 			$output .= $child->render();
 		} // foreach
 		$output .= (empty($this->else) ?
-			$this->renderer->renderEndCodeBlock($this) :
-			'<?php } ' . $this->else->render());
+			$this->renderer->renderEndCodeBlock($this) : $this->else->render());
 
 	  return $this->debug($output);
 	}

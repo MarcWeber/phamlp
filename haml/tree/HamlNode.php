@@ -14,6 +14,7 @@ require_once('HamlCommentNode.php');
 require_once('HamlDoctypeNode.php');
 require_once('HamlElementNode.php');
 require_once('HamlFilterNode.php');
+require_once('HamlHelperNode.php');
 require_once('HamlCodeBlockNode.php');
 require_once('HamlNodeExceptions.php');
 

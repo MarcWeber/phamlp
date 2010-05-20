@@ -131,7 +131,7 @@ class HamlView extends View {
 	 * preserve: array A list of tag names that should automatically have their
 	 * newlines preserved.
 	 */
-	var $hamlOptions = array('format', 'doctype', 'escapeHtml', 'suppressEval', 'attrWrapper', 'style', 'ugly', 'preserveComments', 'debug', 'filterDir', 'doctypes', 'emptyTags', 'inlineTags', 'minimizedAttributes', 'preserve');
+	var $hamlOptions = array('format', 'doctype', 'escapeHtml', 'suppressEval', 'attrWrapper', 'style', 'ugly', 'preserveComments', 'debug', 'filterDir', 'doctypes', 'emptyTags', 'inlineTags', 'minimizedAttributes', 'preserve', 'helperFile');
 	
 	/**
 	 * Initialises HamlView. 
@@ -153,7 +153,7 @@ class HamlView extends View {
 		$options = array();
 		foreach ($this->hamlOptions as $option) {
 			$_option = Configure::read("Haml.$option");
-			if (is_null($_option)) {
+			if (!is_null($_option)) {
 				$options[$option] = $_option;
 			}
 		} // foreach
