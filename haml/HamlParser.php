@@ -64,7 +64,7 @@ class HamlParser {
 	/**#@+
 	 * Regexes used to parse the document
 	 */
-	const REGEX_HAML = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-_:a-zA-Z0-9]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()((?:(?:data[\t ]*=[\t ]*\{.+?\}|\w+[\t ]*=[\t ]*.+)[\t ]*)+\)))?(?:(\{)((?::(?:data[\t ]*=>[\t ]*\{.+?\}|\w+[\t ]*=>?[\t ]*.+)(?:,?[\t ]*)?)+\}))?(\|?>?\|?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
+	const REGEX_HAML = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-:\w]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()((?:(?:html_attrs\(.*?\)|data[\t ]*=[\t ]*\{.+?\}|(?:[_:a-zA-Z]+[-:\w]*)[\t ]*=[\t ]*.+)[\t ]*)+\)))?(?:(\{)((?::(?:html_attrs\(.*?\)|data[\t ]*=>[\t ]*\{.+?\}|(?:[_:a-zA-Z]+[-:\w]*)[\t ]*=>?[\t ]*.+)(?:,?[\t ]*)?)+\}))?(\|?>?\|?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
 	const REGEX_ATTRIBUTES = '/:?(?:(data)\s*=>?\s*([({].*?[})]))|(\w+(?:[-:]\w*)*)\s*=>?\s*(?(?=\[)(?:\[(.+?)\])|(?(?=([\'"]))(?:[\'"](.*?)\5)|([^\s,]+)))/';
 	const REGEX_ATTRIBUTE_FUNCTION = '/^\$?[_a-zA-Z]\w*(?(?=->)(->[_a-zA-Z]\w*)+|(::[_a-zA-Z]\w*)?)\(.+\)$/'; // Matches functions and instantiated and static object methods
 	const REGEX_WHITESPACE_REMOVAL = '/(.*?)\s+$/s';
@@ -73,6 +73,7 @@ class HamlParser {
 	/**#@-*/
 	const MATCH_INTERPOLATION = '/(?<!\\\\)#\{(.*?)\}/';
 	const INTERPOLATE = '<?php echo \1; ?>';
+	const HTML_ATTRS = '/html_attrs\(\s*((?(?=\')(?:.*?)\'|(?:.*?)"))(?:\s*,\s*(.*?))?\)/';
 
 
 	/**#@+
@@ -817,6 +818,10 @@ class HamlParser {
 				}	while (substr($line[self::HAML_XML_ATTRIBUTES], -1) !==
 						self::CLOSE_XML_ATTRIBUTES);		
 			}
+			if (preg_match(self::HTML_ATTRS, $line[self::HAML_XML_ATTRIBUTES], $htmlAttrs)) {
+				$line[self::HAML_XML_ATTRIBUTES] = preg_replace(self::HTML_ATTRS, '', $line[self::HAML_XML_ATTRIBUTES]);
+				$attributes = array_merge($attributes, $this->htmlAttrs($htmlAttrs));			
+			}
 			$attributes = array_merge(
 					$attributes,
 					$this->parseAttributeHash($line[self::HAML_XML_ATTRIBUTES])
@@ -831,6 +836,10 @@ class HamlParser {
 					$line[self::HAML_RUBY_ATTRIBUTES] .= $multiLine[self::HAML_CONTENT];
 				}	while (substr($line[self::HAML_RUBY_ATTRIBUTES], -1) !==
 						self::CLOSE_RUBY_ATTRIBUTES);		
+			}
+			if (preg_match(self::HTML_ATTRS, $line[self::HAML_RUBY_ATTRIBUTES], $htmlAttrs)) {
+				$line[self::HAML_RUBY_ATTRIBUTES] = preg_replace(self::HTML_ATTRS, '', $line[self::HAML_RUBY_ATTRIBUTES]);
+				$attributes = array_merge($attributes, $this->htmlAttrs($htmlAttrs));			
 			}
 			$attributes = array_merge(
 					$attributes,
@@ -863,6 +872,7 @@ class HamlParser {
 			}
 		}
 
+		ksort($attributes, SORT_STRING);
 	  return $attributes;
 	}
 
@@ -915,7 +925,30 @@ class HamlParser {
 		} // foreach
 		return $attributes;
 	}
-
+	
+	/**
+	 * Returns an array of attributes for the html element.
+	 * @param array arguments for HamlHelpers::html_attrs 
+	 * @return array attributes for the html element
+	 */
+	private function htmlAttrs($htmlAttrs) {
+		if (empty($htmlAttrs[1]) && empty($htmlAttrs[2])) {
+			return HamlHelpers::html_attrs();
+		}
+		else {
+			$htmlAttrs[1] = substr($htmlAttrs[1], 1, -1);
+			if (substr($htmlAttrs[1], -1) == ';') {
+				$htmlAttrs[1] = eval("return {$htmlAttrs[1]}");
+			}
+			if (isset($htmlAttrs[2])) {
+				return HamlHelpers::html_attrs($htmlAttrs[1], eval($htmlAttrs[2] . ';'));
+			}
+			else {
+				return HamlHelpers::html_attrs($htmlAttrs[1]);
+			}
+		}
+	}
+	
 	/**
 	 * Parse code
 	 * @param array line to parse
