@@ -122,7 +122,8 @@ class SassParser {
 			'cache_location' => dirname(__FILE__) . DIRECTORY_SEPARATOR . self::CACHE_LOCATION,
 			'css_location'	 => dirname(__FILE__) . DIRECTORY_SEPARATOR . self::CSS_LOCATION,
 			'load_paths' 		 => array(dirname(__FILE__) . DIRECTORY_SEPARATOR . self::TEMPLATE_LOCATION),
-			'property_syntax' => 'either'
+			'property_syntax' => 'either',
+			'file' => array('dirname' => '', 'basename' => '')
 		), $options);
 	}
 
@@ -198,21 +199,20 @@ class SassParser {
 	}
 
 	/**
-	 * Returns a value indicating if the next line is a child of the parent line
+	 * Returns a value indicating if the next line is a child of the parent line.
+	 * Blank lines are ignored.
 	 * @param array parent line
-	 * @param array remaing in source lines
+	 * @param array remaining source lines
 	 * @param boolean whether the source line is a comment.
-	 * If it all indented lines are regarded as children; if not the child line
+	 * If true all indented lines are regarded as children; if not the child line
 	 * must only be indented by 1
 	 * @return boolean true if the next line is a child of the parent line
 	 * @throws SassException if the indent is invalid
 	 */
 	private function hasChild($line, &$lines, $isComment = false) {
 		if (!empty($lines)) {
-			$i = 0;
-			$c = count($lines);
-			while (empty($nextLine) && $i <= $c) {
-				$nextLine = $lines[$i++];
+			for ($i = 0, $c = count($lines); empty($nextLine) && $i < $c; $i++) {
+				$nextLine = $lines[$i];
 			}
 
 			$indentLevel = $this->getIndentLevel($nextLine, $line['number'] + $i);

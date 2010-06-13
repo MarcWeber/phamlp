@@ -64,7 +64,7 @@ class HamlParser {
 	/**#@+
 	 * Regexes used to parse the document
 	 */
-	const REGEX_HAML = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]+[-:\w]*|#\{.+?\})(?:\.?))*))?(?:#((?:[_:a-zA-Z]+[-:\w]*)|(?:#\{.+?\})))?(?:\[(.+)\])?(?:(\()((?:(?:html_attrs\(.*?\)|data[\t ]*=[\t ]*\{.+?\}|(?:[_:a-zA-Z]+[-:\w]*)[\t ]*=[\t ]*.+)[\t ]*)+\)))?(?:(\{)((?::(?:html_attrs\(.*?\)|data[\t ]*=>[\t ]*\{.+?\}|(?:[_:a-zA-Z]+[-:\w]*)[\t ]*=>?[\t ]*.+)(?:,?[\t ]*)?)+\}))?(\|?>?\|?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
+	const REGEX_HAML = '/(?m)^([ \x09]*)((?::(\w*))?(?:%(\w*))?(?:\.((?:(?:[-_:a-zA-Z]|#\{.+?\})+(?:[-:\w]|#\{.+?\})*(?:\.?))*))?(?:#((?:[_:a-zA-Z]|#\{.+?\})+(?:[-:\w]|#\{.+?\})*))?(?:\[(.+)\])?(?:(\()((?:(?:html_attrs\(.*?\)|data[\t ]*=[\t ]*\{.+?\}|(?:[_:a-zA-Z]+[-:\w]*)[\t ]*=[\t ]*.+)[\t ]*)+\)))?(?:(\{)((?::(?:html_attrs\(.*?\)|data[\t ]*=>[\t ]*\{.+?\}|(?:[_:a-zA-Z]+[-:\w]*)[\t ]*=>?[\t ]*.+)(?:,?[\t ]*)?)+\}))?(\|?>?\|?<?) *((?:\?#)|!!!|\/\/|\/|-#|!=|&=|!|&|=|-|~|\\\\\\\\)? *(.*?)(?:\s(\|)?)?)$/'; // Haml line
 	const REGEX_ATTRIBUTES = '/:?(?:(data)\s*=>?\s*([({].*?[})]))|(\w+(?:[-:]\w*)*)\s*=>?\s*(?(?=\[)(?:\[(.+?)\])|(?(?=([\'"]))(?:[\'"](.*?)\5)|([^\s,]+)))/';
 	const REGEX_ATTRIBUTE_FUNCTION = '/^\$?[_a-zA-Z]\w*(?(?=->)(->[_a-zA-Z]\w*)+|(::[_a-zA-Z]\w*)?)\(.+\)$/'; // Matches functions and instantiated and static object methods
 	const REGEX_WHITESPACE_REMOVAL = '/(.*?)\s+$/s';
@@ -549,9 +549,10 @@ class HamlParser {
 			return null;
 		}
 		// The regex will strip off a '<' at the start of a line
-		if (empty($line[self::HAML_TAG])) {
+		if ($line[self::HAML_WHITESPACE_REMOVAL] ===
+				self::INNER_WHITESPACE_REMOVAL && empty($line[self::HAML_TAG])) {
 			$line[self::HAML_CONTENT] =
-				$line[self::HAML_WHITESPACE_REMOVAL].$line[self::HAML_CONTENT];
+				$line[self::HAML_WHITESPACE_REMOVAL].$line[self::HAML_TOKEN].$line[self::HAML_CONTENT];
 		}
 		$line['number'] = $this->lineNumber++;
 		$line['indentLevel'] = $this->getIndentLevel($line, $this->lineNumber);
@@ -961,6 +962,9 @@ class HamlParser {
 				$node = new HamlCodeBlockNode('<?php do { ?>');
 				$node->doWhile = 'while' . $block[2] . ';';
 			}
+			elseif ($block[1] === 'switch') {
+				$node = new HamlCodeBlockNode("<?php {$line[self::HAML_CONTENT]} {");
+			}
 			else {
 				$node = new HamlCodeBlockNode("<?php {$line[self::HAML_CONTENT]} { ?>");
 			}
@@ -975,7 +979,8 @@ class HamlParser {
 			$node = null;
 		}
 		elseif (strpos($line[self::HAML_CONTENT], 'case') === 0) {
-			$node = new HamlNode("{$line[self::HAML_CONTENT]}:");
+			$node = new HamlNode(($parent->hasChildren() ? '<?php ' : '') .
+					"{$line[self::HAML_CONTENT]}: ?>");
 		}
 		else {
 			$node = new HamlNode("<?php {$line[self::HAML_CONTENT]}; ?>");
