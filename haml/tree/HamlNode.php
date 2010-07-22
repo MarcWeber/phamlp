@@ -57,9 +57,23 @@ class HamlNode {
 	 * @var string output buffer
 	 */
 	protected $output;
+	/**
+	 * @var HamlRenderer Renderer object
+	 */
+	private $_r; 
+	/**
+	 * @var array Options
+	 */
+	private $_o;
 
-	public function __construct($content) {
+	public function __construct($content, $parent) {
 	  $this->content = $content;
+	  if (!is_null($parent)) { // $parent === null for "else" code blocks
+		  $this->parent = $parent;
+		  $this->root = $parent->root;
+		  $parent->children[] = $this;			
+	  }
+
 	}
 
 	/**
@@ -118,18 +132,6 @@ class HamlNode {
 	 */
 	public function getParent() {
 		return $this->parent;
-	}
-
-	/**
-	 * Adds a child to this node.
-	 * @return HamlNode the child to add
-	 * @return HamlNode this node
-	 */
-	public function addChild($child, $parent = null) {
-		$child->parent		= $this;
-		$child->root			= (empty($parent) ? $this->root : $parent->root);
-		$this->children[] = $child;
-		return $this;
 	}
 
 	/**
@@ -204,8 +206,10 @@ class HamlNode {
 	 * @return array the options
 	 */
 	public function getOptions() {
-	  $o = $this->root->options;
-	  return $this->root->options;
+		if (empty($this->_o)) {
+			$this->_r = $this->root->options;
+		}
+	  return $this->_o;
 	}
 
 	/**
@@ -213,7 +217,10 @@ class HamlNode {
 	 * @return HamlRenderer the rendered
 	 */
 	public function getRenderer() {
-	  return $this->root->renderer;
+		if (empty($this->_r)) {
+			$this->_r = $this->root->renderer;
+		}
+	  return $this->_r;
 	}
 
 	public function render() {

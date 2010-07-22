@@ -34,9 +34,12 @@ class HamlHelperNode extends HamlNode {
 	 * @param string helper call.
 	 * @return HamlHelperNode
 	 */
-	public function __construct($helperClass, $helperMethod) {
+	public function __construct($helperClass, $helperMethod, $parent) {
 	  $this->helperClass = $helperClass;
 	  $this->helperMethod = $helperMethod;
+	  $this->parent = $parent;
+	  $this->root = $parent->root;
+	  $parent->children[] = $this;
 	}
 
 	/**
