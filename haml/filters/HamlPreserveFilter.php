@@ -22,7 +22,7 @@ class HamlPreserveFilter extends HamlBaseFilter {
 	 * @return string filtered text
 	 */
 	public function run($text) {
-	  return str_replace("\n", '&#x000a',
+	  return str_replace("\n", '&#x000a;',
 	  	preg_replace(HamlParser::MATCH_INTERPOLATION, '<?php echo \1; ?>', $text)
 	  ) . "\n";
 	}
