@@ -134,30 +134,102 @@ class SassScriptFunctions {
 	 * Makes a colour darker.
 	 * @param SassColour The colour to darken
 	 * @param SassNumber The amount to darken the colour by
+	 * @param SassBoolean Whether the amount is relative (true) or absolute (false).
+	 * The default is false - the amount is absolute.
+	 * If the colour lightness value is 80% and the amount is 50%,
+	 * the resulting colour lightness value for an absolute amount is 30%,
+	 * whereas the resulting colour lightness value for a relative amount is 40%.
 	 * @return new SassColour The darkened colour
 	 * @throws SassScriptFunctionException If $colour is not a colour or
 	 * $amount is not a number
+	 * @see darken_rel
 	 */
-	public function darken($colour, $amount) {
+	public function darken($colour, $amount, $rel = null) {
 		self::assertType($colour, 'SassColour');
 		self::assertType($amount, 'SassNumber');
 		self::assertInRange($amount, 0, 100, '%');
-		return $colour->with(array('lightness' => self::inRange($colour->lightness * (1 - $amount->value/100), 0, 100)));
+		if (!is_null($rel)) {
+			self::assertType($rel, 'SassBoolean');
+			$rel = $rel->value;
+		}
+		else {
+			$rel = false;
+		}
+		
+		return $colour->with(array(
+			'lightness',
+			self::inRange((
+				$rel ?
+				$colour->lightness * (1 - $amount->value/100) :
+				$colour->lightness - $amount->value
+			), 0, 100)
+		));
+	}
+
+	/**
+	 * Makes a colour darker by a relative amount.
+	 * e.g. if the colour lightness value is 80% and the amount is 50%, the
+	 * resulting colour lightness value is 40%.
+	 * @param SassColour The colour to darken
+	 * @param SassNumber The amount to darken the colour by
+	 * @return new SassColour The darkened colour
+	 * @throws SassScriptFunctionException If $colour is not a colour or
+	 * $amount is not a number
+	 * @see darken
+	 */
+	public function darken_rel($colour, $amount) {
+		$this->darken($colour, $amount, new SassBoolean('true'));
 	}
 
 	/**
 	 * Makes a colour less saturated.
 	 * @param SassColour The colour to desaturate
 	 * @param SassNumber The amount to desaturate the colour by
+	 * @param SassBoolean Whether the amount is relative (true) or absolute (false).
+	 * The default is false - the amount is absolute.
+	 * If the colour saturation value is 80% and the amount is 50%,
+	 * the resulting colour saturation value for an absolute amount is 30%,
+	 * whereas the resulting colour saturation value for a relative amount is 40%.
 	 * @return new SassColour The desaturateed colour
 	 * @throws SassScriptFunctionException If $colour is not a colour or
 	 * $amount is not a number
+	 * @see desaturate_rel
 	 */
-	public function desaturate($colour, $amount) {
+	public function desaturate($colour, $amount, $rel = null) {
 		self::assertType($colour, 'SassColour');
 		self::assertType($amount, 'SassNumber');
 		self::assertInRange($amount, 0, 100, '%');
-		return $colour->with(array('saturation' => self::inRange($colour->saturation * (1 - $amount->value/100), 0, 100)));
+		if (!is_null($rel)) {
+			self::assertType($rel, 'SassBoolean');
+			$rel = $rel->value;
+		}
+		else {
+			$rel = false;
+		}
+		
+		return $colour->with(array(
+			'saturation',
+			self::inRange((
+				$rel ?
+				$colour->saturation * (1 - $amount->value/100) :
+				$colour->saturation - $amount->value
+			), 0, 100)
+		));
+	}
+
+	/**
+	 * Makes a colour less saturated by a relative amount.
+	 * e.g. if the colour saturation value is 80% and the amount is 50%, the
+	 * resulting colour saturation value is 40%.
+	 * @param SassColour The colour to desaturate
+	 * @param SassNumber The amount to desaturate the colour by
+	 * @return new SassColour The desaturateed colour
+	 * @throws SassScriptFunctionException If $colour is not a colour or
+	 * $amount is not a number
+	 * @see desaturate
+	 */
+	public function desaturate_rel($colour, $amount) {
+		$this->desaturate($colour, $amount, new SassBoolean('true'));
 	}
 
 	/**
@@ -168,9 +240,10 @@ class SassScriptFunctions {
 	 * @return new SassColour The opacified colour
 	 * @throws SassScriptFunctionException If $colour is not a colour or
 	 * $amount is not a number
+	 * @see opacify
 	 */
 	public function fade_in($colour, $amount) {
-		return $this->opacify($colour, $number);
+		return $this->opacify($colour, $amount);
 	}
 
 	/**
@@ -181,9 +254,10 @@ class SassScriptFunctions {
 	 * @return new SassColour The transparentized colour
 	 * @throws SassScriptFunctionException If $colour is not a colour or
 	 * $amount is not a number
+	 * @see transparentize
 	 */
 	public function fade_out($colour, $amount) {
-		return $this->transparentize($colour, $number);
+		return $this->transparentize($colour, $amount);
 	}
 
 	/**
@@ -290,15 +364,51 @@ class SassScriptFunctions {
 	 * Makes a colour lighter.
 	 * @param SassColour The colour to lighten
 	 * @param SassNumber The amount to lighten the colour by
+	 * @param SassBoolean Whether the amount is relative (true) or absolute (false).
+	 * The default is false - the amount is absolute.
+	 * If the colour lightness value is 40% and the amount is 50%,
+	 * the resulting colour lightness value for an absolute amount is 90%,
+	 * whereas the resulting colour lightness value for a relative amount is 60%.
 	 * @return new SassColour The lightened colour
 	 * @throws SassScriptFunctionException If $colour is not a colour or
 	 * $amount is not a number
+	 * @see lighten_rel
 	 */
 	public function lighten($colour, $amount) {
 		self::assertType($colour, 'SassColour');
 		self::assertType($amount, 'SassNumber');
 		self::assertInRange($amount, 0, 100, '%');
-		return $colour->with(array('lightness' => self::inRange($colour->lightness * (1 + $amount->value/100), 0, 100)));
+		if (!is_null($rel)) {
+			self::assertType($rel, 'SassBoolean');
+			$rel = $rel->value;
+		}
+		else {
+			$rel = false;
+		}
+		
+		return $colour->with(array(
+			'lightness',
+			self::inRange((
+				$rel ?
+				$colour->lightness * (1 + $amount->value/100) :
+				$colour->lightness + $amount->value
+			), 0, 100)
+		));
+	}
+
+	/**
+	 * Makes a colour lighter by a relative amount.
+	 * e.g. if the colour lightness value is 40% and the amount is 50%, the
+	 * resulting colour lightness value is 90%.
+	 * @param SassColour The colour to lighten
+	 * @param SassNumber The amount to lighten the colour by
+	 * @return new SassColour The lightened colour
+	 * @throws SassScriptFunctionException If $colour is not a colour or
+	 * $amount is not a number
+	 * @see lighten
+	 */
+	public function lighten_rel($colour, $amount) {
+		$this->lighten($colour, $amount, new SassBoolean('true'));
 	}
 
 	/**
@@ -384,15 +494,35 @@ class SassScriptFunctions {
 	 * Makes a colour more opaque.
 	 * @param SassColour The colour to opacify
 	 * @param SassNumber The amount to opacify the colour by
+	 * If this is a unitless number between 0 and 1 the adjustment is absolute,
+	 * if it is a percentage the adjustment is relative.
+	 * If the colour alpha value is 0.4
+	 * if the amount is 0.5 the resulting colour alpha value  is 0.9,
+	 * whereas if the amount is 50% the resulting colour alpha value  is 0.6.
 	 * @return new SassColour The opacified colour
 	 * @throws SassScriptFunctionException If $colour is not a colour or
 	 * $amount is not a number
+	 * @see opacify_rel
 	 */
 	public function opacify($colour, $amount) {
 		self::assertType($colour, 'SassColour');
 		self::assertType($amount, 'SassNumber');
-		self::assertInRange($amount, 0, 1, '');
-		return $colour->with(array('alpha' => self::inRange($colour->alpha + $amount->value, 0, 1)));
+		if ($this->unitless()) {
+			self::assertInRange($amount, 0, 1, '');
+			$rel = false;
+		}
+		else {
+			self::assertInRange($amount, 0, 100, '%');
+			$rel = true;
+		}
+		
+		return $colour->with(array(
+			'alpha' => self::inRange((
+				$rel ?
+				$colour->alpha * (1 + $amount->value/100) :
+				$colour->alpha + $amount->value
+			) , 0, 1)
+		));
 	}
 
 	/**
@@ -539,15 +669,50 @@ class SassScriptFunctions {
 	 * Makes a colour more saturated.
 	 * @param SassColour The colour to saturate
 	 * @param SassNumber The amount to saturate the colour by
+	 * @param SassBoolean Whether the amount is relative (true) or absolute (false).
+	 * The default is false - the amount is absolute.
+	 * If the colour saturation value is 40% and the amount is 50%,
+	 * the resulting colour saturation value for an absolute amount is 90%,
+	 * whereas the resulting colour saturation value for a relative amount is 60%.
 	 * @return new SassColour The saturated colour
 	 * @throws SassScriptFunctionException If $colour is not a colour or
 	 * $amount is not a number
 	 */
-	public function saturate($colour, $amount) {
+	public function saturate($colour, $amount, $rel = null) {
 		self::assertType($colour, 'SassColour');
 		self::assertType($amount, 'SassNumber');
 		self::assertInRange($amount, 0, 100, '%');
-		return $colour->with(array('saturation', self::inRange($colour->saturation * (1 + $amount->value/100), 0, 100)));
+		if (!is_null($rel)) {
+			self::assertType($rel, 'SassBoolean');
+			$rel = $rel->value;
+		}
+		else {
+			$rel = false;
+		}
+		
+		return $colour->with(array(
+			'saturation',
+			self::inRange((
+				$rel ?
+				$colour->saturation * (1 + $amount->value/100) :
+				$colour->saturation + $amount->value
+			), 0, 100)
+		));
+	}
+
+	/**
+	 * Makes a colour more saturated by a relative amount.
+	 * e.g. if the colour saturation value is 40% and the amount is 50%, the
+	 * resulting colour saturation value is 60%.
+	 * @param SassColour The colour to saturate
+	 * @param SassNumber The amount to saturate the colour by
+	 * @return new SassColour The saturated colour
+	 * @throws SassScriptFunctionException If $colour is not a colour or
+	 * $amount is not a number
+	 * @see saturate
+	 */
+	public function saturate_rel($colour, $amount) {
+		$this->saturate($colour, $amount, new SassBoolean('true'));
 	}
 
 	/**
@@ -564,7 +729,12 @@ class SassScriptFunctions {
 	/**
 	 * Makes a colour more transparent.
 	 * @param SassColour The colour to transparentize
-	 * @param SassNumber The amount to transparentize the colour by
+	 * @param SassNumber The amount to transparentize the colour by.
+	 * If this is a unitless number between 0 and 1 the adjustment is absolute,
+	 * if it is a percentage the adjustment is relative.
+	 * If the colour alpha value is 0.8
+	 * if the amount is 0.5 the resulting colour alpha value  is 0.3,
+	 * whereas if the amount is 50% the resulting colour alpha value  is 0.4.
 	 * @return new SassColour The transparentized colour
 	 * @throws SassScriptFunctionException If $colour is not a colour or
 	 * $amount is not a number
@@ -572,8 +742,22 @@ class SassScriptFunctions {
 	public function transparentize($colour, $amount) {
 		self::assertType($colour, 'SassColour');
 		self::assertType($amount, 'SassNumber');
-		self::assertInRange($amount, 0, 100, '%');
-		return $colour->with(array('alpha' => self::inRange($colour->alpha - $amount->value/100, 0, 1)));
+		if ($this->unitless()) {
+			self::assertInRange($amount, 0, 1, '');
+			$rel = false;
+		}
+		else {
+			self::assertInRange($amount, 0, 100, '%');
+			$rel = true;
+		}
+		
+		return $colour->with(array(
+			'alpha' => self::inRange((
+				$rel ?
+				$colour->alpha * (1 - $amount->value/100) :
+				$colour->alpha - $amount->value
+			) , 0, 1)
+		));
 	}
 	
 	/**
@@ -666,7 +850,7 @@ class SassScriptFunctions {
 	}
 	
 	/**
-	 * Ensures the value is within the given range, clipping it if not
+	 * Ensures the value is within the given range, clipping it if needed.
 	 * @param float the value to test
 	 * @param float the minimum value
 	 * @param float the maximum value
