@@ -22,27 +22,36 @@ class SassRootNode extends SassNode {
 	/**
 	 * @var SassScriptParser SassScript parser
 	 */
-	protected $parser;
+	protected $script;
 	/**
 	 * @var SassRenderer the renderer for this node
 	 */
 	protected $renderer;
 	/**
-	 * @var array options
+	 * @var SassParser
 	 */
-	protected $options;
+	protected $parser;
+	/**
+	 * @var array extenders for this tree in the form extendee=>extender
+	 */
+	protected $extenders = array();
 
 	/**
 	 * Root SassNode constructor.
-	 * @param array options for the tree
+	 * @param SassParser Sass parser
 	 * @return SassNode
 	 */
-	public function __construct($options) {
+	public function __construct($parser) { 
+		parent::__construct((object) array(
+			'source' => '',
+			'level' => -1,
+			'filename' => $parser->filename,
+			'line' => 0,
+		));
+		$this->parser = $parser;
+		$this->script = new SassScriptParser();
+		$this->renderer = SassRenderer::getRenderer($parser->style);
 		$this->root = $this;
-		$this->options = $options;
-		$this->parser = new SassScriptParser();
-		$this->renderer = SassRenderer::getRenderer($this->options['style']);
-		$this->line = array('indentLevel' => -1);
 	}
 
 	/**
@@ -54,9 +63,7 @@ class SassRootNode extends SassNode {
 	 */
 	public function parse($context) {
 		$node = clone $this;
-		foreach ($this->children as $child) {
-			$node->children = array_merge($node->children, $child->parse($context));
-		} // foreach
+		$node->children = $this->parseChildren($context);
 		return $node;
 	}
 
@@ -72,22 +79,22 @@ class SassRootNode extends SassNode {
 		} // foreach
 		return $output;
 	}
+	
+	public function extend($extendee, $selectors) {
+		$this->extenders[$extendee] = (isset($this->extenders[$extendee])
+			? array_merge($this->extenders[$extendee], $selectors) : $selectors);		
+	}
+	
+	public function getExtenders() {
+		return $this->extenders;  
+	} 
 
 	/**
 	 * Returns a value indicating if the line represents this type of node.
 	 * Child classes must override this method.
 	 * @throws SassNodeException if not overriden
 	 */
-	static public function isa($line) {
-		throw new SassNodeException('Child classes must override this method');
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * Child classes must override this method.
-	 * @throws SassNodeException if not overriden
-	 */
-	static public function match($line) {
+	public static function isa($line) {
 		throw new SassNodeException('Child classes must override this method');
 	}
 }

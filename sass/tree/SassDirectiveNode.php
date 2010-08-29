@@ -16,29 +16,16 @@
  * @subpackage	Sass.tree
  */
 class SassDirectiveNode extends SassNode {
-	const IDENTIFIER = '@';
+	const NODE_IDENTIFIER = '@';
 	const MATCH = '/^(@\w+)/';
 
 	/**
-	 * @var string the directive
-	 */
-	private $directive;
-
-	/**
 	 * SassDirectiveNode.
-	 * @param string string the directive
+	 * @param object source token
 	 * @return SassDirectiveNode
 	 */
-	public function __construct($directive) {
-		$this->directive = $directive;
-	}
-
-	/**
-	 * Returns the directive
-	 * @return string the directive
-	 */
-	public function getDirective() {
-	  return $this->directive;
+	public function __construct($token) {
+		parent::__construct($token);
 	}
 
 	/**
@@ -47,11 +34,7 @@ class SassDirectiveNode extends SassNode {
 	 * @return array the parsed node
 	 */
 	public function parse($context) {
-		$children = array();
-		foreach ($this->children as $child) {
-			$children = array_merge($children, $child->parse($context));
-		} // foreach
-		$this->children = $children;
+		$this->children = $this->parseChildren($context);
 		return array($this);
 	}
 
@@ -69,11 +52,21 @@ class SassDirectiveNode extends SassNode {
 	}
 
 	/**
-	 * Returns a value indicating if the line represents this type of node.
-	 * @param array the line to test
-	 * @return boolean true if the line represents this type of node, false if not
+	 * Returns a value indicating if the token represents this type of node.
+	 * @param object token
+	 * @return boolean true if the token represents this type of node, false if not
 	 */
-	static public function isa($line) {
-		return $line['source'][0] === self::IDENTIFIER;
+	public static function isa($token) {
+		return $token->source[0] === self::NODE_IDENTIFIER;
+	}
+
+	/**
+	 * Returns the directive
+	 * @param object token
+	 * @return string the directive
+	 */
+	public static function getDirective($token) {
+		preg_match(self::MATCH, $token->source, $matches);
+	  return strtolower($matches[1]);
 	}
 }

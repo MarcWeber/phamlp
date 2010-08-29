@@ -16,30 +16,30 @@
  * @subpackage	Sass
  */
 class SassFile {
-	const CSS = '.css';
-	const SASS = '.sass';
-	const SASSC = '.sassc';
+	const SASS = 'sass';
+	const SCSS = 'scss';
+	const SASSC = 'sassc';
 
 	/**
 	 * Returns the parse tree for a file.
 	 * If caching is enabled a cached version will be used if possible; if not the
 	 * parsed file will be cached.
 	 * @param string filename to parse
-	 * @param array parse options
+	 * @param SassParser Sass parser
 	 * @return SassRootNode
 	 */
-	static public function getTree($filename, $options) {
-		if ($options['cache']) {
-			$cached = self::getCachedFile($filename, $options);
+	public static function getTree($filename, $parser) {
+		if ($parser->cache) {
+			$cached = self::getCachedFile($filename, $parser->cache_location);
 			if ($cached !== false) {
 				return $cached;
 			}
 		}
 
-		$parser = new SassParser($options);
-		$tree = $parser->parse($filename);
-		if ($options['cache']) {
-			self::setCachedFile($tree, $filename, $options);
+		$sassParser = new SassParser(array_merge($parser->options, array('line'=>1)));
+		$tree = $sassParser->parse($filename);
+		if ($parser->cache) {
+			self::setCachedFile($tree, $filename, $parser->cache_location);
 		}
 		return $tree;
 	 }
@@ -48,38 +48,39 @@ class SassFile {
 	 * Returns the full path to a file to parse.
 	 * The file is looked for recursively under the load_paths directories and
 	 * the template_location directory.
-	 * If the filename does not end in .sass add it.
+	 * If the filename does not end in .sass or .scss add the current sysntax.
 	 * @param string filename to find
-	 * @param array parse options
+	 * @param SassParser Sass parser
 	 * @return string path to file
 	 * @throws SassException if file not found
 	 */
-	static public function getFile($filename, $options) {
-		if (substr($filename, -5) !== self::SASS) {
-			$filename .= self::SASS;
+	public static function getFile($filename, $parser) {
+		$ext = substr($filename, -5);
+		if ($ext !== '.'.self::SASS && $ext !== '.'.self::SCSS) {
+			$filename .= ".{$parser->syntax}";
 		}
 
 		if (file_exists($filename)) {
 			return $filename;
 		}
-		elseif (file_exists($options['file']['dirname'] . DIRECTORY_SEPARATOR . $filename)) {
-			return $options['file']['dirname'] . DIRECTORY_SEPARATOR . $filename;
+		elseif (file_exists(dirname($parser->filename) . DIRECTORY_SEPARATOR . $filename)) {
+			return dirname($parser->filename) . DIRECTORY_SEPARATOR . $filename;
 		}
 
-		foreach ($options['load_paths'] as $loadPath) {
+		foreach ($parser->load_paths as $loadPath) {
 			$path = self::findFile($filename, realpath($loadPath));
 			if ($path !== false) {
 				return $path;
 			}
 		} // foreach
 
-		if (isset($options['template_location'])) {
-			$path = self::findFile($filename, realpath($options['template_location']));
+		if (!empty($parser->template_location)) {
+			$path = self::findFile($filename, realpath($parser->template_location));
 			if ($path !== false) {
 				return $path;
 			}
 		}
-		throw new SassException("Unable to find file $filename\nImported in " . join(DIRECTORY_SEPARATOR, $options['file']));
+		throw new SassException('Unable to find {what}: {filename}', array('{what}'=>'import file', '{filename}'=>$filename));
 	}
 
 	/**
@@ -88,7 +89,7 @@ class SassFile {
 	 * @param string path to directory to look in and under
 	 * @return mixed string: full path to file if found, false if not
 	 */
-	static public function findFile($filename, $dir) {
+	public static function findFile($filename, $dir) {
 		if (file_exists($dir . DIRECTORY_SEPARATOR . $filename)) {
 			return $dir . DIRECTORY_SEPARATOR . $filename;
 		}
@@ -109,12 +110,12 @@ class SassFile {
 	/**
 	 * Returns a cached version of the file if available.
 	 * @param string filename to fetch
-	 * @param array parse options
+	 * @param string path to cache location
 	 * @return mixed the cached file if available or false if it is not
 	 */
-	static public function getCachedFile($filename, $options) {
-		$cached = realpath($options['cache_location']) . DIRECTORY_SEPARATOR .
-			md5($filename) . self::SASSC;
+	public static function getCachedFile($filename, $cacheLocation) {
+		$cached = realpath($cacheLocation) . DIRECTORY_SEPARATOR .
+			md5($filename) . '.'.self::SASSC;
 
 		if ($cached && file_exists($cached) &&
 				filemtime($cached) >= filemtime($filename)) {
@@ -127,19 +128,19 @@ class SassFile {
 	 * Saves a cached version of the file.
 	 * @param SassRootNode Sass tree to save
 	 * @param string filename to save
-	 * @param array parse options
+	 * @param string path to cache location
 	 * @return mixed the cached file if available or false if it is not
 	 */
-	static public function setCachedFile($sassc, $filename, $options) {
-		$cacheDir = realpath($options['cache_location']);
+	public static function setCachedFile($sassc, $filename, $cacheLocation) {
+		$cacheDir = realpath($cacheLocation);
 
 		if (!$cacheDir) {
-			mkdir($options['cache_location']);
-			@chmod($options['cache_location'], 0777);
-			$cacheDir = realpath($options['cache_location']);
+			mkdir($cacheLocation);
+			@chmod($cacheLocation, 0777);
+			$cacheDir = realpath($cacheLocation);
 		}
 
-		$cached = $cacheDir . DIRECTORY_SEPARATOR . md5($filename) . self::SASSC;
+		$cached = $cacheDir . DIRECTORY_SEPARATOR . md5($filename) . '.'.self::SASSC;
 
 		return file_put_contents($cached, serialize($sassc));
 	}

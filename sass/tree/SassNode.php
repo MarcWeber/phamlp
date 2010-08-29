@@ -11,6 +11,7 @@
 
 require_once('SassContext.php');
 require_once('SassCommentNode.php');
+require_once('SassDebugNode.php');
 require_once('SassDirectiveNode.php');
 require_once('SassImportNode.php');
 require_once('SassMixinNode.php');
@@ -19,8 +20,10 @@ require_once('SassPropertyNode.php');
 require_once('SassRootNode.php');
 require_once('SassRuleNode.php');
 require_once('SassVariableNode.php');
+require_once('SassExtendNode.php');
 require_once('SassForNode.php');
 require_once('SassIfNode.php');
+require_once('SassElseNode.php');
 require_once('SassWhileNode.php');
 require_once('SassNodeExceptions.php');
 
@@ -30,27 +33,33 @@ require_once('SassNodeExceptions.php');
  * @package			PHamlP
  * @subpackage	Sass.tree
  */
-abstract class SassNode {
-	const MATCH_INTERPOLATION = '/(?<!\\\\)#\{(.*?)\}/';
-	const MATCH_VARIABLE = '/(?<!\\\\)!(\w+)/';
-
-	/**
-	 * @var SassNode root node of this node
-	 */
-	protected $root;
+class SassNode {
 	/**
 	 * @var SassNode parent of this node
 	 */
 	protected $parent;
 	/**
+	 * @var SassNode root node
+	 */
+	protected $root;
+	/**
 	 * @var array children of this node
 	 */
 	protected $children = array();
 	/**
-	 * @var array source line
+	 * @var object source token
 	 */
-	public $line;
-
+	protected $token;
+	
+	/**
+	 * Constructor.
+	 * @param object source token
+	 * @return SassNode
+	 */
+	public function __construct($token) {
+		$this->token = $token;
+	}
+	
 	/**
 	 * Getter.
 	 * @param string name of property to get
@@ -61,7 +70,7 @@ abstract class SassNode {
 		if (method_exists($this, $getter)) {
 			return $this->$getter();
 		}
-		throw new SassNodeException("No getter function for $name");
+		throw new SassNodeException('No getter function for {what}', array('{what}'=>$name), $this);
 	}
 
 	/**
@@ -76,7 +85,7 @@ abstract class SassNode {
 			$this->$setter($value);
 			return $this;
 		}
-		throw new SassNodeException("No setter function for $name");
+		throw new SassNodeException('No setter function for {what}', array('{what}'=>$name), $this);
 	}
 
 	/**
@@ -106,13 +115,23 @@ abstract class SassNode {
 	/**
 	 * Adds a child to this node.
 	 * @return SassNode the child to add
-	 * @return SassNode this node
 	 */
 	public function addChild($child) {
-		$child->parent		= $this;
-		$child->root			= $this->root;
-		$this->children[] = $child;
-		return $this;
+		if ($child instanceof SassElseNode) {
+			if (!$this->lastChild instanceof SassIfNode) {
+				throw new SassException('@else(if) directive must come after @(else)if', array(), $child);
+			}
+			$this->lastChild->addElse($child);
+		}
+		else {
+			$this->children[] = $child;
+			$child->parent		= $this;
+			$child->root			= $this->root;			
+		}
+		// The child will have children if a debug node has been added
+		foreach ($child->children as $grandchild) {
+			$grandchild->root = $this->root;		
+		}
 	}
 
 	/**
@@ -132,6 +151,16 @@ abstract class SassNode {
 	}
 
 	/**
+	 * Returns a value indicating if this node is a child of the passed node.
+	 * This just checks the levels of the nodes. If this node is at a greater
+	 * level than the passed node if is a child of it.
+	 * @return boolean true if the node is a child of the passed node, false if not
+	 */
+	public function isChildOf($node) {
+		return $this->level > $node->level;
+	}
+
+	/**
 	 * Returns the last child node of this node.
 	 * @return SassNode the last child node of this node
 	 */
@@ -140,22 +169,11 @@ abstract class SassNode {
 	}
 
 	/**
-	 * Returns the indent level of this node.
-	 * @return integer the indent level of this node
+	 * Returns the level of this node.
+	 * @return integer the level of this node
 	 */
-	private function getIndentLevel() {
-		return $this->line['indentLevel'];
-	}
-
-	/**
-	 * Sets the indent level of this node.
-	 * Used during rendering to give correct indentation.
-	 * @param integer the indent level of this node
-	 * @return SassNode this node
-	 */
-	private function setIndentLevel($level) {
-		$this->line['indentLevel'] = $level;
-		return $this;
+	private function getLevel() {
+		return $this->token->level;
 	}
 
 	/**
@@ -163,15 +181,39 @@ abstract class SassNode {
 	 * @return string the source for this node
 	 */
 	private function getSource() {
-		return $this->line['source'];
+		return $this->token->source;
 	}
 
 	/**
-	 * Returns the source for this node
-	 * @return string the source for this node
+	 * Returns the debug_info option setting for this node
+	 * @return boolean the debug_info option setting for this node
 	 */
-	private function getLineNumber() {
-		return $this->line['number'];
+	private function getDebug_info() {
+		return $this->parser->debug_info;
+	}
+
+	/**
+	 * Returns the line number for this node
+	 * @return string the line number for this node
+	 */
+	private function getLine() {
+		return $this->token->line;
+	}
+
+	/**
+	 * Returns the line_numbers option setting for this node
+	 * @return boolean the line_numbers option setting for this node
+	 */
+	private function getLine_numbers() {
+		return $this->parser->line_numbers;
+	}
+
+	/**
+	 * Returns vendor specific properties
+	 * @return array vendor specific properties
+	 */
+	private function getVendor_properties() {
+		return $this->parser->vendor_properties;
 	}
 
 	/**
@@ -179,15 +221,15 @@ abstract class SassNode {
 	 * @return string the filename for this node
 	 */
 	private function getFilename() {
-		return join(DIRECTORY_SEPARATOR, $this->line['file']);
+		return $this->token->filename;
 	}
 
 	/**
-	 * Returns the options.
-	 * @return array the options
+	 * Returns the Sass parser.
+	 * @return SassParser the Sass parser
 	 */
-	public function getOptions() {
-	  return $this->root->options;
+	public function getParser() {
+	  return $this->root->parser;
 	}
 
 	/**
@@ -195,7 +237,23 @@ abstract class SassNode {
 	 * @return string the property syntax being used
 	 */
 	public function getPropertySyntax() {
-	  return $this->root->options['propertySyntax'];
+	  return $this->root->parser->propertySyntax;
+	}
+
+	/**
+	 * Returns the SassScript parser.
+	 * @return SassScriptParser the SassScript parser
+	 */
+	public function getScript() {
+	  return $this->root->script;
+	}
+
+	/**
+	 * Returns the renderer.
+	 * @return SassRenderer the renderer
+	 */
+	public function getRenderer() {
+	  return $this->root->renderer;
 	}
 
 	/**
@@ -203,23 +261,7 @@ abstract class SassNode {
 	 * @return string the render style of the document tree
 	 */
 	public function getStyle() {
-	  return $this->root->options['style'];
-	}
-
-	/**
-	 * Returns the SassScript parser.
-	 * @return SassScriptParser the SassScript parser
-	 */
-	public function getParser() {
-	  return $this->root->parser;
-	}
-
-	/**
-	 * Returns the renderer.
-	 * @return SassRenderer the rendered
-	 */
-	public function getRenderer() {
-	  return $this->root->renderer;
+	  return $this->root->parser->style;
 	}
 
 	/**
@@ -245,66 +287,56 @@ abstract class SassNode {
 	}
 
 	/**
+	 * Evaluates a SassScript expression.
+	 * @param string expression to evaluate
+	 * @param SassContext the context in which the expression is evaluated
+	 * @return SassLiteral value of parsed expression
+	 */
+	protected function evaluate($expression, $context) {
+		$context->node = $this;
+		return $this->script->evaluate($expression, $context);
+	}
+
+	/**
 	 * Replace interpolated SassScript contained in '#{}' with the parsed value.
 	 * @param string the text to interpolate
 	 * @param SassContext the context in which the string is interpolated
 	 * @return string the interpolated text
 	 */
-	protected function interpolate($string, $context) {
-		for ($i = 0, $n = preg_match_all(self::MATCH_INTERPOLATION, $string, $matches);
-				$i < $n; $i++) {
-			$matches[1][$i] = $this->evaluate($matches[1][$i], $context);
-		}
-	  return str_replace($matches[0], $matches[1], $string);
+	protected function interpolate($expression, $context) {
+		$context->node = $this;
+		return $this->script->interpolate($expression, $context);
+	}
+	
+	/**
+	 * Adds a warning to the node. 
+	 * @param string warning message
+	 * @param array line
+	 */
+	public function addWarning($message, $params=array()) {
+		$warning = new SassDebugNode($this->token, $message, $params);
+		$this->addChild($warning);
 	}
 
 	/**
-	 * Parses a Sass script expression.
-	 * @param string expression to parse
-	 * @param SassContext the context in which the expression is parsed
-	 * @return string value of parsed expression
+	 * Parse the children of the node.
+	 * @param SassContext the context in which the children are parsed
+	 * @return array the parsed child nodes
 	 */
-	protected function evaluate($expression, $context) {
-	  return $this->parser->parse(
-	  	$this->substituteVariables($expression, $context));
+	protected function parseChildren($context) {
+		$children = array();
+		foreach ($this->children as $child) {
+			$children = array_merge($children, $child->parse($context));
+		} // foreach
+		return $children; 
 	}
 
 	/**
-	 * Substitute variables in an expression with their values.
-	 * @param string expression to substitue variables in
-	 * @param SassContext the context for variable substitution
-	 * @return string expression with variables substitued
+	 * Returns a value indicating if the token represents this type of node.
+	 * @param object token
+	 * @return boolean true if the token represents this type of node, false if not
 	 */
-	private function substituteVariables($string, $context) {
-		for ($i = 0, $n = preg_match_all(self::MATCH_VARIABLE, $string, $matches);
-				$i < $n; $i++) {
-			$var = $context->getVariable($matches[1][$i]);
-			if (is_bool($var)) {
-				$var = ($var ? 'true' : 'false');
-			}
-			elseif (!(SassColour::isa($var) || SassNumber::isa($var))) {
-				$var = "\"$var\"";
-			}
-			$string = str_replace($matches[0][$i], $var, $string);
-		}
-	  return $string;
-	}
-
-	/**
-	 * Returns a value indicating if the line represents this type of node.
-	 * Child classes must override this method.
-	 * @throws SassNodeException if not overriden
-	 */
-	static public function isa($line) {
-		throw new SassNodeException('Child classes must override this method');
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * Child classes must override this method.
-	 * @throws SassNodeException if not overriden
-	 */
-	static public function match($line) {
+	public static function isa($token) {
 		throw new SassNodeException('Child classes must override this method');
 	}
 }

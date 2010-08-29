@@ -21,25 +21,22 @@ class SassScriptFunction {
 	/**@#+
 	 * Regexes for matching and extracting colours
 	 */
-	const MATCH = '/^(\w+)\((.+?)\)/';
+	const MATCH = '/^(\w+)\((.+)\)/';
 	const NAME = 1;
 	const ARGUMENTS = 2;
 
-	private $_name;
-	private $_args;
+	private $name;
+	private $args;
 
 	/**
 	 * SassScriptFunction constructor
-	 * @param string value of the Function type
+	 * @param string name of the function
+	 * @param array arguments for the function
 	 * @return SassScriptFunction
 	 */
-	public function __construct($value) {
-	  preg_match(self::MATCH, $value, $matches);
-	  $this->_name = $matches[self::NAME];
-	  $args = explode(',', $matches[self::ARGUMENTS]);
-	  foreach ($args as $arg) {
-	  	$this->_args[] = trim($arg);
-	  } // foreach
+	public function __construct($name, $args) {
+		$this->name = $name;
+		$this->args = $args;
 	}
 
 	/**
@@ -47,12 +44,16 @@ class SassScriptFunction {
 	 * @return Function the value of this Function
 	 */
 	public function perform() {
-		if (method_exists('SassScriptFunctions', $this->_name)) {
-			return call_user_func_array(array('SassScriptFunctions', $this->_name),
-				$this->_args);
+		if (method_exists('SassScriptFunctions', $this->name)) {
+			return call_user_func_array(array('SassScriptFunctions', $this->name),
+				$this->args);
 		}
 		else {
-			return new SassString($this->_name . '(' . join(', ', $this->_args) . ')');
+			$args = array();
+			foreach ($this->args as $arg) {
+				$args[] = $arg->toString();
+			}
+			return new SassString($this->name . '(' . join(', ', $args) . ')');
 		}
 	}
 
@@ -62,7 +63,7 @@ class SassScriptFunction {
 	 * @param string the subject string
 	 * @return mixed match at the start of the string or false if no match
 	 */
-	static public function isa($subject) {
+	public static function isa($subject) {
 		return (preg_match(self::MATCH, $subject, $matches) ? $matches[0] : false);
 	}
 }

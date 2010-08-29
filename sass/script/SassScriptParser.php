@@ -20,6 +20,13 @@ require_once('SassScriptParserExceptions.php');
  * @subpackage	Sass.script
  */
 class SassScriptParser {
+	const MATCH_INTERPOLATION = '/(?<!\\\\)#\{(.*?)\}/';
+	
+	/**
+	 * @var SassContext Used for error reporting
+	 */
+	public static $context;
+
 	/**
 	 * @var SassScriptLexer the lexer object
 	 */
@@ -30,16 +37,58 @@ class SassScriptParser {
 	* @return SassScriptParser
 	*/
 	public function __construct() {
-		$this->lexer = new SassScriptLexer();
+		$this->lexer = new SassScriptLexer($this);
 	}
 
 	/**
-	 * Parse SassScript.
+	 * Evaluate SassScript.
+	 * CSS allows "/" to appear in property values as a way of separating numbers.
+	 * To support this while also allowing "/" to be used for division we check to
+	 * for the "/" operator and if present determine if division it to take place.
+	 * There are three situations where the "/" will be interpreted as division:
+	 * 1. If the expression contains a variable.
+	 * 2. If the operator is surrounded by parentheses.
+	 * 3. If the expression contains another operator.
+	 * If division is not to take place the expression is returned.
 	 * @param string expression to parse
-	 * @return string parsed value
+	 * @param SassContext the context in which the expression is parsed
+	 * @return SassLiteral parsed value
 	 */
-	public function parse($expression) {
-		return $this->calculate($this->lexer->lex($expression))->value;
+	public function evaluate($expression, $context) {
+		self::$context = $context;
+		// If expression contains a division operator determine if we do division
+		$division = strpos($expression, '/');
+		if ($division && !(preg_match('/[\$!]\w+/', $expression) || (strpos($expression, '(') < $division && strpos($expression, ')', $division)) || (preg_match('/[-*\^%+!|~&<>]|<<|>>|<=|>=|and|or|xor|not/i', $expression) || strpos($expression, '/', $division+1)))) {
+			$result = new SassString(trim($expression));
+		}
+		else {
+			$result = $this->parse($expression, $context);
+		}
+		return $result;
+	}
+
+	/**
+	 * Replace interpolated SassScript contained in '#{}' with the parsed value.
+	 * @param string the text to interpolate
+	 * @param SassContext the context in which the string is interpolated
+	 * @return string the interpolated text
+	 */
+	public function interpolate($string, $context) {
+		for ($i = 0, $n = preg_match_all(self::MATCH_INTERPOLATION, $string, $matches);
+				$i < $n; $i++) {
+			$matches[1][$i] = $this->evaluate($matches[1][$i], $context)->toString();
+		}
+	  return str_replace($matches[0], $matches[1], $string);
+	}
+
+	/**
+	 * Parse SassScript to a SassLiteral
+	 * @param string expression to parse
+	 * @param SassContext the context in which the expression is parsed
+	 * @return SassLiteral parsed value
+	 */
+	public function parse($expression, $context) {
+		return $this->calculate($this->lexer->lex($expression, $context), $context);
 	}
 
 	/**
@@ -55,17 +104,20 @@ class SassScriptParser {
 			if ($token instanceof SassScriptFunction) {
 				array_push($operands, $token->perform());
 			}
-			elseif (!$token instanceof SassScriptOperation) {
+			elseif ($token instanceof SassLiteral) {
+				if ($token instanceof SassString) {
+					$token = new SassString($this->interpolate($token->toString(), self::$context));
+				}
 				array_push($operands, $token);
 			}
 			else {
 				$args = array();
 				for ($i = 0, $c = $token->operandCount; $i < $c; $i++) {
-					$args[] = array_shift($operands);
+					$args[] = array_pop($operands);
 				}
 				array_push($operands, $token->perform($args));
 			}
 		}
-	  return array_pop($operands);
+	  return array_shift($operands);
 	}
 }

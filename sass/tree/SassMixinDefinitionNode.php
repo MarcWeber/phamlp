@@ -16,46 +16,41 @@
  * @subpackage	Sass.tree
  */
 class SassMixinDefinitionNode extends SassNode {
-	const IDENTIFIER = '=';
-	const MATCH = '/^=([-\w]+)(?:\((.+?)\))?$/';
-	const NAME = 1;
-	const ARGUMENTS = 2;
+	const NODE_IDENTIFIER = '=';
+	const MATCH = '/^(=|@mixin)([-\w]+)(?:\((.+?)\))?$/i';
+	const IDENTIFIER = 1;
+	const NAME = 2;
+	const ARGUMENTS = 3;
 
 	/**
 	 * @var string name of the mixin
 	 */
 	private $name;
 	/**
-	 * @var array arguments for the mixin
+	 * @var array arguments for the mixin as name=>value pairs were value is the
+	 * default value or null for required arguments
 	 */
 	private $args = array();
-	/**
-	 * @var array default values for arguments
-	 */
-	private $defaultValues;
 
 	/**
 	 * SassMixinDefinitionNode constructor.
-	 * @param string name of the mixin
-	 * @param string arguments for the mixin
+	 * @param object source token
 	 * @return SassMixinDefinitionNode
 	 */
-	public function __construct($name, $args = '') {
-	  $this->name = $name;
-	  if (!empty($args)) {
-		  $_args = explode(',', $args);
-		  $required = true;
-		  foreach ($_args as $arg) {
-	  		$arg = explode('=', trim($arg));
-	  		$name = substr(trim($arg[0]), 1);
-	  		$this->args[] = $name;
-	  		if (count($arg) == 2) {
-					$required = false;
-	  			$this->defaultValues[$name] = trim($arg[1]);
-	  		}
-	  		elseif (!$required) {
-					throw new SassMixinDefinitionNodeException("Mixin::{$this->name}: Required variables must be defined before optional variables");
-	  		}
+	public function __construct($token) {
+  	if ($token->level !== 0) {
+			throw new SassMixinDefinitionNodeException('Mixins can only be defined at root level', array(), $this);
+	 	}
+		parent::__construct($token);
+		preg_match(self::MATCH, $token->source, $matches);
+		$this->name = $matches[self::NAME];
+	  if (isset($matches[self::ARGUMENTS])) {
+		  foreach (explode(',', $matches[self::ARGUMENTS]) as $arg) {
+	  		$arg = explode(
+	  				($matches[self::IDENTIFIER] === self::NODE_IDENTIFIER ? '=' : ':'),
+	  				trim($arg)
+	  		);
+	  		$this->args[substr(trim($arg[0]), 1)] = (count($arg) == 2 ? trim($arg[1]) : null);
 		  } // foreach
 	  }
 	}
@@ -75,30 +70,12 @@ class SassMixinDefinitionNode extends SassNode {
 	  return $this->args;
 	}
 
-	public function hasDefault($name) {
-	  return isset($this->defaultValues[$name]);
-	}
-
-	public function getDefault($name) {
-	  return $this->defaultValues[$name];
-	}
-
 	/**
-	 * Returns a value indicating if the line represents this type of node.
-	 * @param array the line to test
-	 * @return boolean true if the line represents this type of node, false if not
+	 * Returns a value indicating if the token represents this type of node.
+	 * @param object token
+	 * @return boolean true if the token represents this type of node, false if not
 	 */
-	static public function isa($line) {
-		return $line['source'][0] === self::IDENTIFIER;
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * @param array the line to match
-	 * @return array matches
-	 */
-	static public function match($line) {
-		preg_match(self::MATCH, $line['source'], $matches);
-		return $matches;
+	public static function isa($token) {
+		return $token->source[0] === self::NODE_IDENTIFIER;
 	}
 }

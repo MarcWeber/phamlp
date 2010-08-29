@@ -17,8 +17,8 @@
  */
 class SassImportNode extends SassNode {
 	const IDENTIFIER = '@';
-	const MATCH = '/^@import\s+(.+)/';
-	const MATCH_CSS = '/^(url\(|")/';
+	const MATCH = '/^@import\s+(.+)/i';
+	const MATCH_CSS = '/^(url\(|")/i';
 	const URI = 1;
 
 	/**
@@ -28,12 +28,13 @@ class SassImportNode extends SassNode {
 
 	/**
 	 * SassImportNode.
-	 * @param SassNode the parent of this node
-	 * @param array source line for this node
+	 * @param object source token
 	 * @return SassImportNode
 	 */
-	public function __construct($uri) {
-		$this->uri = $uri;
+	public function __construct($token) {
+		parent::__construct($token);
+		preg_match(self::MATCH, $token->source, $matches);
+		$this->uri = $matches[self::URI];
 	}
 
 	/**
@@ -49,23 +50,13 @@ class SassImportNode extends SassNode {
 		}
 		else {
 			$tree = SassFile::getTree(
-				SassFile::getFile($this->uri, $this->options), $this->options);
+				SassFile::getFile($this->uri, $this->parser), $this->parser);
 			if (empty($tree)) {
-				throw new SassImportNodeException("Unable to create document tree for {$this->uri}");
+				throw new SassImportNodeException('Unable to create document tree for {uri}', array('{uri}'=>$this->uri), $this);
 			}
 			else {
 				return $tree->parse($context)->children;
 			}
 		}
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * @param array the line to match
-	 * @return array matches
-	 */
-	static public function match($line) {
-		preg_match(self::MATCH, $line['source'], $matches);
-		return $matches;
 	}
 }

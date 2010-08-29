@@ -16,7 +16,7 @@
  * @subpackage	Sass.tree
  */
 class SassWhileNode extends SassNode {
-	const MATCH = '/^@(do|while)\s+(.+)$/';
+	const MATCH = '/^@(do|while)\s+(.+)$/i';
 	const LOOP = 1;
 	const EXPRESSION = 2;
 	const IS_DO = 'do';
@@ -32,14 +32,14 @@ class SassWhileNode extends SassNode {
 
 	/**
 	 * SassWhileNode constructor.
-	 * @param string expression to evaluate
-	 * @param boolean whether this is a "do" or "while" loop.
-	 * True for a "do" loop, false for a "while" loop
+	 * @param object source token
 	 * @return SassWhileNode
 	 */
-	public function __construct($expression, $isDo = false) {
-		$this->expression = $expression;
-		$this->isDo = $isDo;
+	public function __construct($token) {
+		parent::__construct($token);
+		preg_match(self::MATCH, $token->source, $matches);
+		$this->expression = $matches[self::EXPRESSION];
+		$this->isDo = ($matches[self::LOOP] === SassWhileNode::IS_DO);
 	}
 
 	/**
@@ -51,28 +51,14 @@ class SassWhileNode extends SassNode {
 		$children = array();
 		if ($this->isDo) {
 			do {
-				foreach ($this->children as $child) {
-					$children = array_merge($children, $child->parse($context));
-				} // foreach
-			} while ($this->evaluate($this->expression, $context));
+				$children = array_merge($children, $this->parseChildren($context));
+			} while ($this->evaluate($this->expression, $context)->boolean);
 		}
 		else {
-			while ($this->evaluate($this->expression, $context)) {
-				foreach ($this->children as $child) {
-					$children = array_merge($children, $child->parse($context));
-				} // foreach
+			while ($this->evaluate($this->expression, $context)->boolean) {
+				$children = array_merge($children, $this->parseChildren($context));
 			}
 		}
 		return $children;
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * @param array the line to match
-	 * @return array matches
-	 */
-	static public function match($line) {
-		preg_match(self::MATCH, $line['source'], $matches);
-		return $matches;
 	}
 }

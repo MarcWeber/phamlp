@@ -9,6 +9,8 @@
  * @subpackage	Sass.script.literals
  */
 
+require_once('SassLiteral.php');
+ 
 /**
  * SassNumber class.
  * Provides operations and type testing for Sass numbers.
@@ -40,26 +42,20 @@ class SassNumber extends SassLiteral {
 	/**
 	 * @var array Conversion factors for units using inches as the base unit
 	 * (only because pt and px are expressed as fraction of an inch, so makes the
-	 * numbers easy to undertand).
+	 * numbers easy to understand).
 	 * Conversions are based on the following
-	 * in: inches — 1 inch is equal to 2.54 centimeters.
+	 * in: inches — 1 inch = 2.54 centimeters
    * cm: centimeters
    * mm: millimeters
-   * pt: points — the points used by CSS 2.1 are equal to 1/72nd of an inch.
-   * pc: picas — 1 pica is equal to 12 points.
-   * px: 1/96th in
-   * em: 16px
-   * ex: 0.5em.
+   * pc: picas — 1 pica = 12 points
+   * pt: points — 1 point = 1/72nd of an inch
 	 */
 	static private $unitConversion = array(
-		'em' => 6,
-		'ex' => 3,
-		'px' => 96,
 		'in' => 1,
 		'cm' => 2.54,
 		'mm' => 25.4,
-		'pt' => 72,
-		'pc' => 6
+		'pc' => 6,
+		'pt' => 72
 	);
 
 	/**
@@ -78,7 +74,7 @@ class SassNumber extends SassLiteral {
 	  $this->value = $matches[self::VALUE];
 	  if (!empty($matches[self::UNITS])) {
 	  	if (!in_array($matches[self::UNITS], self::$cssUnits)) {
-				throw new SassNumberException("Invalid units: $value");
+				throw new SassNumberException('Invalid units: {value}', array('{value}'=>$value), SassScriptParser::$context->node);
 	  	}
 			$this->units = $matches[self::UNITS];
 	  }
@@ -86,13 +82,13 @@ class SassNumber extends SassLiteral {
 
 	/**
 	 * Adds the value of other to the value of this
-	 * @param string value to add
+	 * @param mixed SassNumber|SassColour: value to add
 	 * @return mixed SassNumber if other is a SassNumber or
 	 * SassColour if it is a SassColour
 	 */
-	public function _add($other) {
+	public function op_plus($other) {
 		if ($other instanceof SassColour) {
-			return $other->_add($this);
+			return $other->plus($this);
 		}
 		else {
 			$other = $this->convertUnits($other);
@@ -102,14 +98,22 @@ class SassNumber extends SassLiteral {
 	}
 
 	/**
+	 * Unary + operator
+	 * @return SassNumber the value of this number
+	 */
+	public function op_unary_plus() {
+		return $this;
+	}
+
+	/**
 	 * Subtracts the value of other from this value
-	 * @param string value to subtract
+	 * @param mixed SassNumber|SassColour: value to subtract
 	 * @return mixed SassNumber if other is a SassNumber or
 	 * SassColour if it is a SassColour
 	 */
-	public function _subtract($other) {
+	public function op_minus($other) {
 		if ($other instanceof SassColour) {
-			return $other->_subtract($this);
+			return $other->minus($this);
 		}
 		else {
 			$other = $this->convertUnits($other);
@@ -119,14 +123,22 @@ class SassNumber extends SassLiteral {
 	}
 
 	/**
+	 * Unary - operator
+	 * @return SassNumber the negative value of this number
+	 */
+	public function op_unary_minus() {
+		return new SassNumber(($this->value * -1).$this->units);
+	}
+
+	/**
 	 * Multiplies this value by the value of other
-	 * @param string value to multiply by
+	 * @param mixed SassNumber|SassColour: value to multiply by
 	 * @return mixed SassNumber if other is a SassNumber or
 	 * SassColour if it is a SassColour
 	 */
-	public function _multiply($other) {
+	public function op_times($other) {
 		if ($other instanceof SassColour) {
-			return $other->_multiply($this);
+			return $other->times($this);
 		}
 		else {
 			$other = $this->convertUnits($other);
@@ -137,13 +149,13 @@ class SassNumber extends SassLiteral {
 
 	/**
 	 * Divides this value by the value of other
-	 * @param string value to divide by
+	 * @param mixed SassNumber|SassColour: value to divide by
 	 * @return mixed SassNumber if other is a SassNumber or
 	 * SassColour if it is a SassColour
 	 */
-	public function _divide($other) {
+	public function op_divide_by($other) {
 		if ($other instanceof SassColour) {
-			return $other->_divide($this);
+			return $other->divide_by($this);
 		}
 		else {
 			$other = $this->convertUnits($other);
@@ -156,7 +168,7 @@ class SassNumber extends SassLiteral {
 	 * @return SassBoolean SassBoolean object with the value true if the values
 	 * of this and other are equal, false if they are not
 	 */
-	public function _eq($other) {
+	public function op_eq($other) {
 		$other = $this->convertUnits($other);
 		return new SassBoolean(($this->value == $other->value ? 'true' : 'false'));
 	}
@@ -165,7 +177,7 @@ class SassNumber extends SassLiteral {
 	 * @return SassBoolean SassBoolean object with the value true if the values
 	 * of this and other are not equal, false if they are
 	 */
-	public function _neq($other) {
+	public function op_neq($other) {
 		$other = $this->convertUnits($other);
 		return new SassBoolean(($this->value != $other->value ? 'true' : 'false'));
 	}
@@ -176,9 +188,9 @@ class SassNumber extends SassLiteral {
 	 * @return mixed SassNumber if other is a SassNumber or
 	 * SassColour if it is a SassColour
 	 */
-	public function _modulus($other) {
+	public function op_modulo($other) {
 		if ($other instanceof SassColour) {
-			return $other->_modulus($this);
+			return $other->modulo($this);
 		}
 		else {
 			$other = $this->convertUnits($other);
@@ -191,13 +203,9 @@ class SassNumber extends SassLiteral {
 	 * Converts the other number to this numbers units.
 	 * @param SassNumber the other number
 	 * @return SassNumber the other number with converted to this numbers units
-	 * @throws SassNumberException if other is not a SassNumber or the units are
-	 * incompatible
+	 * @throws SassNumberException if the units are incompatible
 	 */
 	private function convertUnits($other) {
-		if (!$other instanceof SassNumber) {
-			throw new SassNumberException("Second operand is not a number");
-		}
 		if ($other->hasUnits()) {
 		  if (!$this->hasUnits()) {
 				$this->units = $other->units;
@@ -211,7 +219,7 @@ class SassNumber extends SassLiteral {
 					$other->units = $this->units;
 				}
 				else {
-					throw new SassNumberException("Incompatible units: {$this->units} and {$other->units}");
+					throw new SassNumberException('Incompatible units: {value1} and {value2}', array('{value1}'=>$this->units, '{value2}'=>$this->units), SassScriptParser::$context->node);
 				}
 			}
 		}
@@ -219,11 +227,27 @@ class SassNumber extends SassLiteral {
 	}
 
 	/**
-	 * Returns a value indicating if this nimber has units.
+	 * Returns a value indicating if this number has units.
 	 * @return boolean true if this number has units, false if not
 	 */
 	public function hasUnits() {
 	  return !empty($this->units);
+	}
+
+	/**
+	 * Returns the units of this number.
+	 * @return string the units of this number
+	 */
+	public function getUnits() {
+	  return $this->units;
+	}
+
+	/**
+	 * Returns a value indicating if this number is an integer.
+	 * @return boolean true if this number is an integer, false if not
+	 */
+	public function isInt() {
+	  return $this->value % 1 == 0;
 	}
 
 	/**
@@ -242,8 +266,7 @@ class SassNumber extends SassLiteral {
 	 */
 	public function toString() {
 	  return ($this->units == 'px' ? floor($this->value) :
-	  		round($this->value, self::PRECISION)) .
-	  	$this->units;
+	  		round($this->value, self::PRECISION)).$this->units;
 	}
 
 	/**
@@ -252,7 +275,7 @@ class SassNumber extends SassLiteral {
 	 * @param string the subject string
 	 * @return mixed match at the start of the string or false if no match
 	 */
-	static public function isa($subject) {
+	public static function isa($subject) {
 		return (preg_match(self::MATCH, $subject, $matches) ? $matches[0] : false);
 	}
 }

@@ -16,13 +16,48 @@
  * @subpackage	Sass.tree
  */
 class SassPropertyNode extends SassNode {
-	const MATCH_PROPERTY_NEW = '/^([^\s=:"]+)(?:\s*(=)|:)(?:\s+|$)(.*?)(;)?$/';
+	const MATCH_PROPERTY_NEW = '/^([^\s=:"]+)(?:\s*(= )|:)(.*?)([{;])?$/';
 	const MATCH_PROPERTY_OLD = '/^:([^\s=:]+)(?:\s*(=)\s*|\s+|$)(.*)/';
+	const MATCH_PSUEDO_SELECTOR = '/^:?[-\w]+\(?/i';
 	const NAME	 = 1;
 	const SCRIPT = 2;
 	const VALUE	 = 3;
-	const IS_SCRIPT = '=';
+	const IS_SCRIPT = '= ';
 
+	private static $psuedoSelectors = array(
+		'root',
+		'nth-child(',
+		'nth-last-child(',
+		'nth-of-type(',
+		'nth-last-of-type(',
+		'first-child',
+		'last-child',
+		'first-of-type',
+		'last-of-type',
+		'only-child',
+		'only-of-type',
+		'empty',
+		'link',
+		'visited',
+		'active',
+		'hover',
+		'focus',
+		'target',
+		'lang(',
+		'enabled',
+		'disabled',
+		'checked',
+		':first-line',
+		':first-letter',
+		':before',
+		':after	',
+		// CSS 2.1
+		'first-line',
+		'first-letter',
+		'before',
+		'after	'
+	);
+	
 	/**
 	 * @var string property name
 	 */
@@ -31,23 +66,23 @@ class SassPropertyNode extends SassNode {
 	 * @var string property value or expression to evaluate
 	 */
 	private $value;
-	/**
-	 * @var boolean whether the value is a SassScript expression
-	 */
-	private $isScript;
 
 	/**
 	 * SassPropertyNode constructor.
-	 * @param string name of the property
-	 * @param string value or expression for the property.
-	 * Empty string designates this node as a property namespace.
-	 * @param boolean whether the value is a SassScript expression
+	 * @param object source token
+	 * @param string property syntax
 	 * @return SassPropertyNode
 	 */
-	public function __construct($name, $value, $isScript = false) {
-		$this->name = $name;
-		$this->value = $value;
-		$this->isScript = $isScript;
+	public function __construct($token, $syntax = 'new') {
+		parent::__construct($token);
+		$matches = self::match($token, $syntax);
+		$this->name = $matches[self::NAME];
+		$this->value = $matches[self::VALUE];
+		if ($matches[self::SCRIPT] === self::IS_SCRIPT) {
+			$this->addWarning('Setting CSS properties with "=" is deprecated; use "{name}: {value};"',
+					array('{name}'=>$this->name, '{value}'=>$this->value)
+			);
+		}
 	}
 
 	/**
@@ -58,21 +93,24 @@ class SassPropertyNode extends SassNode {
 	 * @return array the parsed node
 	 */
 	public function parse($context) {
-		if ($this->isNamespace()) {
-			$parsed = array();
-			foreach ($this->children as $child) {
-				$parsed = array_merge($parsed, $child->parse($context));
-			} // foreach
-			return $parsed;
+		if ($this->isNamespace()) { 
+			return $this->parseChildren($context);
 		}
 	  else {
+	  	$return = array();
 	  	$node = clone $this;
 			$node->name = ($this->inNamespace() ? "{$this->namespace}-" : '') .
-				$this->name;
-	  	$node->value = ($this->isScript ?
-	  		$this->evaluate($this->interpolate($this->value, $context), $context) :
-	  		$this->value);
-			return array($node);
+				$this->interpolate($this->name, $context);
+	  	$node->value = $this->evaluate($this->interpolate($this->value, $context), $context)->toString();
+	  	if (array_key_exists($node->name, $this->vendor_properties)) {
+	  		foreach ($this->vendor_properties[$node->name] as $vendorProperty) {
+	  			$_node = clone $node;
+	  			$_node->name = $vendorProperty;
+	  			$return[] = $_node;
+	  		}
+	  	}
+	  	$return[] = $node;
+			return $return; 
 	  }
 	}
 
@@ -81,7 +119,6 @@ class SassPropertyNode extends SassNode {
 	 * @return string the rendered node
 	 */
 	public function render() {
-		$this->indentLevel = $this->parent->indentLevel + 1;
 		return $this->renderer->renderProperty($this);
 	}
 
@@ -142,16 +179,21 @@ class SassPropertyNode extends SassNode {
 	}
 
 	/**
-	 * Returns a value indicating if the line represents this type of node.
-	 * @param array the line to test
+	 * Returns a value indicating if the token represents this type of node.
+	 * @param object token
 	 * @param string the property syntax being used
-	 * @return boolean true if the line represents this type of node, false if not
+	 * @return boolean true if the token represents this type of node, false if not
 	 */
-	static public function isa($line, $syntax) {
-		$matches = self::match($line, $syntax);
-		if (!empty($matches)) {
-	  	if ($line['indentLevel'] === 0) {
-	  		throw new SassPropertyNodeException("Illegal property assignement; properties can not be assigned at zero indent level\nLine {$line['number']}: " . (is_array($line['file']) ? join(DIRECTORY_SEPARATOR, $line['file']) : ''));
+	public static function isa($token, $syntax) {
+		$matches = self::match($token, $syntax);
+	
+		if (!empty($matches)) {	
+			if (isset($matches[self::VALUE]) &&
+					self::isPseudoSelector($matches[self::VALUE])) {
+				return false; 
+			}
+	  	if ($token->level === 0) {
+	  		throw new SassPropertyNodeException('Properties can not be assigned at root level', array(), $this);
 	  	}
 	  	else {
 				return true;
@@ -168,21 +210,34 @@ class SassPropertyNode extends SassNode {
 	 * @param string the property syntax being used
 	 * @return array matches
 	 */
-	static public function match($line, $syntax) {
+	public static function match($token, $syntax) {
 		switch ($syntax) {
 			case 'new':
-				$m = preg_match(self::MATCH_PROPERTY_NEW, $line['source'], $matches);
+				preg_match(self::MATCH_PROPERTY_NEW, $token->source, $matches);
 				break;
 			case 'old':
-				$m = preg_match(self::MATCH_PROPERTY_OLD, $line['source'], $matches);
+				preg_match(self::MATCH_PROPERTY_OLD, $token->source, $matches);
 				break;
 			default:
-				$m = preg_match(self::MATCH_PROPERTY_NEW, $line['source'], $matches);
-				if ($m == 0) {
-					$m = preg_match(self::MATCH_PROPERTY_OLD, $line['source'], $matches);
+				if (preg_match(self::MATCH_PROPERTY_NEW, $token->source, $matches) == 0) {
+					preg_match(self::MATCH_PROPERTY_OLD, $token->source, $matches);
 				}
 				break;
 		}
 		return $matches;
+	}
+	
+	/**
+	 * Returns a value indicating if the string starts with a pseudo selector.
+	 * This is used to reject pseudo selectors as property values as, for example,
+	 * "a:hover" and "text-decoration:underline" look the same to the property
+	 * match regex.
+	 * @see isa() 
+	 * @param string the string to test
+	 * @return bool true if the string starts with a pseudo selector, false if not
+	 */
+	private static function isPseudoSelector($string) {
+		preg_match(self::MATCH_PSUEDO_SELECTOR, $string, $matches);
+		return isset($matches[0]) && in_array($matches[0], self::$psuedoSelectors);
 	}
 }

@@ -9,9 +9,13 @@
  * @subpackage	Sass.script
  */
 
-require_once('literals/SassLiteral.php');
+require_once('literals/SassBoolean.php');
+require_once('literals/SassColour.php');
+require_once('literals/SassNumber.php');
+require_once('literals/SassString.php');
 require_once('SassScriptFunction.php');
 require_once('SassScriptOperation.php');
+require_once('SassScriptVariable.php');
 
 /**
  * SassScriptLexer class.
@@ -23,19 +27,53 @@ require_once('SassScriptOperation.php');
  */
 class SassScriptLexer {
 	const MATCH_WHITESPACE = '/^\s+/';
+	
+	/**
+	 * @var array operators with meaning in uquoted strings;
+	 * selectors, property names and values
+	 */
+	static private $_operators = array(',', '#{');
+
+	/**
+	 * @var SassScriptParser the parser object
+	 */
+	private $parser;
+
+	/**
+	* SassScriptLexer constructor.
+	* @return SassScriptLexer
+	*/
+	public function __construct($parser) {
+		$this->parser = $parser;
+	}
 
 	/**
 	 * Lex a string into SassScript tokens and transform to
 	 * Reverse Polish Notation using the Shunting Yard Algorithm.
 	 * @param string string to lex
+	 * @param SassContext the context in which the expression is lexed
 	 * @return array tokens in RPN
 	 */
-	public function lex($string) {
+	public function lex($string, $context) {
 		$outputQueue = array();
 		$operatorStack = array();
+		
+		$tokens = $this->tokenise($string, $context);
 
-		while (strlen($string)) {
-			$token = $this->nextToken($string); // Read a token.
+		foreach($tokens as $i=>$token) {
+			// If two literals are seperated by whitespace use the concat operator
+			if (empty($token) && $i > 0) {
+				if (!$tokens[$i-1] instanceof SassScriptOperation &&
+						!$tokens[$i+1] instanceof SassScriptOperation) {
+					$token = new SassScriptOperation(SassScriptOperation::$defaultOperator, $context);
+				}
+				else {
+					continue;
+				}				
+			}
+			elseif ($token instanceof SassScriptVariable) {
+				$token = $token->evaluate($context);
+			}
 
 			// If the token is a number or function add it to the output queue.
  			if ($token instanceof SassLiteral || $token instanceof SassScriptFunction) {
@@ -47,7 +85,7 @@ class SassScriptLexer {
 				if ($token->operator == SassScriptOperation::$operators['('][0]) {
 					array_push($operatorStack, $token);
 				}
-				//If the token is a right parenthesis:
+				// If the token is a right parenthesis:
 				elseif ($token->operator == SassScriptOperation::$operators[')'][0]) {
 					while ($c = count($operatorStack)) {
 						// If the token at the top of the stack is a left parenthesis
@@ -61,7 +99,7 @@ class SassScriptLexer {
 					// If the stack runs out without finding a left parenthesis
 					// there are mismatched parentheses.
 					if ($c == 0) {
-						throw new SassScriptLexerException('Unmatched parentheses');
+						throw new SassScriptLexerException('Unmatched parentheses', array(), $context->node);
 					}
 				}
 				// the token is an operator, o1, so:
@@ -92,50 +130,78 @@ class SassScriptLexer {
 				array_push($outputQueue, array_pop($operatorStack));
 			}
 			else {
-				throw new SassScriptLexerException('Unmatched parentheses');
+				throw new SassScriptLexerException('Unmatched parentheses', array(), SassScriptParser::$context->node);
 			}
 		}
 		return $outputQueue;
 	}
 
 	/**
-	 * Returns the next token from the string.
+	 * Create tokens from the string.
 	 * @param string string to tokenise
-	 * @return mixed token. Either a SassLiteral, a SassScriptOperation
-	 * @throws SassScriptLexerException if unable to tokenise string
+	 * @param SassContext the context in which the string is tokenised
+	 * @return array tokens
 	 */
-	private function nextToken(&$string) {
-		if (($match = $this->isWhitespace($string)) !== false) {
+	private function tokenise($string, $context) {
+		$tokens = array();
+		while ($string !== false) {
+			if (($match = $this->isWhitespace($string)) !== false) {
+				$tokens[] = null;
+			}
+			elseif (($match = SassString::isa($string)) !== false) {
+				$tokens[] = new SassString($match);
+			}
+			elseif (($match = SassScriptFunction::isa($string)) !== false) {
+				preg_match(SassScriptFunction::MATCH, $match, $matches);
+				foreach ($this->tokenise($matches[SassScriptFunction::ARGUMENTS], $context) as $arg) {
+					if (empty($arg) || ($arg instanceof SassScriptOperation && $arg->operator === 'comma')) {
+						continue;
+					}
+					elseif ($arg instanceof SassScriptVariable) {
+						$args[] = $arg->evaluate($context);
+					}
+					elseif ($arg instanceof SassScriptFunction) {
+						$args[] = $arg->perform();
+					}
+					else {
+						$args[] = $arg;
+					}					
+				}
+				$tokens[] = new SassScriptFunction(
+						$matches[SassScriptFunction::NAME], $args);
+			}
+			elseif (($match = SassBoolean::isa($string)) !== false) {
+				$tokens[] = new SassBoolean($match);
+			}
+			elseif (($match = SassColour::isa($string)) !== false) {
+				$tokens[] = new SassColour($match);
+			}
+			elseif (($match = SassNumber::isa($string)) !== false) {				
+				$tokens[] = new SassNumber($match);
+			}
+			elseif (($match = SassScriptOperation::isa($string)) !== false) {
+				$tokens[] = new SassScriptOperation($match);
+			}
+			elseif (($match = SassScriptVariable::isa($string)) !== false) {
+				$tokens[] = new SassScriptVariable($match);
+			}
+			else {
+				$_string = $string;
+				$match = '';
+				while (strlen($_string) && !$this->isWhitespace($_string)) {
+					foreach (self::$_operators as $operator) {
+						if (substr($_string, 0, strlen($operator)) == $operator) {
+							break 2;
+						}
+					}
+					$match .= $_string[0];
+					$_string = substr($_string, 1);			
+				}
+				$tokens[] = new SassString($match);
+			}			
 			$string = substr($string, strlen($match));
-			return $this->nextToken($string);
 		}
-		elseif (($match = SassNumber::isa($string)) !== false) {
-			$string = substr($string, strlen($match));
-			return new SassNumber($match);
-		}
-		elseif (($match = SassColour::isa($string)) !== false) {
-			$string = substr($string, strlen($match));
-			return new SassColour($match);
-		}
-		elseif (($match = SassBoolean::isa($string)) !== false) {
-			$string = substr($string, strlen($match));
-			return new SassBoolean($match);
-		}
-		elseif (($match = SassString::isa($string)) !== false) {
-			$string = substr($string, strlen($match));
-			return new SassString($match);
-		}
-		elseif (($match = SassScriptFunction::isa($string)) !== false) {
-			$string = substr($string, strlen($match));
-			return new SassScriptFunction($match);
-		}
-		elseif (($match = SassScriptOperation::isa($string)) !== false) {
-			$string = substr($string, strlen($match));
-			return new SassScriptOperation($match);
-		}
-		else {
-			throw new SassScriptLexerException("Unable to tokenise \"$string\"");
-		}
+		return $tokens; 
 	}
 
 	/**

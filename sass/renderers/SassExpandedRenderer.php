@@ -64,9 +64,11 @@ class SassExpandedRenderer extends SassCompactRenderer {
 	 */
 	public function renderComment($node) {
 		$indent = $this->getIndent($node);
-		$comment = join("\n * ", $node->children);
-		$nl = empty($indent)?"\n":'';
-	  return "$indent/* $comment */$nl";
+		$lines = explode("\n", $node->value);
+		foreach ($lines as &$line) {
+			$line = trim($line);
+		}
+		return "$indent/*\n$indent * ".join("\n$indent * ", $lines)."\n$indent */".(empty($indent)?"\n":'');
 	}
 
 	/**
@@ -76,15 +78,5 @@ class SassExpandedRenderer extends SassCompactRenderer {
 	 */
 	public function renderProperties($properties) {
 		return join("\n", $properties);
-	}
-
-	/**
-	 * Renders a property.
-	 * @param SassNode the node being rendered
-	 * @return string the rendered property
-	 */
-	public function renderProperty($node) {
-		return $this->getIndent($node) .
-		parent::renderProperty($node);
 	}
 }

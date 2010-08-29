@@ -16,18 +16,18 @@
  * @subpackage	Sass.script
  */
 class SassScriptOperation {
-  const MATCH = '/^(\(|\)|\+|-|\*|\/|%|<=|>=|<|>|==|!=|=|#{|}|and|or|xor|not|!|&|\||\^|~)/';
+  const MATCH = '/^(\(|\)|\+|-|\*|\/|%|<=|>=|<|>|==|!=|=|#{|}|&|\||\^|~|,|and|or|xor|not)/';
 
 	/**
 	 * @var array map symbols to tokens.
 	 * A token is function, associativity, precedence, number of operands
 	 */
-	static public $operators = array(
-		'*'		=> array('multiply',	'l', 9, 2),
-		'/'		=> array('divide',		'l', 9, 2),
-		'%'		=> array('modulus',		'l', 9, 2),
-		'+'		=> array('add',				'l', 8, 2),
-		'-'		=> array('subtract',	'l', 8, 2),
+	public static $operators = array(
+		'*'		=> array('times',			'l', 9, 2),
+		'/'		=> array('divide_by',	'l', 9, 2),
+		'%'		=> array('modulo',		'l', 9, 2),
+		'+'		=> array('plus',			'l', 8, 2),
+		'-'		=> array('minus',			'l', 8, 2),
 		'<<'	=> array('shiftl',		'l', 7, 2),
 		'>>'	=> array('shiftr',		'l', 7, 2),
 		'<='	=> array('lte',				'l', 6, 2),
@@ -44,14 +44,19 @@ class SassScriptOperation {
 		'or'	=> array('or',				'l', 3, 2),
 		'xor'	=> array('xor',				'l', 3, 2),
 		'not'	=> array('not',				'l', 3, 1),
-		'!'		=> array('not',				'l', 3, 1),
-		'='		=> array('assign',		'r', 2, 2),
+		//'!'		=> array('not',			'l', 3, 1), not supported while !variable is allowed. Will need to add to MATCH when enabled
+		'='		=> array('equals',		'l', 2, 2),
 		')'		=> array('rparen',		'l', 1),
 		'('		=> array('lparen',		'l', 0),
-		','		=> array('comma'),
+		','		=> array('comma',			'l', 0, 2),
 		'#{'	=> array('begin_interpolation'),
-		'}'	=> array('end_interpolation'),
-	);
+		'}'		=> array('end_interpolation'),
+	); 
+ 
+	/**
+	 * @var array default operator token.
+	 */
+	public static $defaultOperator = array('concat', 'l', 0, 2);
 
 	/**
 	 * @var string operator for this operation
@@ -73,16 +78,19 @@ class SassScriptOperation {
 	/**
 	 * SassScriptOperation constructor
 	 *
-	 * @param array operation to perform
+	 * @param mixed string: operator symbol; array: operator token
 	 * @return SassScriptOperation
 	 */
 	public function __construct($operation) {
-		$this->operator			 = self::$operators[$operation][0];
-		if (isset(self::$operators[$operation][1])) {
-			$this->associativity = self::$operators[$operation][1];
-			$this->precedence		 = self::$operators[$operation][2];
-			$this->operandCount	 = (isset(self::$operators[$operation][3]) ?
-					self::$operators[$operation][3] : null);
+		if (is_string($operation)) {
+			$operation = self::$operators[$operation];
+		}
+		$this->operator			 = $operation[0];
+		if (isset($operation[1])) {
+			$this->associativity = $operation[1];
+			$this->precedence		 = $operation[2];
+			$this->operandCount	 = (isset($operation[3]) ?
+					$operation[3] : null);
 		}
 	}
 
@@ -97,7 +105,7 @@ class SassScriptOperation {
 			return $this->$name;
 		}
 	  else {
-			throw new SassScriptOperationException("Unknown property: $name");
+			throw new SassScriptOperationException('Unknown property: {name}', array('{name}'=>$name), SassScriptParser::$context->node);
 	  }
 	}
 
@@ -110,15 +118,20 @@ class SassScriptOperation {
 	 */
 	public function perform($operands) {
 		if (count($operands) !== $this->operandCount) {
-			throw new SassScriptOperationException("Incorrect number of operands for " . get_class($operands[0]) . " Expected {$this->operandCount}, received " . count($operands));
+			throw new SassScriptOperationException('Incorrect operand count for {operation}; expected {expected}, received {received}', array('{operation}'=>get_class($operands[0]), '{expected}'=>$this->operandCount, '{received}'=>count($operands)), SassScriptParser::$context->node);
+		}
+		
+		if ($this->associativity == 'l') {
+			$operands = array_reverse($operands);
 		}
 
-		$operation = "_{$this->operator}";
+		$operation = 'op' . (is_null($operands[1]) ? '_unary_' : '_') . $this->operator;
+		
 		if (method_exists($operands[0], $operation)) {
 			return $operands[0]->$operation($operands[1]);
 		}
 
-		throw new SassScriptOperationException("Undefined operation \"$operation\" for " . get_class($operands[0]));
+		throw new SassScriptOperationException('Undefined operation "{operation}" for {what}',  array('{operation}'=>$operation, '{what}'=>get_class($operands[0])), SassScriptParser::$context->node);
 	}
 
 	/**
@@ -127,7 +140,7 @@ class SassScriptOperation {
 	 * @param string the subject string
 	 * @return mixed match at the start of the string or false if no match
 	 */
-	static public function isa($subject) {
+	public static function isa($subject) {
 		return (preg_match(self::MATCH, $subject, $matches) ? $matches[0] : false);
 	}
 }

@@ -8,9 +8,22 @@
  * @package			PHamlP
  * @subpackage	Haml
  */
+
+require_once(dirname(__FILE__).'/../PhamlpException.php');
+
 /**
  * Haml exception class.
  * @package			PHamlP
  * @subpackage	Haml
  */
-class HamlException extends Exception {}
+class HamlException extends PhamlpException {
+	/**
+	 * Haml Exception. 
+	 * @param string Exception message
+	 * @param array parameters to be applied to the message using <code>strtr</code>.
+	 * @param object object with source code and meta data
+	 */
+	public function __construct($message, $params = array(), $object = null) {
+		parent::__construct('haml', $message, $params, $object);
+	}
+}

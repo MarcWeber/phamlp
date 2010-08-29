@@ -36,7 +36,7 @@ class SassRenderer {
 	 * @param string render style
 	 * @return SassRenderer
 	 */
-	static public function getRenderer($style = null) {
+	public static function getRenderer($style) {
 		switch ($style) {
 			case self::STYLE_COMPACT:
 		  	return new SassCompactRenderer();

@@ -34,6 +34,15 @@ class SassCompressedRenderer extends SassRenderer {
 	}
 
 	/**
+	 * Returns the indent string for the node
+	 * @param SassNode the node to return the indent string for
+	 * @return string the indent string for this SassNode
+	 */
+	protected function getIndent($node) {
+		return '';
+	}
+
+	/**
 	 * Renders a comment.
 	 * @param SassNode the node being rendered
 	 * @return string the rendered comment
@@ -67,7 +76,7 @@ class SassCompressedRenderer extends SassRenderer {
 	 * @return string the rendered property
 	 */
 	public function renderProperty($node) {
-		return "{$node->name}:{$node->value};";
+		return $this->getIndent($node) . "{$node->name}: {$node->value};";
 	}
 
 	/**
@@ -87,10 +96,6 @@ class SassCompressedRenderer extends SassRenderer {
 	 * @return string the rendered selectors
 	 */
 	protected function renderSelectors($node) {
-		$selectors = '';
-		foreach ($node->selectors as $line) {
-			$selectors .= join(',', $line) . ",";
-		} // foreach
-	  return substr($selectors, 0, -1);
+		return join(',', $node->selectors);
 	}
 }

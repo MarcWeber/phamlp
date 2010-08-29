@@ -30,10 +30,14 @@ class SassContext {
 	 * @var array variables defined in this context
 	 */
 	protected $variables = array();
+	/**
+	 * @var SassNode the node being processed
+	 */
+	public $node; 
 
 	/**
 	 * SassContext constructor.
-	 * @param mixed array - options for the context, SassContext - the enclosing context
+	 * @param SassContext - the enclosing context
 	 * @return SassContext
 	 */
 	public function __construct($parent = null) {
@@ -63,7 +67,7 @@ class SassContext {
 		elseif (!empty($this->parent)) {
 			return $this->parent->getMixin($name);
 		}
-		throw new SassContextException("Undefined Mixin: $name");
+		throw new SassContextException('Undefined {what}: {name}', array('{what}'=>'Mixin', '{name}'=>$name), $this->node);
 	}
 
 	/**
@@ -80,7 +84,7 @@ class SassContext {
 			return $this->parent->getVariable($name);
 		}
 		else {
-			throw new SassContextException("Undefined Variable: \"$name\"");
+			throw new SassContextException('Undefined {what}: {name}', array('{what}'=>'Variable', '{name}'=>$name), $this->node);
 		}
 	}
 
@@ -105,7 +109,7 @@ class SassContext {
 
 	/**
 	 * Makes variables and mixins from this context available in the parent context.
-	 * Note that is there are variables or mixins with the same name in the two
+	 * Note that if there are variables or mixins with the same name in the two
 	 * contexts they will be set to that defined in this context.
 	 */
 	public function merge() {

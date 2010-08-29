@@ -23,36 +23,43 @@ class SassRuleNode extends SassNode {
 	/**
 	 * @const string that is replaced with the parent node selector
 	 */
-	const PARENT = '&';
+	const PARENT_REFERENCE = '&';
 
 	/**
-	 * @var array rule selector(s). Each entry in the array is a line of comma
-	 * separated selectors. Lines that are to continue must end in a comma.
+	 * @var array selector(s)
 	 */
-	private $selectors;
+	private $selectors = array();
 
 	/**
-	 * @var array rule selector(s). Each entry in the array is an array of
-	 * selectors that were on a line
+	 * @var array parent selectors
 	 */
-	private $_selectors = array();
+	private $_parentSelectors = array();
+	
+	/**
+	 * @var boolean whether the node expects more selectors
+	 */
+	private $isContinued;
 
 	/**
 	 * SassRuleNode constructor.
+	 * @param object source token
 	 * @param string rule selector
 	 * @return SassRuleNode
 	 */
-	public function __construct($selector) {
-		$this->addSelectors($selector);
+	public function __construct($token) {
+		parent::__construct($token);
+		preg_match(self::MATCH, $token->source, $matches);
+		$this->addSelectors($matches[SassRuleNode::SELECTOR]);
 	}
 
 	/**
-	 * Adds a selector or selectors to the rule.
+	 * Adds selector(s) to the rule.
 	 * If the selectors are to continue for the rule the selector must end in a comma
 	 * @param string selector
 	 */
-	public function addSelectors($selector) {
-		$this->selectors[] = $selector;
+	public function addSelectors($selectors) {
+		$this->isContinued = substr($selectors, -1) === self::CONTINUED;
+		$this->selectors = array_merge($this->selectors, $this->explode($selectors));
 	}
 
 	/**
@@ -60,9 +67,8 @@ class SassRuleNode extends SassNode {
 	 * @param boolean true if the selectors for this rule are to be continued,
 	 * false if not
 	 */
-	protected function getIsContinued() {
-		return substr($this->selectors[count($this->selectors) - 1], -1) ===
-			self::CONTINUED;
+	public function getIsContinued() {
+		return $this->isContinued;
 	}
 
 	/**
@@ -71,49 +77,9 @@ class SassRuleNode extends SassNode {
 	 * @return array the parsed node and its children
 	 */
 	public function parse($context) {
-		$this->_selectors = array();
-		$parentSelectors = $this->getParentSelectors();
-
-		foreach ($this->selectors as $line) {
-			$selectors = $this->explode($line);
-			$_selectors = array();
-
-			foreach ($selectors as $selector) {
-				$selector = $this->interpolate(trim($selector), $context);
-
-				if ($this->parentReferencePos($selector) !== false) {
-					if (!empty($parentSelectors)) {
-						foreach ($parentSelectors as $parentSelectorLine) {
-							foreach ($parentSelectorLine as $parentSelector) {
-								$_selectors[] = $this->replaceParentReference($selector, $parentSelector);
-							} // foreach
-						} // foreach
-					}
-					else {
-						throw new SassRuleNodeException('Can not use parent selector (' .
-							self::PARENT . ") when no parent selectors.\n
-							Line {$this->line['number']}: {$this->line['filename']}");
-					}
-				}
-				elseif (!empty($parentSelectors)) {
-					foreach ($parentSelectors as $parentSelectorLine) {
-						foreach ($parentSelectorLine as $parentSelector) {
-							$_selectors[] = "$parentSelector $selector";
-						} // foreach
-					} // foreach
-				}
-				else {
-					$_selectors[] = $selector;
-				}
-			} // foreach
-
-			$this->_selectors[] = $_selectors;
-		} // foreach
-
 		$node = clone $this;
-		foreach ($this->children as $child) {
-			$node->children = array_merge($node->children, $child->parse($context));
-		} // foreach
+		$node->resolveSelectors($context);
+		$node->children = $this->parseChildren($context);
 		return array($node);
 	}
 
@@ -122,9 +88,9 @@ class SassRuleNode extends SassNode {
 	 * @return string the rendered node
 	 */
 	public function render() {
+		$this->extend();
 		$rules = '';
 		$properties = array();
-		$this->indentLevel = $this->parent->indentLevel + 1;
 
 		foreach ($this->children as $child) {
 			$child->parent = $this;
@@ -138,32 +104,132 @@ class SassRuleNode extends SassNode {
 
 		return $this->renderer->renderRule($this, $properties, $rules);
 	}
-
+	
 	/**
-	 * Returns the selectors array
-	 * @return array selectors
+	 * Extend this nodes selectors
+	 * $extendee is the subject of the @extend directive
+	 * $extender is the selector that contains the @extend directive
+	 * $selector a selector or selector sequence that is to be extended 
 	 */
-	public function getSelectors() {
-		return $this->_selectors;
+	public function extend() {
+		foreach ($this->root->extenders as $extendee=>$extenders) {
+			if ($this->isPsuedo($extendee)) {
+				$extendee = explode(':', $extendee);
+				$pattern = preg_quote($extendee[0]).'((\.[-\w]+)*):'.preg_quote($extendee[1]);
+			}
+			else {
+				$pattern = preg_quote($extendee);
+			}
+			foreach (preg_grep('/'.$pattern.'$/', $this->selectors) as $selector) {
+				foreach ($extenders as $extender) {
+					if (is_array($extendee)) {
+						$this->selectors[] = preg_replace('/(.*?)'.$pattern.'$/', "\\1$extender\\2", $selector);
+					}
+					elseif ($this->isSequence($extender) || $this->isSequence($selector)) {
+						$this->selectors = array_merge($this->selectors, $this->mergeSequence($extender, $selector));
+					}
+					else {
+						$this->selectors[] = str_replace($extendee, $extender, $selector);
+					}
+				}
+			}
+		}
+	}
+	
+	/**
+	 * Tests whether the selector is a psuedo selector
+	 * @param string selector to test
+	 * @return boolean true if the selector is a psuedo selector, false if not
+	 */
+	private function isPsuedo($selector) {
+		return strpos($selector, ':') !== false;
+	}
+	
+	/**
+	 * Tests whether the selector is a sequence selector
+	 * @param string selector to test
+	 * @return boolean true if the selector is a sequence selector, false if not
+	 */
+	private function isSequence($selector) {
+		return strpos($selector, ' ') !== false;
+	}
+	
+	/**
+	 * Merges selector sequences
+	 * @param string the extender selector
+	 * @param string selector to extend
+	 * @return array the merged sequences 
+	 */
+	private function mergeSequence($extender, $selector) {
+		$extender = explode(' ', $extender);
+		$end = ' '.array_pop($extender);
+		$selector = explode(' ', $selector);
+		array_pop($selector);
+		
+		$common = array();
+		while($extender[0] === $selector[0]) {
+			$common[] = array_shift($selector);
+			array_shift($extender);
+		}
+		
+		$begining = (!empty($common) ? join(' ', $common) . ' ' : '');
+		
+		return array(
+			$begining.join(' ', $selector).' '.join(' ', $extender).$end,
+			$begining.join(' ', $extender).' '.join(' ', $selector).$end
+		);
 	}
 
 	/**
-	 * Returns the parent selector for this node.
-	 * This in an empty string if there is no parent selector.
-	 * @return the parent selector for this node
+	 * Returns the selectors
+	 * @return array selectors
 	 */
-	private function getParentSelectors() {
-		$selector = array();
-		$ancestor = $this->getParent();
-		while (!$ancestor instanceof SassRuleNode && $ancestor->hasParent()) {
-			$ancestor = $ancestor->getParent();
-		}
+	public function getSelectors() {
+		return $this->selectors;
+	}
+	
+	/**
+	 * Resolves selectors.
+	 * Interpolates SassScript in selectors and resolves any parent references or
+	 * appends the parent selectors.
+	 * @param SassContext the context in which this node is parsed
+	 */
+	private function resolveSelectors($context) {
+		$resolvedSelectors = array();
+		foreach ($this->selectors as $key=>$selector) {
+			$selector = $this->interpolate($selector, $context);
+			if ($this->hasParentReference($selector)) {
+				$resolvedSelectors = array_merge($resolvedSelectors, $this->resolveParentReferences($selector));
+			}
+			elseif ($this->parent instanceof SassRuleNode) {
+				foreach ($this->parentSelectors as $parentSelector) {
+					$resolvedSelectors[] = "$parentSelector $selector";
+				} // foreach
+			}
+			else {
+				$resolvedSelectors[] = $selector;
+			}
+		} // foreach
+		$this->selectors = $resolvedSelectors;
+	}
 
-	  if ($ancestor instanceof SassRuleNode) {
-			$selector = $ancestor->getSelectors();
-		}
+	/**
+	 * Returns the parent selector(s) for this node.
+	 * This in an empty string if there is no parent selector.
+	 * @return array the parent selector for this node
+	 */
+	protected function getParentSelectors() {
+		if (empty($this->_parentSelectors)) {
+			$ancestor = $this->parent;
+			while (!$ancestor instanceof SassRuleNode && $ancestor->hasParent()) {
+				$ancestor = $ancestor->parent;
+			}
 
-	  return $selector;
+			if ($ancestor instanceof SassRuleNode) {
+				$this->_parentSelectors = $ancestor->selectors;
+			}
+		}
+		return $this->_parentSelectors;
 	}
 
 	/**
@@ -177,30 +243,46 @@ class SassRuleNode extends SassNode {
 	 * boolean: false if there is no parent reference.
 	 */
 	private function parentReferencePos($selector) {
-		$inString = false;
+		$inString = '';
 		for ($i = 0, $l = strlen($selector); $i < $l; $i++) {
 			$c = $selector[$i];
-			if ($c === self::PARENT && !$inString) {
+			if ($c === self::PARENT_REFERENCE && empty($inString)) {
 				return $i;
 			}
-			elseif ($c == '"') {
-				$inString = !$inString;
+			elseif (empty($inString) && ($c === '"' || $c === "'")) {
+				$inString = $c;
+			}
+			elseif ($c === $inString) {
+				$inString = '';
 			}
 		}
 	  return false;
 	}
 
 	/**
-	 * Replaces parent references in the selector with the parent selector
+	 * Determines if there is a parent reference in the selector
 	 * @param string selector
-	 * @param string parent selector
-	 * @return string selector with parent references replaced
+	 * @return boolean true if there is a parent reference in the selector
 	 */
-	private function replaceParentReference($selector, $parentSelector) {
-		while (($pos = $this->parentReferencePos($selector)) !== false) {
-			$selector = substr($selector, 0, $pos) . $parentSelector . substr($selector, $pos + 1);
+	private function hasParentReference($selector) {
+		return $this->parentReferencePos($selector) !== false;
+	}
+
+	/**
+	 * Resolves parent references in the selector
+	 * @param string selector
+	 * @return string selector with parent references resolved
+	 */
+	private function resolveParentReferences($selector) {
+		$resolvedReferences = array(); 
+		if (!count($this->parentSelectors)) {
+			throw new SassRuleNodeException('Can not use parent selector (' .
+					self::PARENT_REFERENCE . ') when no parent selectors', array(), $this);
 		}
-		return $selector;
+		foreach ($this->parentSelectors as $parentSelector) {
+			$resolvedReferences[] = str_replace(self::PARENT_REFERENCE, $parentSelector, $selector);
+		}
+		return $resolvedReferences;
 	}
 
 	/**
@@ -216,7 +298,7 @@ class SassRuleNode extends SassNode {
 		$selector = '';
 		for ($i = 0, $l = strlen($string); $i < $l; $i++) {
 			$c = $string[$i];
-			if ($c === ',' && !$inString) {
+			if ($c === self::CONTINUED && !$inString) {
 				$selectors[] = trim($selector);
 				$selector = '';
 			}
@@ -233,15 +315,5 @@ class SassRuleNode extends SassNode {
 		}
 
 	  return $selectors;
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * @param array the line to match
-	 * @return array matches
-	 */
-	static public function match($line) {
-		preg_match(self::MATCH, $line['source'], $matches);
-		return $matches;
 	}
 }

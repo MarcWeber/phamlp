@@ -8,22 +8,30 @@
  * @package			PHamlP
  * @subpackage	Sass.script.literals
  */
-require_once('SassBoolean.php');
-require_once('SassColour.php');
-require_once('SassNumber.php');
-require_once('SassString.php');
+
 require_once('SassLiteralExceptions.php');
 
 /**
  * SassLiteral class.
  * Base class for all Sass literals.
- * Sass data types are extended from this class.
+ * Sass data types are extended from this class and these override the operation
+ * methods to provide the appropriate semantics.
  * @package			PHamlP
  * @subpackage	Sass.script.literals
  */
 abstract class SassLiteral {
 	/**
-	 * @var string value of the literal type
+	 * @var array maps class names to data types
+	 */
+	static private $typeOf = array(
+		'SassBoolean' => 'bool',
+		'SassColour'  => 'color',
+		'SassNumber'  => 'number',
+		'SassString'  => 'string'
+	);
+	
+	/**
+	 * @var mixed value of the literal type
 	 */
   protected $value;
 
@@ -32,8 +40,9 @@ abstract class SassLiteral {
 	 * @param string value of the literal type
 	 * @return SassLiteral
 	 */
-	public function __construct($value = null) {
+	public function __construct($value = null, $context) {
 		$this->value = $value;
+		$this->context = $context;
 	}
 
 	/**
@@ -47,12 +56,8 @@ abstract class SassLiteral {
 			return $this->$getter();
 		}
 		else {
-			throw new SassLiteralException("No getter function for $name.");
+			throw new SassLiteralException('No getter function for {what}', array('{what}'=>$name), array(), SassScriptParser::$context->node);
 		}
-	}
-
-	protected function getValue() {
-		throw new SassLiteralException(get_class($this) . ' must override getValue() method');
 	}
 
 	/**
@@ -64,53 +69,76 @@ abstract class SassLiteral {
 	}
 
 	/**
-	 * Adds the value of other to the value of this
-	 * @param string value to add
-	 * @return SassLiteral result
-	 * @throws Exception if addition not supported for the data type
+	 * Returns the type of this
+	 * @return string the type of this
 	 */
-	public function _add($other) {
-		throw new SassLiteralException(get_class($this) . ' does not support Addition.');
+	protected function getTypeOf() {
+		return self::$typeOf[get_class($this)];
 	}
 
 	/**
-	 * Subtracts the value of other from the value of this
-	 * @param string value to subtract
+	 * Returns the value of this
+	 * @return mixed the value of this
+	 */
+	protected function getValue() {
+		throw new SassLiteralException('Child classes must override this method', array(), SassScriptParser::$context->node);
+	}
+	
+	/**
+	 * Adds a child object to this.
+	 * @param sassLiteral the child object
+	 */
+	public function addChild($sassLiteral) {
+		$this->children[] = $sassLiteral;
+	}
+
+	/**
+	 * SassScript '+' operation.
+	 * @param sassLiteral value to add
+	 * @return sassString the string values of this and other with no seperation
+	 */
+	public function op_plus($other) {
+		return new SassString($this->toString().$other->toString());
+	}
+
+	/**
+	 * SassScript '-' operation.
+	 * @param SassLiteral value to subtract
 	 * @return SassLiteral result
 	 * @throws Exception if subtraction not supported for the data type
 	 */
-	public function _subtract($other) {
-		throw new SassLiteralException(get_class($this) . ' does not support Subtraction');
+	public function op_minus($other) {
+		throw new SassLiteralException('{class} does not support {operation}.', array('{class}'=>get_class($this), '{operation}'=>Phamlp::t('sass', 'Subtraction')), SassScriptParser::$context->node);
 	}
 
 	/**
-	 * Multiplies the value of this by the value of other
-	 * @param string value to multiply by
+	 * SassScript '*' operation.
+	 * @param SassLiteral value to multiply by
 	 * @return SassLiteral result
 	 * @throws Exception if multiplication not supported for the data type
 	 */
-	public function _multiply($other) {
-		throw new SassLiteralException(get_class($this) . ' does not support Multiplication');
+	public function op_times($other) {
+		throw new SassLiteralException('{class} does not support {operation}.', array('{class}'=>get_class($this), '{operation}'=>Phamlp::t('sass', 'Multiplication')), SassScriptParser::$context->node);
 	}
 
 	/**
-	 * Divides the value of this by the value of other
-	 * @param string value to divide by
+	 * SassScript '/' operation.
+	 * @param SassLiteral value to divide by
 	 * @return SassLiteral result
 	 * @throws Exception if division not supported for the data type
 	 */
-	public function _divide($other) {
-		throw new SassLiteralException(get_class($this) . ' does not support Division');
+	public function op_divide_by($other) {
+		throw new SassLiteralException('{class} does not support {operation}.', array('{class}'=>get_class($this), '{operation}'=>Phamlp::t('sass', 'Division')), SassScriptParser::$context->node);
 	}
 
 	/**
-	 * Takes the modulus (remainder) of this value divided by the value of other
-	 * @param string value to divide by
+	 * SassScript '%' operation.
+	 * @param SassLiteral value to take the modulus of
 	 * @return SassLiteral result
-	 * @throws Exception if modulus not supported for the data type
+	 * @throws Exception if modulo not supported for the data type
 	 */
-	public function _modulus($other) {
-		throw new SassLiteralException(get_class($this) . ' does not support Modulus');
+	public function op_modulo($other) {
+		throw new SassLiteralException('{class} does not support {operation}.', array('{class}'=>get_class($this), '{operation}'=>Phamlp::t('sass', 'Modulus')), SassScriptParser::$context->node);
 	}
 
 	/**
@@ -119,147 +147,179 @@ abstract class SassLiteral {
 	 * @return string result
 	 * @throws Exception if bitwise AND not supported for the data type
 	 */
-	public function _bw_and($other) {
-		throw new SassLiteralException(get_class($this) . ' does not support Bitwise AND');
+	public function op_bw_and($other) {
+		throw new SassLiteralException('{class} does not support {operation}.', array('{class}'=>get_class($this), '{operation}'=>Phamlp::t('sass', 'Bitwise AND')), SassScriptParser::$context->node);
 	}
 
 	/**
 	 * Bitwise OR the value of other and this value
-	 * @param string value to bitwise OR with
+	 * @param SassNumber value to bitwise OR with
 	 * @return string result
 	 * @throws Exception if bitwise OR not supported for the data type
 	 */
-	public function _bw_or($other) {
-		throw new SassLiteralException(get_class($this) . ' does not support Bitwise OR');
+	public function op_bw_or($other) {
+		throw new SassLiteralException('{class} does not support {operation}.', array('{class}'=>get_class($this), '{operation}'=>Phamlp::t('sass', 'Bitwise OR')), SassScriptParser::$context->node);
 	}
 
 	/**
 	 * Bitwise XOR the value of other and the value of this
-	 * @param string value to bitwise XOR with
+	 * @param SassNumber value to bitwise XOR with
 	 * @return string result
 	 * @throws Exception if bitwise XOR not supported for the data type
 	 */
-	public function _bw_xor($other) {
-		throw new SassLiteralException(get_class($this) . ' does not support Bitwise XOR');
+	public function op_bw_xor($other) {
+		throw new SassLiteralException('{class} does not support {operation}.', array('{class}'=>get_class($this), '{operation}'=>Phamlp::t('sass', 'Bitwise XOR')), SassScriptParser::$context->node);
 	}
 
 	/**
 	 * Bitwise NOT the value of other and the value of this
-	 * @param string value to bitwise NOT with
+	 * @param SassNumber value to bitwise NOT with
 	 * @return string result
 	 * @throws Exception if bitwise NOT not supported for the data type
 	 */
-	public function _bw_not() {
-		throw new SassLiteralException(get_class($this) . ' does not support Bitwise NOT');
+	public function op_bw_not() {
+		throw new SassLiteralException('{class} does not support {operation}.', array('{class}'=>get_class($this), '{operation}'=>Phamlp::t('sass', 'Bitwise NOT')), SassScriptParser::$context->node);
 	}
 
 	/**
 	 * Shifts the value of this left by the number of bits given in value
-	 * @param string amount to shift left by
+	 * @param SassNumber amount to shift left by
 	 * @return string result
 	 * @throws Exception if bitwise Shift Left not supported for the data type
 	 */
-	public function _shiftl($other) {
-		throw new SassLiteralException(get_class($this) . ' does not support Bitwise Shift Left');
+	public function op_shiftl($other) {
+		throw new SassLiteralException('{class} does not support {operation}.', array('{class}'=>get_class($this), '{operation}'=>Phamlp::t('sass', 'Bitwise Shift Left')), SassScriptParser::$context->node);
 	}
 
 	/**
 	 * Shifts the value of this right by the number of bits given in value
-	 * @param string amount to shift right by
+	 * @param SassNumber amount to shift right by
 	 * @return string result
 	 * @throws Exception if bitwise Shift Right not supported for the data type
 	 */
-	public function _shiftr($other) {
-		throw new SassLiteralException(get_class($this) . ' does not support Bitwise Shift Right');
+	public function op_shiftr($other) {
+		throw new SassLiteralException('{class} does not support {operation}.', array('{class}'=>get_class($this), '{operation}'=>Phamlp::t('sass', 'Bitwise Shift Right')), SassScriptParser::$context->node);
 	}
 
 	/**
 	 * The SassScript and operation.
+	 * @param sassLiteral the value to and with this
 	 * @return SassBoolean SassBoolean object with the value true if the boolean
 	 * of this the boolean of other are both true, false if not
 	 */
-	public function _and($other) {
+	public function op_and($other) {
 		return new SassBoolean(($this->boolean and $other->boolean ?
 			'true' : 'false'));
 	}
+	
 	/**
 	 * The SassScript or operation.
+	 * @param sassLiteral the value to or with this
 	 * @return SassBoolean SassBoolean object with the value true if either the
 	 * boolean of this and/or the boolean of other are true, false if not
 	 */
-	public function _or($other) {
+	public function op_or($other) {
 		return new SassBoolean(($this->boolean or $other->boolean ?
 			'true' : 'false'));
 	}
+	
 	/**
 	 * The SassScript xor operation.
+	 * @param sassLiteral the value to xor with this
 	 * @return SassBoolean SassBoolean object with the value true if either the
 	 * boolean of this or the boolean of other, but not both, is true, false if not
 	 */
-	public function _xor($other) {
+	public function op_xor($other) {
 		return new SassBoolean(($this->boolean xor $other->boolean ?
 			'true' : 'false'));
 	}
+	
 	/**
 	 * The SassScript not operation.
 	 * @return SassBoolean SassBoolean object with the value true if the
 	 * boolean of this is false or false if it is true
 	 */
-	public function _not($other) {
+	public function op_not() {
 		return new SassBoolean(($this->boolean ? 'false' : 'true'));
 	}
+	
 	/**
 	 * The SassScript > operation.
+	 * @param sassLiteral the value to compare to this
 	 * @return SassBoolean SassBoolean object with the value true if the values
 	 * of this is greater than the value of other, false if it is not
 	 */
-	public function _gt($other) {
+	public function op_gt($other) {
 		return new SassBoolean(($this->value > $other->value ? 'true' : 'false'));
 	}
+	
 	/**
 	 * The SassScript >= operation.
+	 * @param sassLiteral the value to compare to this
 	 * @return SassBoolean SassBoolean object with the value true if the values
 	 * of this is greater than or equal to the value of other, false if it is not
 	 */
-	public function _gte($other) {
+	public function op_gte($other) {
 		return new SassBoolean(($this->value >= $other->value ? 'true' : 'false'));
 	}
+	
 	/**
 	 * The SassScript < operation.
+	 * @param sassLiteral the value to compare to this
 	 * @return SassBoolean SassBoolean object with the value true if the values
 	 * of this is less than the value of other, false if it is not
 	 */
-	public function _lt($other) {
+	public function op_lt($other) {
 		return new SassBoolean(($this->value < $other->value ? 'true' : 'false'));
 	}
+	
 	/**
 	 * The SassScript <= operation.
+	 * @param sassLiteral the value to compare to this
 	 * @return SassBoolean SassBoolean object with the value true if the values
 	 * of this is less than or equal to the value of other, false if it is not
 	 */
-	public function _lte($other) {
+	public function op_lte($other) {
 		return new SassBoolean(($this->value <= $other->value ? 'true' : 'false'));
 	}
+	
 	/**
 	 * The SassScript == operation.
-	 * @return SassBoolean SassBoolean object with the value true if the values
-	 * of this and other are equal, false if they are not
+	 * @param sassLiteral the value to compare to this
+	 * @return SassBoolean SassBoolean object with the value true if this and
+	 * other are equal, false if they are not
 	 */
-	public function _eq($other) {
-		return new SassBoolean(($this->value == $other->value ? 'true' : 'false'));
+	public function op_eq($other) {
+		return new SassBoolean(($this == $other ? 'true' : 'false'));
 	}
+	
 	/**
 	 * The SassScript != operation.
-	 * @return SassBoolean SassBoolean object with the value true if the values
-	 * of this and other are not equal, false if they are
+	 * @param sassLiteral the value to compare to this
+	 * @return SassBoolean SassBoolean object with the value true if this and
+	 * other are not equal, false if they are
 	 */
-	public function _neq($other) {
-		return new SassBoolean(($this->value != $other->value ? 'true' : 'false'));
+	public function op_neq($other) {
+		return new SassBoolean(($this != $other ? 'true' : 'false'));
 	}
+	
 	/**
-	 * The SassScript default operation (e.g. !a !b, "foo" "bar").
-	*/
-	public function _concat($other) {}
+	 * The SassScript default operation (e.g. $a $b, "foo" "bar").
+	 * @param sassLiteral the value to concatenate with a space to this
+	 * @return sassString the string values of this and other seperated by " "
+	 */
+	public function op_concat($other) {
+		return new SassString($this->toString().' '.$other->toString());
+	}
+
+	/**
+	 * SassScript ',' operation.
+	 * @param sassLiteral the value to concatenate with a comma to this
+	 * @return sassString the string values of this and other seperated by ","
+	 */
+	public function op_comma($other) {
+		return new SassString($this->toString().','.$other->toString());
+	}
 
 	/**
 	 * Returns a string representation of the value.
@@ -273,5 +333,5 @@ abstract class SassLiteral {
 	 * @param string the subject string
 	 * @return mixed match at the start of the string or false if no match
 	 */
-	abstract static public function isa($subject);
+	abstract public static function isa($subject);
 }

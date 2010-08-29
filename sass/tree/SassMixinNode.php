@@ -16,10 +16,11 @@
  * @subpackage	Sass.tree
  */
 class SassMixinNode extends SassNode {
-	const IDENTIFIER = '+';
-	const MATCH = '/^\+([-\w]+)(?:\((.*?)\))?$/';
-	const NAME = 1;
-	const ARGUMENTS = 2;
+	const NODE_IDENTIFIER = '+';
+	const MATCH = '/^(\+|@include\s+)([-\w]+)(?:\((.*?)\))?$/i';
+	const IDENTIFIER = 1;
+	const NAME = 2;
+	const ARGUMENTS = 3;
 
 	/**
 	 * @var string name of the mixin
@@ -32,23 +33,21 @@ class SassMixinNode extends SassNode {
 
 	/**
 	 * SassMixinDefinitionNode constructor.
-	 * @param string name of the mixin
-	 * @param string arguments for the mixin
+	 * @param object source token
 	 * @return SassMixinNode
 	 */
-	public function __construct($name, $args = '') {
-	  $this->name = $name;
-	  if (!empty($args)) {
-		  $_args = explode(',', $args);
-		  foreach ($_args as $arg) {
-	  		$this->args[] = trim($arg);
-		  } // foreach
+	public function __construct($token) {
+		parent::__construct($token);
+		preg_match(self::MATCH, $token->source, $matches);
+		$this->name = $matches[self::NAME];
+	  if (!empty($matches[self::ARGUMENTS])) {
+	  	$this->args = array_map('trim', explode(',', $matches[self::ARGUMENTS]));
 	  }
 	}
 
 	/**
 	 * Parse this node.
-	 * Set any attributes passed and any optional arguments not passed to their
+	 * Set passed arguments and any optional arguments not passed to their
 	 * defaults, then render the children of the mixin definition.
 	 * @param SassContext the context in which this node is parsed
 	 * @return array the parsed node
@@ -57,15 +56,17 @@ class SassMixinNode extends SassNode {
 		$mixin = $context->getMixin($this->name);
 
 		$context = new SassContext($context);
-		foreach ($mixin->args as $n => $name) {
-			if (isset($this->args[$n])) {
-				$context->setVariable($name, $this->evaluate($this->args[$n], $context));
+		$argc = count($this->args);
+		$count = 0;
+		foreach ($mixin->args as $name=>$value) {
+			if ($count < $argc) {
+				$context->setVariable($name, $this->evaluate($this->args[$count++], $context)->toString());
 			}
-			elseif ($mixin->hasDefault($name)) {
-				$context->setVariable($name, $this->evaluate($mixin->getDefault($name), $context));
+			elseif (!is_null($value)) {
+				$context->setVariable($name, $this->evaluate($value, $context)->toString());
 			}
 			else {
-				throw new SassMixinNodeException("Required variable - $name - not given when using Mixin::{$this->name}\nMixin used at Line {$this->line['number']}: " . (is_array($this->line['file']) ? join(DIRECTORY_SEPARATOR, $this->line['file']) : '')."\nMixin defined at Line {$mixin->line['number']}: " . (is_array($mixin->line['file']) ? join(DIRECTORY_SEPARATOR, $mixin->line['file']) : ''));
+				throw new SassMixinNodeException("Mixin::{mname}: Required variable ({vname}) not given.\nMixin defined: {dfile}::{dline}\nMixin used", array('{vname}'=>$name, '{mname}'=>$this->name, '{dfile}'=>$mixin->token->filename, '{dline}'=>$mixin->token->line), $this);
 			}
 		} // foreach
 
@@ -80,21 +81,11 @@ class SassMixinNode extends SassNode {
 	}
 
 	/**
-	 * Returns a value indicating if the line represents this type of node.
-	 * @param array the line to test
-	 * @return boolean true if the line represents this type of node, false if not
+	 * Returns a value indicating if the token represents this type of node.
+	 * @param object token
+	 * @return boolean true if the token represents this type of node, false if not
 	 */
-	static public function isa($line) {
-		return $line['source'][0] === self::IDENTIFIER;
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * @param array the line to match
-	 * @return array matches
-	 */
-	static public function match($line) {
-		preg_match(self::MATCH, $line['source'], $matches);
-		return $matches;
+	public static function isa($token) {
+		return $token->source[0] === self::NODE_IDENTIFIER;
 	}
 }

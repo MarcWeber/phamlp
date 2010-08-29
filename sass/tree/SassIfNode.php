@@ -17,8 +17,8 @@
  * @subpackage	Sass.tree
  */
 class SassIfNode extends SassNode {
-	const MATCH_IF = '/^@if\s+(.+)$/';
-	const MATCH_ELSE = '/@else(\s+if\s+(.+))?/';
+	const MATCH_IF = '/^@if\s+(.+)$/i';
+	const MATCH_ELSE = '/@else(\s+if\s+(.+))?/i';
 	const IF_EXPRESSION = 1;
 	const ELSE_IF = 1;
 	const ELSE_EXPRESSION = 2;
@@ -30,18 +30,23 @@ class SassIfNode extends SassNode {
 	 * @var string expression to evaluate
 	 */
 	private $expression;
-	/**
-	 * @var string current value of the expression
-	 */
-	private $value;
 
 	/**
 	 * SassIfNode constructor.
-	 * @param string expression to evaluate. Null if this is an "else" node
+	 * @param object source token
+	 * @param boolean true for an "if" node, false for an "else if | else" node
 	 * @return SassIfNode
 	 */
-	public function __construct($expression = null) {
-		$this->expression = $expression;
+	public function __construct($token, $if=true) {
+		parent::__construct($token);
+		if ($if) {
+			preg_match(self::MATCH_IF, $token->source, $matches);
+			$this->expression = $matches[SassIfNode::IF_EXPRESSION];
+		}
+		else {
+			preg_match(self::MATCH_ELSE, $token->source, $matches);
+			$this->expression = (sizeof($matches)==1 ? null : $matches[SassIfNode::ELSE_EXPRESSION]);
+		}
 	}
 
 	/**
@@ -51,9 +56,9 @@ class SassIfNode extends SassNode {
 	 */
 	public function addElse($node) {
 	  if (is_null($this->else)) {
-	  	$node->root			= $this->root;
-	  	$node->parent		= $this->parent;
-			$this->else			= $node;
+	  	$node->parent	= $this->parent;
+	  	$node->root		= $this->root;
+			$this->else		= $node;
 	  }
 	  else {
 			$this->else->addElse($node);
@@ -67,15 +72,14 @@ class SassIfNode extends SassNode {
 	 * @return array parsed child nodes
 	 */
 	public function parse($context) {
-		$children = array();
-
-		if ($this->isElse() || $this->evaluate($this->expression, $context)) {
-			foreach ($this->children as $child) {
-				$children = array_merge($children, $child->parse($context));
-			} // foreach
+		if ($this->isElse() || $this->evaluate($this->expression, $context)->boolean) {
+			$children = $this->parseChildren($context);
 		}
 		elseif (!empty($this->else)) {
 			$children = $this->else->parse($context);
+		}
+		else {
+			$children = array();
 		}
 		return $children;
 	}
@@ -87,25 +91,5 @@ class SassIfNode extends SassNode {
 	 */
 	private function isElse() {
 	  return empty($this->expression);
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * @param array the line to match
-	 * @return array matches
-	 */
-	static public function matchIf($line) {
-		preg_match(self::MATCH_IF, $line['source'], $matches);
-		return $matches;
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * @param array the line to match
-	 * @return array matches
-	 */
-	static public function matchElse($line) {
-		preg_match(self::MATCH_ELSE, $line['source'], $matches);
-		return $matches;
 	}
 }

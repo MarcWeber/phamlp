@@ -38,9 +38,9 @@ class HamlNode {
 	 */
 	protected $children = array();
 	/**
-	 * @var array source line
+	 * @var array source line token
 	 */
-	public $line;
+	public $token;
 	/**
 	 * @var boolean whether to show the output in the browser for debug
 	 */
@@ -86,7 +86,7 @@ class HamlNode {
 		if (method_exists($this, $getter)) {
 			return $this->$getter();
 		}
-		throw new HamlNodeException("No getter function for $name");
+		throw new HamlNodeException('No getter function for {what}', array('{what}'=>$name));
 	}
 
 	/**
@@ -101,7 +101,7 @@ class HamlNode {
 			$this->$setter($value);
 			return $this;
 		}
-		throw new HamlNodeException("No setter function for $name");
+		throw new HamlNodeException('No setter function for {what}', array('{what}'=>$name));
 	}
 
 	/**
@@ -162,8 +162,8 @@ class HamlNode {
 	 * Returns the indent level of this node.
 	 * @return integer the indent level of this node
 	 */
-	private function getIndentLevel() {
-		return $this->line['indentLevel'];
+	private function getLevel() {
+		return $this->token['level'];
 	}
 
 	/**
@@ -172,8 +172,8 @@ class HamlNode {
 	 * @param integer the indent level of this node
 	 * @return HamlNode this node
 	 */
-	private function setIndentLevel($level) {
-		$this->line['indentLevel'] = $level;
+	private function setLevel($level) {
+		$this->token['level'] = $level;
 		return $this;
 	}
 
@@ -182,15 +182,15 @@ class HamlNode {
 	 * @return string the source for this node
 	 */
 	private function getSource() {
-		return $this->line['indentLevel'];
+		return $this->token[HamlParser::HAML_SOURCE];
 	}
 
 	/**
 	 * Returns the source for this node
 	 * @return string the source for this node
 	 */
-	private function getLineNumber() {
-		return $this->line['number'];
+	private function getLine() {
+		return $this->token['line'];
 	}
 
 	/**
@@ -198,7 +198,7 @@ class HamlNode {
 	 * @return string the filename for this node
 	 */
 	private function getFilename() {
-		return join(DIRECTORY_SEPARATOR, $this->line['file']);
+		return $this->token['filename'];
 	}
 
 	/**

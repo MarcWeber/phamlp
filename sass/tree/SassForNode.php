@@ -26,14 +26,14 @@
  * @subpackage	Sass.tree
  */
 class SassForNode extends SassNode {
-	const MATCH = '/@for\s+!(\w+)\s+from\s+(.+?)\s+(through|to)\s+(.+?)(?:\s+step\s+(.+))?$/';
+	const MATCH = '/@for\s+[!\$](\w+)\s+from\s+(.+?)\s+(through|to)\s+(.+?)(?:\s+step\s+(.+))?$/i';
 
 	const VARIABLE = 1;
 	const FROM = 2;
 	const INCLUSIVE = 3;
 	const TO = 4;
 	const STEP = 5;
-	const IS_INCLUSIVE = 'to';
+	const IS_INCLUSIVE = 'through';
 
 	/**
 	 * @var string variable name for the loop
@@ -59,21 +59,19 @@ class SassForNode extends SassNode {
 
 	/**
 	 * SassForNode constructor.
-	 * @var string variable name for the loop
-	 * @var string expression that provides the loop start value
-	 * @var string expression that provides the loop end value
-	 * @var boolean whether the loop end value is inclusive
-	 * @var string expression that provides the amount by which the loop variable
-	 * changes on each iteration
-
+	 * @param object source token
 	 * @return SassForNode
 	 */
-	public function __construct($variable, $from, $to, $inclusive, $step) {
-		$this->variable = $variable;
-		$this->from = $from;
-		$this->to = $to;
-		$this->inclusive = $inclusive;
-		$this->step = $step;
+	public function __construct($token) {
+		parent::__construct($token);
+		if (!preg_match(self::MATCH, $token->source, $matches)) {
+			throw new SassForNodeException('Invalid {what}', array('{what}'=>'@for directive'), $this);
+		}
+		$this->variable  = $matches[self::VARIABLE];
+		$this->from			 = $matches[self::FROM];
+		$this->to				 = $matches[self::TO];
+		$this->inclusive = ($matches[self::INCLUSIVE] === SassForNode::IS_INCLUSIVE);
+		$this->step			 = (empty($matches[self::STEP]) ? 1 : $matches[self::STEP]);
 	}
 
 	/**
@@ -83,9 +81,9 @@ class SassForNode extends SassNode {
 	 */
 	public function parse($context) {
 		$children = array();
-		$from = $this->evaluate($this->from, $context);
-		$to = $this->evaluate($this->to, $context);
-		$step = $this->evaluate($this->step, $context) * ($to > $from ? 1 : -1);
+		$from = (float)$this->evaluate($this->from, $context)->value;
+		$to		= (float)$this->evaluate($this->to,		$context)->value;
+		$step = (float)$this->evaluate($this->step, $context)->value * ($to > $from ? 1 : -1);
 
 		if ($this->inclusive) {
 			$to += ($from < $to ? 1 : -1);
@@ -94,20 +92,8 @@ class SassForNode extends SassNode {
 		$context = new SassContext($context);
 		for ($i = $from; ($from < $to ? $i < $to : $i > $to); $i = $i + $step) {
 			$context->setVariable($this->variable, $i);
-			foreach ($this->children as $child) {
-				$children = array_merge($children, $child->parse($context));
-			} // foreach
+			$children = array_merge($children, $this->parseChildren($context));
 		}
 		return $children;
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * @param array the line to match
-	 * @return array matches
-	 */
-	static public function match($line) {
-		preg_match(self::MATCH, $line['source'], $matches);
-		return $matches;
 	}
 }

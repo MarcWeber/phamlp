@@ -9,6 +9,8 @@
  * @subpackage	Sass.script.literals
  */
 
+require_once('SassLiteral.php');
+ 
 /**
  * SassString class.
  * Provides operations and type testing for Sass strings.
@@ -16,56 +18,59 @@
  * @subpackage	Sass.script.literals
  */
 class SassString extends SassLiteral {
-  const MATCH = '/^"(.*?)"/';
+  const MATCH = '/^((["\'])(.*)(\2))|(url\(.*?\))/i';
+  const _MATCH = '/^(["\'])(.*?)(\1)?$/'; // Used to match strings such as "Times New Roman",serif
+  const VALUE = 2;
+  const QUOTE = 3;
+  
+  /**
+   * @var string string quote type; double or single quotes, or unquoted.
+   */
+  private $quote; 
 
 	/**
 	 * class constructor
-	 * @param string value of the literal type
+	 * @param string string
 	 * @return SassString
 	 */
-	public function __construct($value = null) {
-		// Strip start and end quotes if present
-		$this->value = (self::isa($value)?substr($value, 1, -1):$value);
+	public function __construct($value) {
+		preg_match(self::_MATCH, $value, $matches);
+		if ((isset($matches[self::QUOTE]))) {
+			$this->quote =  $matches[self::QUOTE];
+			$this->value = $matches[self::VALUE];			
+		}
+		else {
+			$this->quote =  '';
+			$this->value = $value;			
+		}
 	}
 
 	/**
 	 * String addition.
-	 * If other is a SassString its value is concatenated to the value of this.
-	 * If other is a SassNumber the value of this is repeated other times
-	 * @param mixed value(sassString or sassNumber) to subtract
+	 * Concatenates this and other.
+	 * The resulting string will be quoted in the same way as this.
+	 * @param sassString string to add to this
 	 * @return sassString the string result
 	 */
-	public function _add($other) {
-		if ($other instanceof SassString) {
-			if ($other->hasUnits()) {
-				throw new SassStringException("Number is not unitless: $other");
-			}
-			$this->value = str_repeat($this->value, $other->value);
+	public function op_plus($other) {
+		if (!($other instanceof SassString)) {
+			throw new SassStringException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Value'), '{type}'=>Phamlp::t('sass', 'string')), SassScriptParser::$context->node);
 		}
-		else {
-			$this->value .= $other->value;
-		}
+		$this->value .= $other->value;
 		return $this;
 	}
 
 	/**
-	 * String subtraction.
-	 * If other is a SassString its value is removed from the value of this.
-	 * If other is a SassNumber that number of characters are removed from
-	 * the class string; positive - from the start, negative - from the end
-	 * @param mixed value(sassString or sassNumber) to subtract
+	 * String multiplication.
+	 * this is repeated other times
+	 * @param sassNumber the number of times to repeat this
 	 * @return sassString the string result
 	 */
-	public function _subtract($other) {
-		if ($other instanceof SassString) {
-			if ($other->hasUnits()) {
-				throw new SassStringException("Number is not unitless: $other");
-			}
-			$this->value = substr($this->value, $other->value);
+	public function op_times($other) {
+		if (!($other instanceof SassNumber) || $other->hasUnits()) {
+			throw new SassStringException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Value'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 		}
-		else {
-			$this->value = str_replace($other->value, '', $this->value);
-		}
+		$this->value = str_repeat($this->value, $other->value);
 		return $this;
 	}
 
@@ -82,7 +87,7 @@ class SassString extends SassLiteral {
 	 * @return string string representation of the value.
 	 */
 	public function toString() {
-		return $this->value;
+		return $this->quote.$this->value.$this->quote;
 	}
 
 	/**
@@ -91,7 +96,7 @@ class SassString extends SassLiteral {
 	 * @param string the subject string
 	 * @return mixed match at the start of the string or false if no match
 	 */
-	static public function isa($subject) {
+	public static function isa($subject) {
 		return (preg_match(self::MATCH, $subject, $matches) ? $matches[0] : false);
 	}
 }

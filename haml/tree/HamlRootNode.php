@@ -42,7 +42,7 @@ class HamlRootNode extends HamlNode {
 				'minimizedAttributes' => $this->options['minimizedAttributes'],
 			)
 		);
-		$this->line = array('indentLevel' => -1);
+		$this->token = array('level' => -1);
 	}
 
 	/**

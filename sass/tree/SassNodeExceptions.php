@@ -24,6 +24,7 @@ class SassNodeException extends SassException {}
  * @subpackage	Sass.tree
  */
 class SassContextException extends SassNodeException {}
+
 /**
  * SassCommentNodeException class.
  * @package			PHamlP
@@ -32,11 +33,25 @@ class SassContextException extends SassNodeException {}
 class SassCommentNodeException extends SassNodeException {}
 
 /**
+ * SassDebugNodeException class.
+ * @package			PHamlP
+ * @subpackage	Sass.tree
+ */
+class SassDebugNodeException extends SassNodeException {}
+
+/**
  * SassDirectiveNodeException class.
  * @package			PHamlP
  * @subpackage	Sass.tree
  */
 class SassDirectiveNodeException extends SassNodeException {}
+
+/**
+ * SassExtendNodeException class.
+ * @package			PHamlP
+ * @subpackage	Sass.tree
+ */
+class SassExtendNodeException extends SassNodeException {}
 
 /**
  * SassForNodeException class.

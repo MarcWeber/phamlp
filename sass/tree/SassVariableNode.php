@@ -16,12 +16,15 @@
  * @subpackage	Sass.tree
  */
 class SassVariableNode extends SassNode {
-	const MATCH = '/^!(.+?)\s*((?:\|\|)?=)\s?(.+)?$/';
-	const NAME = 1;
-	const ASSIGNMENT = 2;
-	const VALUE = 3;
-	const IDENTIFIER = '!';
-	const IS_OPTIONAL = '||=';
+	const MATCH = '/^([!$])([\w-]+):?\s*((\|\|)?=)?\s*(.+?)\s*(!default)?;?$/i';
+	const IDENTIFIER = 1;
+	const NAME = 2;
+	const SASS_ASSIGNMENT = 3;
+	const SASS_DEFAULT = 4;
+	const VALUE = 5;
+	const SCSS_DEFAULT = 6;
+	const SASS_IDENTIFIER = '!';
+	const SCSS_IDENTIFIER = '$';
 
 	/**
 	 * @var string name of the variable
@@ -34,19 +37,30 @@ class SassVariableNode extends SassNode {
 	/**
 	 * @var boolean whether the variable is optionally assigned
 	 */
-	private $isOptional;
+	private $isDefault;
 
 	/**
 	 * SassVariableNode constructor.
-	 * @param string name of the variable
-	 * @param string value of the variable or expression to evaluate
-	 * @param boolean whether the variable is optionally assigned
+	 * @param object source token
 	 * @return SassVariableNode
 	 */
-	public function __construct($name, $value, $isOptional = false) {
-		$this->name = $name;
-		$this->value = $value;
-		$this->isOptional = $isOptional;
+	public function __construct($token) {
+		parent::__construct($token);
+		preg_match(self::MATCH, $token->source, $matches);
+		if (empty($matches[self::NAME]) || ($matches[self::VALUE] === '')) {
+			throw new SassVariableNodeException('Invalid variable definition; name and expression required', array(), $this);			
+		}
+		$this->name = $matches[self::NAME];
+		$this->value = $matches[self::VALUE];
+		$this->isDefault = (!empty($matches[self::SASS_DEFAULT]) || !empty($matches[self::SCSS_DEFAULT]));
+		
+		// Warn about deprecated features
+		if ($matches[self::IDENTIFIER] === self::SASS_IDENTIFIER) {
+			$this->addWarning('Variables prefixed with "!" is deprecated; use "${name}"', array('{name}'=>$this->name));
+		}
+		if (!empty($matches[SassVariableNode::SASS_ASSIGNMENT])) {
+			$this->addWarning('Setting variables with "{sassDefault}=" is deprecated; use "${name}: {value}{scssDefault}"', array('{sassDefault}'=>(!empty($matches[SassVariableNode::SASS_DEFAULT])?'||':''), '{name}'=>$this->name, '{value}'=>$this->value, '{scssDefault}'=>(!empty($matches[SassVariableNode::SASS_DEFAULT])?' !default':'')));
+		}		
 	}
 
 	/**
@@ -56,32 +70,20 @@ class SassVariableNode extends SassNode {
 	 * @return array the parsed node - an empty array
 	 */
 	public function parse($context) {
-		if (!$this->isOptional || !$context->hasVariable($this->name)) {
+		if (!$this->isDefault || !$context->hasVariable($this->name)) {
 				$context->setVariable(
-					$this->name, $this->evaluate($this->value, $context));
-		}
+					$this->name, $this->evaluate($this->value, $context)->toString());
+		}		
+		$this->parseChildren($context); // Parse any warnings
 		return array();
 	}
 
 	/**
-	 * Returns a value indicating if the line represents this type of node.
-	 * @param array the line to test
-	 * @return boolean true if the line represents this type of node, false if not
+	 * Returns a value indicating if the token represents this type of node.
+	 * @param object token
+	 * @return boolean true if the token represents this type of node, false if not
 	 */
-	static public function isa($line) {
-		return $line['source'][0] === self::IDENTIFIER;
-	}
-
-	/**
-	 * Returns the matches for this type of node.
-	 * @param array the line to match
-	 * @return array matches
-	 */
-	static public function match($line) {
-		preg_match(self::MATCH, $line['source'], $matches);
-		if (empty($matches[self::NAME]) || ($matches[self::VALUE] === '')) {
-			throw new SassVariableNodeException("Invalid variable definition; name and expression required.\nLine {$line['number']}: " . (is_array($line['file']) ? join(DIRECTORY_SEPARATOR, $line['file']) : ''));
-		}
-		return $matches;
+	public static function isa($token) {
+		return $token->source[0] === self::SASS_IDENTIFIER || $token->source[0] === self::SCSS_IDENTIFIER;
 	}
 }

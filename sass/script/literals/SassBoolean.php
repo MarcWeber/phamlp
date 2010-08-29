@@ -9,6 +9,8 @@
  * @subpackage	Sass.script.literals
  */
 
+require_once('SassLiteral.php');
+
 /**
  * SassBoolean class.
  * @package			PHamlP
@@ -16,7 +18,7 @@
  */
 class SassBoolean extends SassLiteral {
 	/**@#+
-	 * Regexes for matching and extracting colours
+	 * Regex for matching and extracting booleans
 	 */
 	const MATCH = '/^(true|false)\b/';
 
@@ -30,7 +32,7 @@ class SassBoolean extends SassLiteral {
 			$this->value = ($value === 'true' ? true : false);
 		}
 		else {
-			throw new SassBooleanException('Invalid SassBoolean value');
+			throw new SassBooleanException('Invalid {what}', array('{what}'=>'SassBoolean'), SassScriptParser::$context->node);
 		}
 	}
 
@@ -56,7 +58,7 @@ class SassBoolean extends SassLiteral {
 	 * @param string the subject string
 	 * @return mixed match at the start of the string or false if no match
 	 */
-	static public function isa($subject) {
+	public static function isa($subject) {
 		return (preg_match(self::MATCH, $subject, $matches) ? $matches[0] : false);
 	}
 }
