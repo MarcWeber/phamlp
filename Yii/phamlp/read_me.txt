@@ -33,7 +33,7 @@ description of options for Haml and Sass.
     in the same application, so you can swap your views to Haml gradually and 
     use extensions and widgets with .php views.
 
-    Yii 1.1.2 and 1.0.13 support this feature natively.
+    Yii 1.1.2 and greater support this feature natively.
     For use with earlier versions of Yii the extension contains the 
     AppController file in the Yii directory. This has a new resolveViewFile() 
     method that must override CCcontroller::resolveViewFile(). This is done 
@@ -64,6 +64,27 @@ description of options for Haml and Sass.
   ),
   ~~~
 
+  Sass supports the .sass (indented) and the .scss (CSS style) syntaxes.
+  To use both you need to tell the asset manager that both extensions are to be
+  parsed with Sass.
+  ~~~
+  'assetManager' => array(
+    'class' => 'PBMAssetManager',
+    'parsers' => array(
+      'sass' => array( // key == the type of file to parse
+        'class' => 'ext.phamlp.Sass', // path alias to the parser
+        'output' => 'css', // the file type it is parsed to
+        'options' => array(<Parser specific options>)
+      ),
+      'scss' => array( // key == the type of file to parse
+        'class' => 'ext.phamlp.Sass', // path alias to the parser
+        'output' => 'css', // the file type it is parsed to
+        'options' => array(<Parser specific options>)
+      ),
+    )
+  ),
+  ~~~
+  
   Publishing a Sass file is the same as publishing any other asset, i.e.:
   ~~~
   $publishedAsset = Yii::app()->getAssetMananger()->publish(
