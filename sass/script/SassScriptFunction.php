@@ -44,9 +44,14 @@ class SassScriptFunction {
 	 * @return Function the value of this Function
 	 */
 	public function perform() {
-		if (method_exists('SassScriptFunctions', $this->name)) {
-			return call_user_func_array(array('SassScriptFunctions', $this->name),
-				$this->args);
+		static $functions;
+		
+		if (empty($functions)) {
+			$functions = new SassScriptFunctions();
+		}
+		
+		if (method_exists($functions, $this->name)) {
+			return call_user_func_array(array($functions, $this->name), $this->args);
 		}
 		else {
 			$args = array();

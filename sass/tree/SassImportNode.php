@@ -18,13 +18,13 @@
 class SassImportNode extends SassNode {
 	const IDENTIFIER = '@';
 	const MATCH = '/^@import\s+(.+)/i';
-	const MATCH_CSS = '/^(url\(|")/i';
-	const URI = 1;
+	const MATCH_CSS = '/^(.+\.css|url\(.+\)|.+" \w+|"http)/im';
+	const FILES = 1;
 
 	/**
-	 * @var string uri to import
+	 * @var array files to import
 	 */
-	private $uri;
+	private $files = array();
 
 	/**
 	 * SassImportNode.
@@ -34,29 +34,36 @@ class SassImportNode extends SassNode {
 	public function __construct($token) {
 		parent::__construct($token);
 		preg_match(self::MATCH, $token->source, $matches);
-		$this->uri = $matches[self::URI];
+		foreach (explode(',', $matches[self::FILES]) as $file) {
+			$this->files[] = trim($file);
+		}		
 	}
 
 	/**
 	 * Parse this node.
-	 * If a CSS import returns the import rule.
+	 * If the node is a CSS import return the CSS import rule.
 	 * Else returns the rendered tree for the file.
 	 * @param SassContext the context in which this node is parsed
 	 * @return array the parsed node
 	 */
 	public function parse($context) {
-		if (preg_match(self::MATCH_CSS, $this->uri)) {
-			return "@import {$this->uri}";
-		}
-		else {
-			$tree = SassFile::getTree(
-				SassFile::getFile($this->uri, $this->parser), $this->parser);
-			if (empty($tree)) {
-				throw new SassImportNodeException('Unable to create document tree for {uri}', array('{uri}'=>$this->uri), $this);
+		$imported = array();
+		foreach ($this->files as $file) {
+			if (preg_match(self::MATCH_CSS, $file)) {
+				return "@import {$file}";
 			}
 			else {
-				return $tree->parse($context)->children;
+				$file = trim($file, '\'"');
+				$tree = SassFile::getTree(
+					SassFile::getFile($file, $this->parser), $this->parser);
+				if (empty($tree)) {
+					throw new SassImportNodeException('Unable to create document tree for {file}', array('{file}'=>$file), $this);
+				}
+				else {
+					$imported = array_merge($imported, $tree->parse($context)->children);
+				}
 			}
 		}
+		return $imported;
 	}
 }

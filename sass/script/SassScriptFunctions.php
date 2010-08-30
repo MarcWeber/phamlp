@@ -157,8 +157,7 @@ class SassScriptFunctions {
 		}
 		
 		return $colour->with(array(
-			'lightness',
-			self::inRange((
+			'lightness' => self::inRange((
 				$rel ?
 				$colour->lightness * (1 - $amount->value/100) :
 				$colour->lightness - $amount->value
@@ -178,7 +177,7 @@ class SassScriptFunctions {
 	 * @see darken
 	 */
 	public function darken_rel($colour, $amount) {
-		$this->darken($colour, $amount, new SassBoolean('true'));
+		return $this->darken($colour, $amount, new SassBoolean('true'));
 	}
 
 	/**
@@ -208,8 +207,7 @@ class SassScriptFunctions {
 		}
 		
 		return $colour->with(array(
-			'saturation',
-			self::inRange((
+			'saturation' => self::inRange((
 				$rel ?
 				$colour->saturation * (1 - $amount->value/100) :
 				$colour->saturation - $amount->value
@@ -229,7 +227,7 @@ class SassScriptFunctions {
 	 * @see desaturate
 	 */
 	public function desaturate_rel($colour, $amount) {
-		$this->desaturate($colour, $amount, new SassBoolean('true'));
+		return $this->desaturate($colour, $amount, new SassBoolean('true'));
 	}
 
 	/**
@@ -387,8 +385,7 @@ class SassScriptFunctions {
 		}
 		
 		return $colour->with(array(
-			'lightness',
-			self::inRange((
+			'lightness' => self::inRange((
 				$rel ?
 				$colour->lightness * (1 + $amount->value/100) :
 				$colour->lightness + $amount->value
@@ -408,7 +405,7 @@ class SassScriptFunctions {
 	 * @see lighten
 	 */
 	public function lighten_rel($colour, $amount) {
-		$this->lighten($colour, $amount, new SassBoolean('true'));
+		return $this->lighten($colour, $amount, new SassBoolean('true'));
 	}
 
 	/**
@@ -677,6 +674,7 @@ class SassScriptFunctions {
 	 * @return new SassColour The saturated colour
 	 * @throws SassScriptFunctionException If $colour is not a colour or
 	 * $amount is not a number
+	 * @see saturate_rel
 	 */
 	public function saturate($colour, $amount, $rel = null) {
 		self::assertType($colour, 'SassColour');
@@ -691,8 +689,7 @@ class SassScriptFunctions {
 		}
 		
 		return $colour->with(array(
-			'saturation',
-			self::inRange((
+			'saturation' => self::inRange((
 				$rel ?
 				$colour->saturation * (1 + $amount->value/100) :
 				$colour->saturation + $amount->value
@@ -712,7 +709,7 @@ class SassScriptFunctions {
 	 * @see saturate
 	 */
 	public function saturate_rel($colour, $amount) {
-		$this->saturate($colour, $amount, new SassBoolean('true'));
+		return $this->saturate($colour, $amount, new SassBoolean('true'));
 	}
 
 	/**

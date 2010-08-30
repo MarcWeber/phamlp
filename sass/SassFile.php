@@ -19,6 +19,8 @@ class SassFile {
 	const SASS = 'sass';
 	const SCSS = 'scss';
 	const SASSC = 'sassc';
+	
+	private static $extensions = array(self::SASS, self::SCSS);
 
 	/**
 	 * Returns the parse tree for a file.
@@ -48,7 +50,8 @@ class SassFile {
 	 * Returns the full path to a file to parse.
 	 * The file is looked for recursively under the load_paths directories and
 	 * the template_location directory.
-	 * If the filename does not end in .sass or .scss add the current sysntax.
+	 * If the filename does not end in .sass or .scss try the current syntax first
+	 * then, if a file is not found, try the other syntax.
 	 * @param string filename to find
 	 * @param SassParser Sass parser
 	 * @return string path to file
@@ -56,30 +59,42 @@ class SassFile {
 	 */
 	public static function getFile($filename, $parser) {
 		$ext = substr($filename, -5);
-		if ($ext !== '.'.self::SASS && $ext !== '.'.self::SCSS) {
-			$filename .= ".{$parser->syntax}";
-		}
-
-		if (file_exists($filename)) {
-			return $filename;
-		}
-		elseif (file_exists(dirname($parser->filename) . DIRECTORY_SEPARATOR . $filename)) {
-			return dirname($parser->filename) . DIRECTORY_SEPARATOR . $filename;
-		}
-
-		foreach ($parser->load_paths as $loadPath) {
-			$path = self::findFile($filename, realpath($loadPath));
-			if ($path !== false) {
-				return $path;
+		
+		foreach (self::$extensions as $i=>$extension) {
+			if ($ext !== '.'.self::SASS && $ext !== '.'.self::SCSS) {
+				if ($i===0) {
+					$_filename = "$filename.{$parser->syntax}";
+				}
+				else {
+					$_filename = $filename.($parser->syntax === self::SASS ? self::SCSS : self::SASS);
+				}
 			}
-		} // foreach
-
-		if (!empty($parser->template_location)) {
-			$path = self::findFile($filename, realpath($parser->template_location));
-			if ($path !== false) {
-				return $path;
+			else {
+				$_filename = $filename;
 			}
+
+			if (file_exists($_filename)) {
+				return $_filename;
+			}
+			elseif (file_exists(dirname($parser->filename) . DIRECTORY_SEPARATOR . $_filename)) {
+				return dirname($parser->filename) . DIRECTORY_SEPARATOR . $_filename;
+			}
+
+			foreach ($parser->load_paths as $loadPath) {
+				$path = self::findFile($_filename, realpath($loadPath));
+				if ($path !== false) {
+					return $path;
+				}
+			} // foreach
+
+			if (!empty($parser->template_location)) {
+				$path = self::findFile($_filename, realpath($parser->template_location));
+				if ($path !== false) {
+					return $path;
+				}
+			}		
 		}
+
 		throw new SassException('Unable to find {what}: {filename}', array('{what}'=>'import file', '{filename}'=>$filename));
 	}
 
