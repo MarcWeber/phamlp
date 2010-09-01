@@ -67,7 +67,7 @@ class SassString extends SassLiteral {
 	 * @return sassString the string result
 	 */
 	public function op_times($other) {
-		if (!($other instanceof SassNumber) || $other->hasUnits()) {
+		if (!($other instanceof SassNumber) || !$other->isUnitless()) {
 			throw new SassStringException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Value'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 		}
 		$this->value = str_repeat($this->value, $other->value);

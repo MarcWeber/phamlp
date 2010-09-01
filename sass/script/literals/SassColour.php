@@ -349,7 +349,7 @@ class SassColour extends SassLiteral {
 	 */
 	public function op_plus($other) {
 		if ($other instanceof SassNumber) {
-			if ($other->hasUnits()) {
+			if (!$other->isUnitless()) {
 				throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 			}
 			$this->red   = $this->getRed()   + $other->value;
@@ -374,7 +374,7 @@ class SassColour extends SassLiteral {
 	 */
 	public function op_minus($other) {
 		if ($other instanceof SassNumber) {
-			if ($other->hasUnits()) {
+			if (!$other->isUnitless()) {
 				throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 			}
 			$this->red   = $this->getRed()   - $other->value;
@@ -399,7 +399,7 @@ class SassColour extends SassLiteral {
 	 */
 	public function op_times($other) {
 		if ($other instanceof SassNumber) {
-			if ($other->hasUnits()) {
+			if (!$other->isUnitless()) {
 				throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 			}
 			$this->red   = $this->getRed()   * $other->value;
@@ -424,7 +424,7 @@ class SassColour extends SassLiteral {
 	 */
 	public function op_divide_by($other) {
 		if ($other instanceof SassNumber) {
-			if ($other->hasUnits()) {
+			if (!$other->isUnitless()) {
 				throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 			}
 			$this->red   = $this->getRed()   / $other->value;
@@ -449,7 +449,7 @@ class SassColour extends SassLiteral {
 	 */
 	public function op_modulo($other) {
 		if ($other instanceof SassNumber) {
-			if ($other->hasUnits()) {
+			if (!$other->isUnitless()) {
 				throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 			}
 			$this->red   = $this->getRed()   % $other->value;
@@ -474,7 +474,7 @@ class SassColour extends SassLiteral {
 	 */
 	public function op_bw_and($other) {
 		if ($other instanceof SassNumber) {
-			if ($other->hasUnits()) {
+			if (!$other->isUnitless()) {
 				throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 			}
 			$this->red   = $this->getRed()   & $other->value;
@@ -499,7 +499,7 @@ class SassColour extends SassLiteral {
 	 */
 	public function op_bw_or($other) {
 		if ($other instanceof SassNumber) {
-			if ($other->hasUnits()) {
+			if (!$other->isUnitless()) {
 				throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 			}
 			$this->red   = $this->getRed()   | $other->value;
@@ -524,7 +524,7 @@ class SassColour extends SassLiteral {
 	 */
 	public function op_bw_xor($other) {
 		if ($other instanceof SassNumber) {
-			if ($other->hasUnits()) {
+			if (!$other->isUnitless()) {
 				throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 			}
 			$this->red   = $this->getRed()   ^ $other->value;
@@ -559,7 +559,7 @@ class SassColour extends SassLiteral {
 	 * @return sassColour the colour result
 	 */
 	public function op_shiftl($other) {
-		if (!$other instanceof SassNumber || $other->hasUnits()) {
+		if (!$other instanceof SassNumber ||!$other->isUnitless()) {
 			throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 		}
 		$this->red   = $this->getRed()   << $other->value;
@@ -574,7 +574,7 @@ class SassColour extends SassLiteral {
 	 * @return sassColour the colour result
 	 */
 	public function op_shiftr($other) {
-		if (!$other instanceof SassNumber || $other->hasUnits()) {
+		if (!$other instanceof SassNumber || !$other->isUnitless()) {
 			throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 		}
 		$this->red   = $this->getRed()   >> $other->value;
@@ -610,7 +610,7 @@ class SassColour extends SassLiteral {
 
 	/**
 	 * Returns the alpha component (opacity) of this colour.
-	 * @return SassNumber the alpha component (opacity) of this colour.
+	 * @return float the alpha component (opacity) of this colour.
 	 */
 	public function getAlpha() {
 		return $this->alpha;
@@ -618,7 +618,7 @@ class SassColour extends SassLiteral {
 
 	/**
 	 * Returns the hue of this colour.
-	 * @return SassNumber the hue of this colour.
+	 * @return float the hue of this colour.
 	 */
 	public function getHue() {
 		if (is_null($this->hue)) {
@@ -629,7 +629,7 @@ class SassColour extends SassLiteral {
 
 	/**
 	 * Returns the saturation of this colour.
-	 * @return SassNumber the saturation of this colour.
+	 * @return float the saturation of this colour.
 	 */
 	public function getSaturation() {
 		if (is_null($this->saturation)) {
@@ -640,7 +640,7 @@ class SassColour extends SassLiteral {
 
 	/**
 	 * Returns the lightness of this colour.
-	 * @return SassNumber the lightness of this colour.
+	 * @return float the lightness of this colour.
 	 */
 	public function getLightness() {
 		if (is_null($this->lightness)) {
@@ -651,7 +651,7 @@ class SassColour extends SassLiteral {
 
 	/**
 	 * Returns the blue component of this colour.
-	 * @return SassNumber the blue component of this colour.
+	 * @return integer the blue component of this colour.
 	 */
 	public function getBlue() {
 		if (is_null($this->blue)) {
@@ -663,7 +663,7 @@ class SassColour extends SassLiteral {
 
 	/**
 	 * Returns the green component of this colour.
-	 * @return SassNumber the green component of this colour.
+	 * @return integer the green component of this colour.
 	 */
 	public function getGreen() {
 		if (is_null($this->green)) {
@@ -675,7 +675,7 @@ class SassColour extends SassLiteral {
 
 	/**
 	 * Returns the red component of this colour.
-	 * @return SassNumber the red component of this colour.
+	 * @return integer the red component of this colour.
 	 */
 	public function getRed() {
 		if (is_null($this->red)) {
@@ -719,11 +719,19 @@ class SassColour extends SassLiteral {
 
 	/**
 	 * Returns the value of this colour.
-	 * @return string the colour
+	 * @return array the colour
 	 * @deprecated
 	 */
 	public function getValue() {
 		return $this->rgb;
+	}
+
+	/**
+	 * Returns whether this colour object is translucent; that is, whether the alpha channel is non-1.
+	 * @return boolean true if this colour is translucent, false if not
+	 */
+	public function isTranslucent() {
+		return $this->alpha < 1;
 	}
 
 	/**

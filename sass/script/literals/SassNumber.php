@@ -41,7 +41,7 @@ class SassNumber extends SassLiteral {
 
 	/**
 	 * @var array Conversion factors for units using inches as the base unit
-	 * (only because pt and px are expressed as fraction of an inch, so makes the
+	 * (only because pt and pc are expressed as fraction of an inch, so makes the
 	 * numbers easy to understand).
 	 * Conversions are based on the following
 	 * in: inches — 1 inch = 2.54 centimeters
@@ -59,9 +59,14 @@ class SassNumber extends SassLiteral {
 	);
 
 	/**
-	 * @var string units of this number
+	 * @var array numerator units of this number
 	 */
-	private $units = '';
+	private $numeratorUnits = array();
+
+	/**
+	 * @var array denominator units of this number
+	 */
+	private $denominatorUnits = array();
 
 	/**
 	 * class constructor.
@@ -76,7 +81,15 @@ class SassNumber extends SassLiteral {
 	  	if (!in_array($matches[self::UNITS], self::$cssUnits)) {
 				throw new SassNumberException('Invalid units: {value}', array('{value}'=>$value), SassScriptParser::$context->node);
 	  	}
-			$this->units = $matches[self::UNITS];
+			$units = explode('/', $matches[self::UNITS]);
+			foreach (explode('*', $units[0]) as $unit) {
+				$this->numeratorUnits[] = trim($unit);			
+			}
+			if (isset($units[1])) {
+				foreach (explode('*', $units[0]) as $unit) {
+					$this->denominatorUnits[] = trim($unit);			
+				}
+			}
 	  }
 	}
 
@@ -88,10 +101,10 @@ class SassNumber extends SassLiteral {
 	 */
 	public function op_plus($other) {
 		if ($other instanceof SassColour) {
-			return $other->plus($this);
+			return $other->op_plus($this);
 		}
 		else {
-			$other = $this->convertUnits($other);
+			$other = $this->convert($other);
 			$this->value += $other->value;
 			return $this;
 		}
@@ -113,10 +126,10 @@ class SassNumber extends SassLiteral {
 	 */
 	public function op_minus($other) {
 		if ($other instanceof SassColour) {
-			return $other->minus($this);
+			return $other->op_minus($this);
 		}
 		else {
-			$other = $this->convertUnits($other);
+			$other = $this->convert($other);
 			$this->value -= $other->value;
 			return $this;
 		}
@@ -138,11 +151,12 @@ class SassNumber extends SassLiteral {
 	 */
 	public function op_times($other) {
 		if ($other instanceof SassColour) {
-			return $other->times($this);
+			return $other->op_times($this);
 		}
 		else {
-			$other = $this->convertUnits($other);
 			$this->value *= $other->value;
+			$this->numeratorUnits = array_merge($this->numeratorUnits, $other->numeratorUnits);
+			$this->denominatorUnits = array_merge($this->denominatorUnits, $other->denominatorUnits);
 			return $this;
 		}
 	}
@@ -155,31 +169,72 @@ class SassNumber extends SassLiteral {
 	 */
 	public function op_divide_by($other) {
 		if ($other instanceof SassColour) {
-			return $other->divide_by($this);
+			return $other->op_divide_by($this);
 		}
 		else {
-			$other = $this->convertUnits($other);
 			$this->value /= $other->value;
+			$this->numeratorUnits = array_merge($this->numeratorUnits, $other->denominatorUnits);
+			$this->denominatorUnits = array_merge($this->denominatorUnits, $other->numeratorUnits);
 			return $this;
 		}
 	}
+	
 	/**
 	 * The SassScript == operation.
 	 * @return SassBoolean SassBoolean object with the value true if the values
 	 * of this and other are equal, false if they are not
 	 */
 	public function op_eq($other) {
-		$other = $this->convertUnits($other);
-		return new SassBoolean(($this->value == $other->value ? 'true' : 'false'));
+		return new SassBoolean(($this->value == $this->convert($other)->value ? 'true' : 'false'));
 	}
+	
 	/**
 	 * The SassScript != operation.
 	 * @return SassBoolean SassBoolean object with the value true if the values
 	 * of this and other are not equal, false if they are
 	 */
 	public function op_neq($other) {
-		$other = $this->convertUnits($other);
-		return new SassBoolean(($this->value != $other->value ? 'true' : 'false'));
+		return new SassBoolean(($this->value != $this->convert($other)->value ? 'true' : 'false'));
+	}
+	
+	/**
+	 * The SassScript > operation.
+	 * @param sassLiteral the value to compare to this
+	 * @return SassBoolean SassBoolean object with the value true if the values
+	 * of this is greater than the value of other, false if it is not
+	 */
+	public function op_gt($other) {
+		return new SassBoolean(($this->value > $this->convert($other)->value ? 'true' : 'false'));
+	}
+	
+	/**
+	 * The SassScript >= operation.
+	 * @param sassLiteral the value to compare to this
+	 * @return SassBoolean SassBoolean object with the value true if the values
+	 * of this is greater than or equal to the value of other, false if it is not
+	 */
+	public function op_gte($other) {
+		return new SassBoolean(($this->value >= $this->convert($other)->value ? 'true' : 'false'));
+	}
+	
+	/**
+	 * The SassScript < operation.
+	 * @param sassLiteral the value to compare to this
+	 * @return SassBoolean SassBoolean object with the value true if the values
+	 * of this is less than the value of other, false if it is not
+	 */
+	public function op_lt($other) {
+		return new SassBoolean(($this->value < $this->convert($other)->value ? 'true' : 'false'));
+	}
+	
+	/**
+	 * The SassScript <= operation.
+	 * @param sassLiteral the value to compare to this
+	 * @return SassBoolean SassBoolean object with the value true if the values
+	 * of this is less than or equal to the value of other, false if it is not
+	 */
+	public function op_lte($other) {
+		return new SassBoolean(($this->value <= $this->convert($other)->value ? 'true' : 'false'));
 	}
 
 	/**
@@ -189,49 +244,143 @@ class SassNumber extends SassLiteral {
 	 * SassColour if it is a SassColour
 	 */
 	public function op_modulo($other) {
-		if ($other instanceof SassColour) {
-			return $other->modulo($this);
+		if (!$other instanceof SassNumber || !$other->isUnitless()) {
+			throw new SassNumberException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 		}
-		else {
-			$other = $this->convertUnits($other);
-			$this->value %= $other->value;
-			return $this;
-		}
+		$this->value %= $this->convert($other)->value;
+		return $this;
 	}
 
 	/**
-	 * Converts the other number to this numbers units.
+	 * Converts values and units.
+	 * If this is a unitless numeber it will take the units of other; if not
+	 * other is coerced to the units of this.
 	 * @param SassNumber the other number
-	 * @return SassNumber the other number with converted to this numbers units
+	 * @return SassNumber the other number with its value and units coerced if neccessary
 	 * @throws SassNumberException if the units are incompatible
 	 */
-	private function convertUnits($other) {
-		if ($other->hasUnits()) {
-		  if (!$this->hasUnits()) {
-				$this->units = $other->units;
-		  }
-			elseif ($other->units != $this->units) {
-				if (array_key_exists($this->units, self::$unitConversion) &&
-						array_key_exists($other->units, self::$unitConversion)) {
-					$other->value *=
-						(self::$unitConversion[$this->units] /
-						 self::$unitConversion[$other->units]);
-					$other->units = $this->units;
-				}
-				else {
-					throw new SassNumberException('Incompatible units: {value1} and {value2}', array('{value1}'=>$this->units, '{value2}'=>$this->units), SassScriptParser::$context->node);
-				}
-			}
+	private function convert($other) {
+		if ($this->isUnitless()) {
+			$this->numeratorUnits = $other->numeratorUnits;
+			$this->denominatorUnits = $other->denominatorUnits;
+		}
+		else {
+			$other = $other->coerce($this->numeratorUnits, $this->denominatorUnits);
 		}
 		return $other;
 	}
+	
+	/**
+	 * Returns the value of this number converted to other units.
+	 * The conversion takes into account the relationship between e.g. mm and cm,
+	 * as well as between e.g. in and cm.
+	 * 
+	 * If this number is unitless, it will simply return itself with the given units.
+	 * @param array $numeratorUnits
+	 * @param array $denominatorUnits
+	 * @return SassNumber
+	 */
+	public function coerce($numeratorUnits, $denominatorUnits) {
+		return new SassNumber(($this->isUnitless() ?
+				$this->value :
+				$this->value *
+					$this->coercionFactor($this->numeratorUnits, $numeratorUnits) /
+          $this->coercionFactor($this->denominatorUnits, $denominatorUnits)
+		).join(' * ', $numeratorUnits) .
+	  (!empty($denominatorUnits) ? ' / ' . join(' * ', $denominatorUnits) : ''));
+	}
+	
+	/**
+	 * Calculates the corecion factor to apply to the value
+	 * @param array units being converted from
+	 * @param array units being converted to
+	 * @return float the coercion factor to apply
+	 */
+	private function coercionFactor($fromUnits, $toUnits) {
+		$units = $this->removeCommonUnits($fromUnits, $toUnits);
+		$fromUnits = $units[0];
+		$toUnits = $units[1];
+		
+		if (sizeof($fromUnits) !== sizeof($toUnits) || !$this->areConvertable(array_merge($fromUnits, $toUnits))) {
+			throw new SassNumberException("Incompatible units: '{from}' and '{to}'", array('{from}'=>join(' * ', $fromUnits), '{to}'=>join(' * ', $toUnits)), SassScriptParser::$context->node);
+		}
+		
+		$coercionFactor = 1;
+		foreach ($fromUnits as $i=>$from) {
+			if (array_key_exists($from) && array_key_exists($from)) {
+				$coercionFactor *=
+					self::$unitConversion[$toUnits[$i]] / self::$unitConversion[$from];
+			}
+			else {
+				throw new SassNumberException("Incompatible units: '{from}' and '{to}",
+					array('{from}'=>join(' * ', $fromUnits), '{to}'=>join(' * ', $toUnits)),
+					SassScriptParser::$context->node);
+			}			
+		}
+		return $coercionFactor; 
+	}
+	
+	/**
+	 * Returns a value indicating if all the units are capable of being converted
+	 * @param array units to test
+	 * @return boolean true if all units can be converted, false if not
+	 */
+	private function areConvertable($units) {
+		foreach ($units as $unit) {
+			if (!in_array($unit, self::$cssUnits))
+				return false;		
+		}
+		return true; 
+	}
+	
+	/**
+	 * Removes common units from each set.
+	 * We don't use array_diff because we want (for eaxmple) mm*mm/mm*cm to
+	 * end up as mm/cm. 
+	 * @param array first set of units
+	 * @param array second set of units
+	 * @return array both sets of units with common units removed
+	 */
+	private function removeCommonUnits($u1, $u2) {
+		$_u1 = array();
+		while (!empty($u1)) {
+			$u = array_shift($u1);
+			$i = array_search($u, $u2);
+			if ($i !== false) {
+				unset($u2[$i]);
+			}
+			else {
+				$_u1[] = $u;
+			}
+		}
+		return (array($_u1, $u2));
+	}
 
 	/**
-	 * Returns a value indicating if this number has units.
-	 * @return boolean true if this number has units, false if not
+	 * Returns a value indicating if this number is unitless.
+	 * @return boolean true if this number is unitless, false if not
 	 */
-	public function hasUnits() {
-	  return !empty($this->units);
+	public function isUnitless() {
+	  return empty($this->numeratorUnits) && empty($this->denominatorUnits);
+	}
+
+	/**
+	 * Returns a value indicating if this number has units that can be represented
+	 * in CSS.
+	 * @return boolean true if this number has units that can be represented in
+	 * CSS, false if not
+	 */
+	public function hasLegalUnits() {
+	  return (empty($this->numeratorUnits) || count($this->numeratorUnits) === 1) &&
+	  	empty($this->denominatorUnits);
+	}
+
+	/**
+	 * Returns the units of this number.
+	 * @return string the units of this number
+	 */
+	public function unit_str() {
+	  return $this->units;
 	}
 
 	/**
@@ -239,7 +388,22 @@ class SassNumber extends SassLiteral {
 	 * @return string the units of this number
 	 */
 	public function getUnits() {
-	  return $this->units;
+	  return join(' * ', $this->numeratorUnits) .
+	  	(!empty($this->denominatorUnits) ? ' / ' . join(' * ', $this->denominatorUnits) : '');
+	}
+	
+	/**
+	 * Returns a value indicating if this number can be compared to other.
+	 * @return boolean true if this number can be compared to other, false if not
+	 */
+	public function isComparableTo($other) {
+		try {
+			$this->op_plus($other);
+			return true; 
+		}
+		catch (Exception $e) {
+			return false; 
+		}
 	}
 
 	/**
@@ -247,15 +411,27 @@ class SassNumber extends SassLiteral {
 	 * @return boolean true if this number is an integer, false if not
 	 */
 	public function isInt() {
-	  return $this->value % 1 == 0;
+	  return $this->value % 1 === 0;
 	}
 
 	/**
 	 * Returns the value of this number.
-	 * @return mixed float if a unitless number, otherwise string
+	 * @return float the value of this number.
 	 */
 	public function getValue() {
-		return $this->hasUnits() ? $this->toString() : $this->value;
+		return $this->value;
+	}
+
+	/**
+	 * Returns the integer value.
+ 	 * @return integer the integer value.
+ 	 * @throws SassNumberException if the number is not an integer
+	 */
+	public function toInt() {
+		if  (!$this->isInt()) {
+			throw new SassNumberException('Not an integer: {value}', array('{value}'=>$this->value), SassScriptParser::$context->node);
+		}
+	  return intval($this->value);
 	}
 
 	/**
@@ -265,6 +441,9 @@ class SassNumber extends SassLiteral {
  	 * @return string number as a string with it's units if any
 	 */
 	public function toString() {
+		if  (!$this->hasLegalUnits()) {
+			throw new SassNumberException('Invalid {what}', array('{what}'=>"CSS units ({$this->units})"), SassScriptParser::$context->node);
+		}
 	  return ($this->units == 'px' ? floor($this->value) :
 	  		round($this->value, self::PRECISION)).$this->units;
 	}
