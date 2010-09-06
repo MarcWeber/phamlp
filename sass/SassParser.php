@@ -660,25 +660,24 @@ class SassParser {
 						$token = $this->createToken($statement.self::END_CSS_COMMENT);
 					}
 					else {
-						//$statement .= $c.$this->source[$srcpos];
 						$statement .= $c;
 					}
 					break;
 				case self::DOUBLE_QUOTE:
 				case self::SINGLE_QUOTE:
 					$statement .= $c;
-					do {
+					while ($this->source[$srcpos] !== $c) {
 						$statement .= $this->source[$srcpos++];
-					} while ($this->source[$srcpos] !== $c);
+					}
 					$statement .= $this->source[$srcpos++];
 					break;
 				case self::BEGIN_INTERPOLATION:
 					$statement .= $c;
 					if (substr($this->source, $srcpos-1, strlen(self::BEGIN_INTERPOLATION_BLOCK))
 							=== self::BEGIN_INTERPOLATION_BLOCK) {
-						do {
+						while ($this->source[$srcpos] !== self::END_BLOCK) {
 							$statement .= $this->source[$srcpos++];
-						} while ($this->source[$srcpos] !== self::END_BLOCK);
+						}
 						$statement .= $this->source[$srcpos++];
 					}
 					break;
@@ -692,6 +691,10 @@ class SassParser {
 					break;
 			}	
 		}
+		
+		if (is_null($token))
+			$srclen = $srcpos = 0;
+
 		return $token; 
 	}
 	
