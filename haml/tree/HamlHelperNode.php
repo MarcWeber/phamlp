@@ -17,15 +17,28 @@
  * @subpackage	Haml.tree
  */
 class HamlHelperNode extends HamlNode {
-	const REGEX_HELPER = '/(.*?)(\w+)\(((?:array\(.+?\))?.*?)\)/';
+	const MATCH = '/(.*?)(\w+)\((.+?)\)(?:\s+(.*))?$/';
+	const PRE = 1;
+	const NAME = 2;
+	const ARGS = 3;
+	const BLOCK = 4;
+	
 	/**
 	 * @var string the helper class name
 	 */
-	private $helperClass;
+	private $class;
 	/**
-	 * @var string the helper method and its arguments
+	 * @var string helper method name
 	 */
-	private $helperMethod;
+	private $pre;
+	/**
+	 * @var string helper method name
+	 */
+	private $name;
+	/**
+	 * @var string helper method arguments
+	 */
+	private $args;
 
 	/**
 	 * HamlFilterNode constructor.
@@ -34,9 +47,11 @@ class HamlHelperNode extends HamlNode {
 	 * @param string helper call.
 	 * @return HamlHelperNode
 	 */
-	public function __construct($helperClass, $helperMethod, $parent) {
-	  $this->helperClass = $helperClass;
-	  $this->helperMethod = $helperMethod;
+	public function __construct($class, $pre, $name, $args, $parent) {
+	  $this->class = $class;
+	  $this->pre = $pre;
+	  $this->name = $name;
+	  $this->args = $args;
 	  $this->parent = $parent;
 	  $this->root = $parent->root;
 	  $parent->children[] = $this;
@@ -48,12 +63,11 @@ class HamlHelperNode extends HamlNode {
 	* @return string the rendered node
 	*/
 	public function render() {
-		$output = '';
+		$children = '';
 		foreach ($this->children as $child) {
-			$output .= trim($child->render());
+			$children .= trim($child->render());
 		} // foreach
-		preg_match(self::REGEX_HELPER, $this->helperMethod, $matches);
-		$output = '<?php '.(empty($matches[1]) ? 'echo' : $matches[1])." {$this->helperClass}::".$matches[2]."('$output',{$matches[3]}); ?>";
+		$output = '<?php '.(empty($this->pre) ? 'echo' : $this->pre)." {$this->class}::{$this->name}('$children',{$this->args}); ?>";
 		return $this->debug($output);
 	}
 }

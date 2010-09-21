@@ -81,7 +81,6 @@ class HamlParser {
 	const REGEX_WHITESPACE_REMOVAL = '/(.*?)\s+$/s';
 	const REGEX_WHITESPACE_REMOVAL_DEBUG = '%(.*?)(?:<br />\s)$%s'; // whitespace control when showing output
 	//const REGEX_CODE_INTERPOLATION = '/(?:(?<!\\\\)#{(.+?(?:\(.*?\).*?)*)})/';
-	const REGEX_HELPER = '/(\w+\(.+?\))(?:\s+(.*))?$/';
 	/**#@-*/
 	const MATCH_INTERPOLATION = '/(?<!\\\\)#\{(.*?)\}/';
 	const INTERPOLATE = '<?php echo \1; ?>';
@@ -747,8 +746,8 @@ class HamlParser {
 	 * @return boolean true if the line is a HamlHelper, false if not
 	 */
 	private function isHelper($line) {
-		return (preg_match(HamlHelperNode::REGEX_HELPER, $line[self::HAML_CONTENT], $matches)
-			? method_exists($this->helperClass, $matches[2]) : false);
+		return (preg_match(HamlHelperNode::MATCH, $line[self::HAML_CONTENT], $matches)
+			? method_exists($this->helperClass, $matches[HamlHelperNode::NAME]) : false);
 	}
 
 	/**
@@ -1154,10 +1153,10 @@ class HamlParser {
 	 * @return HamlHelperNode
 	 */
 	private function parseHelper($line, $parent) {
-		preg_match(self::REGEX_HELPER, $line[self::HAML_CONTENT], $matches);
-		$node = new HamlHelperNode($this->helperClass, $matches[1], $parent);
-		if (isset($matches[2])) {
-			new HamlNode($matches[2], $node);
+		preg_match(HamlHelperNode::MATCH, $line[self::HAML_CONTENT], $matches);
+		$node = new HamlHelperNode($this->helperClass, $matches[HamlHelperNode::PRE], $matches[HamlHelperNode::NAME], $matches[HamlHelperNode::ARGS], $parent);
+		if (isset($matches[HamlHelperNode::BLOCK])) {
+			new HamlNode($matches[HamlHelperNode::BLOCK], $node);
 		}
 		return $node;
 	}
