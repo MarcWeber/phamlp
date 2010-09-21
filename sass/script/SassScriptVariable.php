@@ -18,7 +18,7 @@ class SassScriptVariable {
 	/**
 	 * Regex for matching and extracting Variables
 	 */
-	const MATCH = '/^(?<!\\\\)[!\$]([\w-]+)/';
+	const MATCH = '/^(?<!\\\\)(?(?!!important\b)[!\$]([\w-]+))/';
 	
 	/**
 	 * @var string name of variable
@@ -50,6 +50,8 @@ class SassScriptVariable {
 	 * @return mixed match at the start of the string or false if no match
 	 */
 	public static function isa($subject) {
-		return (preg_match(self::MATCH, $subject, $matches) ? $matches[0] : false);
+		// we need to do the check as preg_match returns a count of 1 if
+		// subject == '!important'; the match being an empty match
+		return (preg_match(self::MATCH, $subject, $matches) ? (empty($matches[0]) ? false : $matches[0]) : false);
 	}
 }
