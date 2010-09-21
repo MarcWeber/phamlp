@@ -18,7 +18,7 @@ require_once('SassLiteral.php');
  * @subpackage	Sass.script.literals
  */
 class SassString extends SassLiteral {
-  const MATCH = '/^((["\'])(.*)(\2))|(url\(.*?\))/i';
+  const MATCH = '/^(((["\'])(.*)(\3))|(-[a-zA-Z][^\s]*))/i';
   const _MATCH = '/^(["\'])(.*?)(\1)?$/'; // Used to match strings such as "Times New Roman",serif
   const VALUE = 2;
   const QUOTE = 3;
@@ -88,6 +88,10 @@ class SassString extends SassLiteral {
 	 */
 	public function toString() {
 		return $this->quote.$this->value.$this->quote;
+	}
+	
+	public function toVar() {
+		return SassScriptParser::$context->getVariable($this->value);
 	}
 
 	/**

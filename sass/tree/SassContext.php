@@ -100,7 +100,7 @@ class SassContext {
 	/**
 	 * Sets a variable to the given value
 	 * @param string name of variable
-	 * @param string value of variable
+	 * @param sassLiteral value of variable
 	 */
 	public function setVariable($name, $value) {
 		$this->variables[$name] = $value;

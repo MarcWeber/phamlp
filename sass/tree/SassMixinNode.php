@@ -17,10 +17,10 @@
  */
 class SassMixinNode extends SassNode {
 	const NODE_IDENTIFIER = '+';
-	const MATCH = '/^(\+|@include\s+)([-\w]+)(?:\((.*?)\))?$/i';
+	const MATCH = '/^(\+|@include\s+)([-\w]+)\s*(?:\((.*?)\))?$/i';
 	const IDENTIFIER = 1;
 	const NAME = 2;
-	const ARGUMENTS = 3;
+	const ARGS = 3;
 
 	/**
 	 * @var string name of the mixin
@@ -40,8 +40,8 @@ class SassMixinNode extends SassNode {
 		parent::__construct($token);
 		preg_match(self::MATCH, $token->source, $matches);
 		$this->name = $matches[self::NAME];
-	  if (!empty($matches[self::ARGUMENTS])) {
-	  	$this->args = array_map('trim', explode(',', $matches[self::ARGUMENTS]));
+	  if (isset($matches[self::ARGS])) {
+	  	$this->args = SassScriptFunction::extractArgs($matches[self::ARGS]);
 	  }
 	}
 
@@ -60,10 +60,10 @@ class SassMixinNode extends SassNode {
 		$count = 0;
 		foreach ($mixin->args as $name=>$value) {
 			if ($count < $argc) {
-				$context->setVariable($name, $this->evaluate($this->args[$count++], $context)->toString());
+				$context->setVariable($name, $this->evaluate($this->args[$count++], $context));
 			}
 			elseif (!is_null($value)) {
-				$context->setVariable($name, $this->evaluate($value, $context)->toString());
+				$context->setVariable($name, $this->evaluate($value, $context));
 			}
 			else {
 				throw new SassMixinNodeException("Mixin::{mname}: Required variable ({vname}) not given.\nMixin defined: {dfile}::{dline}\nMixin used", array('{vname}'=>$name, '{mname}'=>$this->name, '{dfile}'=>$mixin->token->filename, '{dline}'=>$mixin->token->line), $this);

@@ -40,15 +40,6 @@ class SassCompactRenderer extends SassCompressedRenderer {
 	}
 
 	/**
-	 * Returns the indent string for the node
-	 * @param SassNode the node to return the indent string for
-	 * @return string the indent string for this SassNode
-	 */
-	protected function getIndent($node) {
-		return '';
-	} 
-
-	/**
 	 * Renders a comment.
 	 * Comments preceeding a rule are on their own line.
 	 * Comments within a rule are on the same line as the rule.
@@ -73,10 +64,11 @@ class SassCompactRenderer extends SassCompressedRenderer {
 
 	/**
 	 * Renders properties.
+	 * @param SassNode the node being rendered
 	 * @param array properties to render
 	 * @return string the rendered properties
 	 */
-	public function renderProperties($properties) {
+	public function renderProperties($node, $properties) {
 		return join(' ', $properties);
 	}
 
@@ -86,7 +78,7 @@ class SassCompactRenderer extends SassCompressedRenderer {
 	 * @return string the rendered property
 	 */
 	public function renderProperty($node) {
-		return $this->getIndent($node)."{$node->name}: {$node->value};";
+		return "{$node->name}: {$node->value};";
 	}
 
 	/**

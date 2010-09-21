@@ -292,9 +292,9 @@ class SassNode {
 	 * @param SassContext the context in which the expression is evaluated
 	 * @return SassLiteral value of parsed expression
 	 */
-	protected function evaluate($expression, $context) {
+	protected function evaluate($expression, $context, $x=null) {
 		$context->node = $this;
-		return $this->script->evaluate($expression, $context);
+		return $this->script->evaluate($expression, $context, $x);
 	}
 
 	/**

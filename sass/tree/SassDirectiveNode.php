@@ -27,6 +27,10 @@ class SassDirectiveNode extends SassNode {
 	public function __construct($token) {
 		parent::__construct($token);
 	}
+	
+	protected function getDirective() {
+		return self::extractDirective($this->token);
+	}
 
 	/**
 	 * Parse this node.
@@ -65,7 +69,7 @@ class SassDirectiveNode extends SassNode {
 	 * @param object token
 	 * @return string the directive
 	 */
-	public static function getDirective($token) {
+	public static function extractDirective($token) {
 		preg_match(self::MATCH, $token->source, $matches);
 	  return strtolower($matches[1]);
 	}

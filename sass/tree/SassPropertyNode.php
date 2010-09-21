@@ -16,9 +16,10 @@
  * @subpackage	Sass.tree
  */
 class SassPropertyNode extends SassNode {
-	const MATCH_PROPERTY_NEW = '/^([^\s=:"]+)(?:\s*(= )|:)(.*?)([{;])?$/';
+	const MATCH_PROPERTY_NEW = '/^([^\s=:"]+)\s*(?:(= )|:)(.*?)$/';
 	const MATCH_PROPERTY_OLD = '/^:([^\s=:]+)(?:\s*(=)\s*|\s+|$)(.*)/';
-	const MATCH_PSUEDO_SELECTOR = '/^:?[-\w]+\(?/i';
+	const MATCH_PSUEDO_SELECTOR = '/^:?\w[-\w]+\(?/i';
+	const MATCH_INTERPOLATION = '/^#\{(.*?)\}/i';
 	const NAME	 = 1;
 	const SCRIPT = 2;
 	const VALUE	 = 3;
@@ -50,12 +51,12 @@ class SassPropertyNode extends SassNode {
 		':first-line',
 		':first-letter',
 		':before',
-		':after	',
+		':after',
 		// CSS 2.1
 		'first-line',
 		'first-letter',
 		'before',
-		'after	'
+		'after'
 	);
 	
 	/**
@@ -93,15 +94,12 @@ class SassPropertyNode extends SassNode {
 	 * @return array the parsed node
 	 */
 	public function parse($context) {
-		if ($this->isNamespace()) { 
-			return $this->parseChildren($context);
-		}
-	  else {
-	  	$return = array();
+	  $return = array();
+	 	if ($this->value) {
 	  	$node = clone $this;
 			$node->name = ($this->inNamespace() ? "{$this->namespace}-" : '') .
 				$this->interpolate($this->name, $context);
-	  	$node->value = $this->evaluate($this->interpolate($this->value, $context), $context)->toString();
+	  	$node->value = $this->evaluate($this->interpolate($this->value, $context), $context, SassScriptParser::CSS_PROPERTY)->toString();
 	  	if (array_key_exists($node->name, $this->vendor_properties)) {
 	  		foreach ($this->vendor_properties[$node->name] as $vendorProperty) {
 	  			$_node = clone $node;
@@ -110,8 +108,11 @@ class SassPropertyNode extends SassNode {
 	  		}
 	  	}
 	  	$return[] = $node;
-			return $return; 
 	  }
+	  if ($this->children) {
+			$return = array_merge($return, $this->parseChildren($context));
+	  }
+	  return $return; 
 	}
 
 	/**
@@ -120,14 +121,6 @@ class SassPropertyNode extends SassNode {
 	 */
 	public function render() {
 		return $this->renderer->renderProperty($this);
-	}
-
-	/**
-	 * Returns a value indicating if this node is a property namespace
-	 * @return boolean true if this node is a property namespace, false if not
-	 */
-	protected function isNamespace() {
-	  return $this->value === '';
 	}
 
 	/**
@@ -186,7 +179,7 @@ class SassPropertyNode extends SassNode {
 	 */
 	public static function isa($token, $syntax) {
 		$matches = self::match($token, $syntax);
-	
+
 		if (!empty($matches)) {	
 			if (isset($matches[self::VALUE]) &&
 					self::isPseudoSelector($matches[self::VALUE])) {
@@ -232,12 +225,15 @@ class SassPropertyNode extends SassNode {
 	 * This is used to reject pseudo selectors as property values as, for example,
 	 * "a:hover" and "text-decoration:underline" look the same to the property
 	 * match regex.
+	 * It will also match interpolation to allow for constructs such as
+	 * content:#{$pos}
 	 * @see isa() 
 	 * @param string the string to test
 	 * @return bool true if the string starts with a pseudo selector, false if not
 	 */
 	private static function isPseudoSelector($string) {
 		preg_match(self::MATCH_PSUEDO_SELECTOR, $string, $matches);
-		return isset($matches[0]) && in_array($matches[0], self::$psuedoSelectors);
+		return (isset($matches[0]) && in_array($matches[0], self::$psuedoSelectors)) ||
+			preg_match(self::MATCH_INTERPOLATION, $string);
 	}
 }

@@ -37,27 +37,6 @@ class SassExpandedRenderer extends SassCompactRenderer {
 	}
 
 	/**
-	 * Returns the indent string for the node
-	 * @param SassNode the node to return the indent string for
-	 * @return string the indent string for this SassNode
-	 */
-	protected function getIndent($node) {
-		if ($node instanceof SassRuleNode) {
-			return ($node->inDirective() ? self::INDENT : '');
-		}
-		if ($node instanceof SassPropertyNode) {
-			return self::INDENT . ($node->inDirective() ? self::INDENT : '');
-		}
-		elseif ($node instanceof SassCommentNode && 
-				$node->parent instanceof SassRuleNode) {
-			return self::INDENT . $this->getIndent($node->parent);
-		}
-		else {
-			return '';
-		}
-	}
-
-	/**
 	 * Renders a comment.
 	 * @param SassNode the node being rendered
 	 * @return string the rendered commnt
@@ -76,7 +55,8 @@ class SassExpandedRenderer extends SassCompactRenderer {
 	 * @param array properties to render
 	 * @return string the rendered properties
 	 */
-	public function renderProperties($properties) {
-		return join("\n", $properties);
+	public function renderProperties($node, $properties) {
+		$indent = $this->getIndent($node).self::INDENT;
+		return $indent.join("\n$indent", $properties);
 	}
 }

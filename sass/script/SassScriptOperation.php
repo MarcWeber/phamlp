@@ -16,42 +16,43 @@
  * @subpackage	Sass.script
  */
 class SassScriptOperation {
-  const MATCH = '/^(\(|\)|\+|-|\*|\/|%|<=|>=|<|>|==|!=|=|#{|}|&|\||\^|~|,|and|or|xor|not)/';
+  const MATCH = '/^(\(|\)|\+|-|\*|\/|%|<=|>=|<|>|==|!=|=|#{|}|,|and\b|or\b|xor\b|not\b)/';
 
 	/**
 	 * @var array map symbols to tokens.
 	 * A token is function, associativity, precedence, number of operands
 	 */
 	public static $operators = array(
-		'*'		=> array('times',			'l', 9, 2),
-		'/'		=> array('divide_by',	'l', 9, 2),
-		'%'		=> array('modulo',		'l', 9, 2),
-		'+'		=> array('plus',			'l', 8, 2),
-		'-'		=> array('minus',			'l', 8, 2),
-		'<<'	=> array('shiftl',		'l', 7, 2),
-		'>>'	=> array('shiftr',		'l', 7, 2),
-		'<='	=> array('lte',				'l', 6, 2),
-		'>='	=> array('gte',				'l', 6, 2),
-		'<'		=> array('lt',				'l', 6, 2),
-		'>'		=> array('gt',				'l', 6, 2),
-		'=='	=> array('eq',				'l', 5, 2),
-		'!='	=> array('neq',				'l', 5, 2),
-		'&'		=> array('bw_and',		'l', 4, 2),
-		'|'		=> array('bw_or',			'l', 4, 2),
-		'^'		=> array('bw_xor',		'l', 4, 2),
-		'~'		=> array('bw_not',		'r', 4, 1),
-		'and'	=> array('and',				'l', 3, 2),
-		'or'	=> array('or',				'l', 3, 2),
-		'xor'	=> array('xor',				'l', 3, 2),
-		'not'	=> array('not',				'l', 3, 1),
-		//'!'		=> array('not',			'l', 3, 1), not supported while !variable is allowed. Will need to add to MATCH when enabled
-		'='		=> array('equals',		'l', 2, 2),
-		')'		=> array('rparen',		'l', 1),
-		'('		=> array('lparen',		'l', 0),
-		','		=> array('comma',			'l', 0, 2),
+		'*'		=> array('times',		'l', 8, 2),
+		'/'		=> array('div',			'l', 8, 2),
+		'%'		=> array('modulo',	'l', 8, 2),
+		'+'		=> array('plus',		'l', 7, 2),
+		'-'		=> array('minus',		'l', 7, 2),
+		'<<'	=> array('shiftl',	'l', 6, 2),
+		'>>'	=> array('shiftr',	'l', 6, 2),
+		'<='	=> array('lte',			'l', 5, 2),
+		'>='	=> array('gte',			'l', 5, 2),
+		'<'		=> array('lt',			'l', 5, 2),
+		'>'		=> array('gt',			'l', 5, 2),
+		'=='	=> array('eq',			'l', 4, 2),
+		'!='	=> array('neq',			'l', 4, 2),
+		'and'	=> array('and',			'l', 3, 2),
+		'or'	=> array('or',			'l', 3, 2),
+		'xor'	=> array('xor',			'l', 3, 2),
+		'not'	=> array('not',			'l', 3, 1),
+		'='		=> array('assign',	'l', 2, 2),
+		')'		=> array('rparen',	'l', 1),
+		'('		=> array('lparen',	'l', 0),
+		','		=> array('comma',		'l', 0, 2),
 		'#{'	=> array('begin_interpolation'),
 		'}'		=> array('end_interpolation'),
-	); 
+	);
+	
+	/**
+	 * @var array operators with meaning in uquoted strings;
+	 * selectors, property names and values
+	 */
+	public static $inStrOperators = array(',', '#{');
  
 	/**
 	 * @var array default operator token.
@@ -121,14 +122,18 @@ class SassScriptOperation {
 			throw new SassScriptOperationException('Incorrect operand count for {operation}; expected {expected}, received {received}', array('{operation}'=>get_class($operands[0]), '{expected}'=>$this->operandCount, '{received}'=>count($operands)), SassScriptParser::$context->node);
 		}
 		
-		if ($this->associativity == 'l') {
-			$operands = array_reverse($operands);
+		if (count($operands) > 1 && is_null($operands[1])) {
+			$operation = 'op_unary_' . $this->operator;
 		}
-
-		$operation = 'op' . (is_null($operands[1]) ? '_unary_' : '_') . $this->operator;
+		else {
+			$operation = 'op_' . $this->operator;
+			if ($this->associativity == 'l') {
+				$operands = array_reverse($operands);
+			}
+		}
 		
 		if (method_exists($operands[0], $operation)) {
-			return $operands[0]->$operation($operands[1]);
+			return $operands[0]->$operation(!empty($operands[1]) ? $operands[1] : null);
 		}
 
 		throw new SassScriptOperationException('Undefined operation "{operation}" for {what}',  array('{operation}'=>$operation, '{what}'=>get_class($operands[0])), SassScriptParser::$context->node);
@@ -141,6 +146,6 @@ class SassScriptOperation {
 	 * @return mixed match at the start of the string or false if no match
 	 */
 	public static function isa($subject) {
-		return (preg_match(self::MATCH, $subject, $matches) ? $matches[0] : false);
+		return (preg_match(self::MATCH, $subject, $matches) ? trim($matches[0]) : false);
 	}
 }

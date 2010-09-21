@@ -52,10 +52,10 @@ class SassWhileNode extends SassNode {
 		if ($this->isDo) {
 			do {
 				$children = array_merge($children, $this->parseChildren($context));
-			} while ($this->evaluate($this->expression, $context)->boolean);
+			} while ($this->evaluate($this->expression, $context)->toBoolean());
 		}
 		else {
-			while ($this->evaluate($this->expression, $context)->boolean) {
+			while ($this->evaluate($this->expression, $context)->toBoolean()) {
 				$children = array_merge($children, $this->parseChildren($context));
 			}
 		}

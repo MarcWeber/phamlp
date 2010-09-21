@@ -91,7 +91,7 @@ class SassForNode extends SassNode {
 
 		$context = new SassContext($context);
 		for ($i = $from; ($from < $to ? $i < $to : $i > $to); $i = $i + $step) {
-			$context->setVariable($this->variable, $i);
+			$context->setVariable($this->variable, new SassNumber($i));
 			$children = array_merge($children, $this->parseChildren($context));
 		}
 		return $children;

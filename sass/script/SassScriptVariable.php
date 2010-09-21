@@ -40,20 +40,7 @@ class SassScriptVariable {
 	 * @return SassLiteral the SassScript object for this variable
 	 */
 	public function evaluate($context) {
-		$value = $context->getVariable($this->name);
-		
-		if ((SassBoolean::isa($value)) !== false) {
-			return new SassBoolean($value);
-		}
-		elseif ((SassNumber::isa($value)) !== false) {
-			return new SassNumber($value);
-		}
-		elseif ((SassColour::isa($value)) !== false) {
-			return new SassColour($value);
-		}
-		else {
-			return new SassString($value);
-		}
+		return $context->getVariable($this->name);
 	}
 
 	/**

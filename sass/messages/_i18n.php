@@ -31,7 +31,7 @@
 		'Illegal comment type'=>'',
 		'Illegal indentation ({level}); indentation can only increase by one'=>'',
 		'import directives'=>'',
-		'Incompatible units: {value1} and {value2}'=>'',
+		'Incompatible units: {from} and {to}'=>'',
 		'Incorrect argument count for {method}; expected {expected}, received {received}'=>'',
 		'Incorrect operand count for {operation}; expected {expected}, received {received}'=>'',
 		'Invalid indentation'=>'',

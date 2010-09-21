@@ -31,7 +31,7 @@
 		'Illegal comment type'=>'Illegal Art Kommentar',
 		'Illegal indentation ({level}); indentation can only increase by one'=>'Illegale einrückungsebene ({level}); einrückungsebene kann nur von einem',
 		'import directives'=>'import-richtlinien',
-		'Incompatible units: {value1} and {value2}'=>'Unvereinbare Einheiten: {value1} und {value2}',
+		'Incompatible units: {from} and {to}'=>'Unvereinbare Einheiten: {from} und {to}',
 		'Incorrect argument count for {method}; expected {expected}, received {received}'=>'Falscher argument zählen für den {method}; erwartet {expected}, erhielt {received}',
 		'Incorrect operand count for {operation}; expected {expected}, received {received}'=>'Falscher operand zählen für den {operation}; erwartet {expected}, erhielt {received}',
 		'Invalid indentation'=>'Ungültige einrückung',

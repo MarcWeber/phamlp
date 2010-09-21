@@ -35,13 +35,7 @@ class SassNestedRenderer extends SassExpandedRenderer {
 	 * @return string the indent string for this SassNode
 	 */
 	protected function getIndent($node) {
-		$level = $node->level;
-		if (($node instanceof SassPropertyNode && $node->inNamespace()) ||
-				$node->parent instanceof SassMixinNode ||
-				$node->inSassScriptDirective()) {
-			$level--;
-		}
-		return str_repeat(self::INDENT, $level);
+		return str_repeat(self::INDENT, $node->level);
 	}
 
 	/**

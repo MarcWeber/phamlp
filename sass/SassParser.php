@@ -114,11 +114,26 @@ class SassParser {
 	private $debug_info;
 	
 	/**
+	 * extensions:
+	 * @var array Sass extensions, e.g. Compass. An associative array of the form
+	 * $name => $options where $name is the name of the extension and $options
+	 * is an array of name=>value options pairs.
+	 */
+	protected $extensions;
+	
+	/**
 	 * filename:
 	 * @var string The filename of the file being rendered. 
 	 * This is used solely for reporting errors.
 	 */
 	protected $filename;
+	
+	/**
+	 * function_paths:
+	 * @var array An array of filesystem paths which should be searched for
+	 * SassScript functions.
+	 */
+	private $function_paths;
 	
 	/**
 	 * line:
@@ -274,9 +289,24 @@ class SassParser {
 		if (!is_array($options)) {
 			throw new SassException('{what} must be a {type}', array('{what}'=>'options', '{type}'=>'array'));
 		}
-		if (isset($options['language'])) {
+		if (!empty($options['language'])) {
 			Phamlp::$language = $options['language'];
-			unset($options['language']);
+		}
+		
+		if (!empty($options['extensions'])) {
+			foreach ($options['extensions'] as $extension=>$extOptions) {
+				include dirname(__FILE__).DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$extension.DIRECTORY_SEPARATOR.'config.php';
+				$configClass = 'SassExtentions'.$extension.'Config';
+				$config = new $configClass;
+				$config->config($extOptions);
+				
+				$lp = dirname(__FILE__).DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$extension.DIRECTORY_SEPARATOR.'frameworks';
+				$fp = dirname(__FILE__).DIRECTORY_SEPARATOR.'extensions'.DIRECTORY_SEPARATOR.$extension.DIRECTORY_SEPARATOR.'functions';
+				$options['load_paths'] = (empty($options['load_paths']) ?
+					array($lp) : array_merge($options['load_paths'], $lp));
+				$options['function_paths'] = (empty($options['function_paths']) ?
+					array($fp) : array_merge($options['function_paths'], $fp));			
+			}
 		}
 		
 		if (!empty($options['vendor_properties'])) {
@@ -286,8 +316,8 @@ class SassParser {
 			elseif (is_array($options['vendor_properties'])) {
 				$this->vendor_properties = array_merge($this->vendor_properties, $this->_vendorProperties);
 			}
-			unset($options['vendor_properties']);
 		}
+		unset($options['language'], $options['vendor_properties']);
 		
 		$defaultOptions = array(
 			'cache' 				 => self::CACHE,
@@ -295,6 +325,7 @@ class SassParser {
 			'css_location'	 => dirname(__FILE__) . DIRECTORY_SEPARATOR . self::CSS_LOCATION,
 			'debug_info'		 => false,
 			'filename'			 => array('dirname' => '', 'basename' => ''),
+			'function_paths' => array(),
 			'load_paths' 		 => array(dirname(__FILE__) . DIRECTORY_SEPARATOR . self::TEMPLATE_LOCATION),
 			'line'					 => 1,
 			'line_numbers'	 => false,
@@ -354,6 +385,10 @@ class SassParser {
 		return $this->line_numbers; 
 	}
 	
+	public function getFunction_paths() {
+		return $this->function_paths; 
+	}
+	
 	public function getLoad_paths() {
 		return $this->load_paths; 
 	}
@@ -388,6 +423,7 @@ class SassParser {
 			'cache_location' => $this->cache_location,
 			'css_location' => $this->css_location,
 			'filename' => $this->filename,
+			'function_paths' => $this->function_paths,
 			'line' => $this->line,
 			'line_numbers' => $this->line_numbers,
 			'load_paths' => $this->load_paths,
@@ -431,7 +467,7 @@ class SassParser {
 			}
 
 			if ($this->cache) {
-				$cached = SassFile::getCachedFile($filename, $this->cache_location);
+				$cached = SassFile::getCachedFile($this->filename, $this->cache_location);
 				if ($cached !== false) {
 					return $cached;
 				}
@@ -681,11 +717,12 @@ class SassParser {
 						$statement .= $this->source[$srcpos++];
 					}
 					break;
-				case self::BEGIN_BLOCK:					
+				case self::BEGIN_BLOCK:				
 				case self::END_BLOCK:
 				case self::END_STATEMENT:
 					$token = $this->createToken($statement . $c);
-					break;
+					if (is_null($token)) $statement = '';
+					break;	
 				default:
 					$statement .= $c;
 					break;
@@ -734,7 +771,7 @@ class SassParser {
 	 * @return SassNode a Sass directive node
 	 */
 	private function parseDirective($token, $parent) {
-		switch (SassDirectiveNode::getDirective($token)) {
+		switch (SassDirectiveNode::extractDirective($token)) {
 			case '@extend':
 				return new SassExtendNode($token);
 				break;

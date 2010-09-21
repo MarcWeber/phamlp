@@ -33,7 +33,12 @@ class SassRuleNode extends SassNode {
 	/**
 	 * @var array parent selectors
 	 */
-	private $_parentSelectors = array();
+	private $parentSelectors = array();
+
+	/**
+	 * @var array resolved selectors
+	 */
+	private $resolvedSelectors = array();
 	
 	/**
 	 * @var boolean whether the node expects more selectors
@@ -78,7 +83,7 @@ class SassRuleNode extends SassNode {
 	 */
 	public function parse($context) {
 		$node = clone $this;
-		$node->resolveSelectors($context);
+		$node->selectors = $this->resolveSelectors($context);
 		$node->children = $this->parseChildren($context);
 		return array($node);
 	}
@@ -194,14 +199,17 @@ class SassRuleNode extends SassNode {
 	 * appends the parent selectors.
 	 * @param SassContext the context in which this node is parsed
 	 */
-	private function resolveSelectors($context) {
+	public function resolveSelectors($context) {
 		$resolvedSelectors = array();
+		$this->parentSelectors = $this->getParentSelectors($context);
+		
 		foreach ($this->selectors as $key=>$selector) {
 			$selector = $this->interpolate($selector, $context);
+			//$selector = $this->evaluate($this->interpolate($selector, $context), $context)->toString();
 			if ($this->hasParentReference($selector)) {
-				$resolvedSelectors = array_merge($resolvedSelectors, $this->resolveParentReferences($selector));
+				$resolvedSelectors = array_merge($resolvedSelectors, $this->resolveParentReferences($selector, $context));
 			}
-			elseif ($this->parent instanceof SassRuleNode) {
+			elseif ($this->parentSelectors) {
 				foreach ($this->parentSelectors as $parentSelector) {
 					$resolvedSelectors[] = "$parentSelector $selector";
 				} // foreach
@@ -210,26 +218,25 @@ class SassRuleNode extends SassNode {
 				$resolvedSelectors[] = $selector;
 			}
 		} // foreach
-		$this->selectors = $resolvedSelectors;
+		sort($resolvedSelectors);
+		return $resolvedSelectors;
 	}
 
 	/**
 	 * Returns the parent selector(s) for this node.
-	 * This in an empty string if there is no parent selector.
+	 * This in an empty array if there is no parent selector.
 	 * @return array the parent selector for this node
 	 */
-	protected function getParentSelectors() {
-		if (empty($this->_parentSelectors)) {
-			$ancestor = $this->parent;
-			while (!$ancestor instanceof SassRuleNode && $ancestor->hasParent()) {
-				$ancestor = $ancestor->parent;
-			}
-
-			if ($ancestor instanceof SassRuleNode) {
-				$this->_parentSelectors = $ancestor->selectors;
-			}
+	protected function getParentSelectors($context) {
+		$ancestor = $this->parent;
+		while (!$ancestor instanceof SassRuleNode && $ancestor->hasParent()) {
+			$ancestor = $ancestor->parent;
 		}
-		return $this->_parentSelectors;
+
+		if ($ancestor instanceof SassRuleNode) {
+			return $ancestor->resolveSelectors($context);
+		}
+		return array();
 	}
 
 	/**
@@ -273,13 +280,13 @@ class SassRuleNode extends SassNode {
 	 * @param string selector
 	 * @return string selector with parent references resolved
 	 */
-	private function resolveParentReferences($selector) {
+	private function resolveParentReferences($selector, $context) {
 		$resolvedReferences = array(); 
 		if (!count($this->parentSelectors)) {
 			throw new SassRuleNodeException('Can not use parent selector (' .
 					self::PARENT_REFERENCE . ') when no parent selectors', array(), $this);
 		}
-		foreach ($this->parentSelectors as $parentSelector) {
+		foreach ($this->getParentSelectors($context) as $parentSelector) {
 			$resolvedReferences[] = str_replace(self::PARENT_REFERENCE, $parentSelector, $selector);
 		}
 		return $resolvedReferences;
@@ -288,25 +295,36 @@ class SassRuleNode extends SassNode {
 	/**
 	 * Explodes a string of selectors into an array.
 	 * We can't use PHP::explode as this will potentially explode attribute
-	 * matches in the selector, e.g. div[title="some,value"]
+	 * matches in the selector, e.g. div[title="some,value"] and interpolations.
 	 * @param string selectors
 	 * @return array selectors
 	 */
 	private function explode($string) {
 		$selectors = array();
 		$inString = false;
+		$interpolate = false;
 		$selector = '';
+		
 		for ($i = 0, $l = strlen($string); $i < $l; $i++) {
 			$c = $string[$i];
-			if ($c === self::CONTINUED && !$inString) {
+			if ($c === self::CONTINUED && !$inString && !$interpolate) {
 				$selectors[] = trim($selector);
 				$selector = '';
 			}
 			else {
-				if ($c == '"') {
-					$inString = !$inString;
-				}
 				$selector .= $c;
+				if ($c === '"' || $c === "'") {
+					do {
+						$_c = $string[++$i];
+						$selector .= $_c;
+					} while ($_c !== $c);
+				}
+				elseif ($c === '#' && $string[$i+1] === '{') {
+					do {
+						$c = $string[++$i];
+						$selector .= $c;
+					} while ($c !== '}');
+				}
 			}
 		}
 

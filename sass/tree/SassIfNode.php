@@ -72,7 +72,7 @@ class SassIfNode extends SassNode {
 	 * @return array parsed child nodes
 	 */
 	public function parse($context) {
-		if ($this->isElse() || $this->evaluate($this->expression, $context)->boolean) {
+		if ($this->isElse() || $this->evaluate($this->expression, $context)->toBoolean()) {
 			$children = $this->parseChildren($context);
 		}
 		elseif (!empty($this->else)) {

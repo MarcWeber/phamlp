@@ -28,7 +28,10 @@ class SassBoolean extends SassLiteral {
 	 * @return SassBoolean
 	 */
 	public function __construct($value) {
-		if ($value === 'true' || $value === 'false') {
+		if (is_bool($value)) {
+			$this->value = $value;
+		}
+		elseif ($value === 'true' || $value === 'false') {
 			$this->value = ($value === 'true' ? true : false);
 		}
 		else {

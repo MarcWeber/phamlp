@@ -16,7 +16,7 @@
  * @subpackage	Sass.tree
  */
 class SassVariableNode extends SassNode {
-	const MATCH = '/^([!$])([\w-]+):?\s*((\|\|)?=)?\s*(.+?)\s*(!default)?;?$/i';
+	const MATCH = '/^([!$])([\w-]+)\s*:?\s*((\|\|)?=)?\s*(.+?)\s*(!default)?;?$/i';
 	const IDENTIFIER = 1;
 	const NAME = 2;
 	const SASS_ASSIGNMENT = 3;
@@ -72,7 +72,8 @@ class SassVariableNode extends SassNode {
 	public function parse($context) {
 		if (!$this->isDefault || !$context->hasVariable($this->name)) {
 				$context->setVariable(
-					$this->name, $this->evaluate($this->value, $context)->toString());
+					$this->name, $this->evaluate($this->value, $context)
+				);
 		}		
 		$this->parseChildren($context); // Parse any warnings
 		return array();
