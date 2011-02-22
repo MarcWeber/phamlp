@@ -210,7 +210,7 @@ abstract class SassLiteral {
 	public function op_and($other) {
 		return ($this->toBoolean() ? $other : $this);
 	}
-	
+
 	/**
 	 * The SassScript or operation.
 	 * @param sassLiteral the value to or with this
@@ -219,7 +219,11 @@ abstract class SassLiteral {
 	public function op_or($other) {
 		return ($this->toBoolean() ? $this : $other);
 	}
-	
+
+    public function op_assign($other) {
+        return $other;
+    }
+
 	/**
 	 * The SassScript xor operation.
 	 * @param sassLiteral the value to xor with this
