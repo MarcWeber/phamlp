@@ -314,7 +314,7 @@ class SassParser {
 				$this->vendor_properties = $this->_vendorProperties;
 			}
 			elseif (is_array($options['vendor_properties'])) {
-				$this->vendor_properties = array_merge($this->vendor_properties, $this->_vendorProperties);
+			    $this->vendor_properties = array_merge($this->_vendorProperties, $options['vendor_properties']);
 			}
 		}
 		unset($options['language'], $options['vendor_properties']);
