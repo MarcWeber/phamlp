@@ -1059,6 +1059,19 @@ class HamlParser {
 						($this->style == HamlRenderer::STYLE_EXPANDED ||
 							$this->style == HamlRenderer::STYLE_NESTED ? "\n" : ''));
 		    break;
+          case self::UNESCAPE_XML:
+              $content = ($this->suppressEval ? '' :
+              '<?php echo ' . ($line[self::HAML_CONTENT]) . "; ?>" .
+              ($this->style == HamlRenderer::STYLE_EXPANDED ||
+              $this->style == HamlRenderer::STYLE_NESTED ? "\n" : ''));
+            break;
+
+          case self::ESCAPE_XML:
+              $content = ($this->suppressEval ? '' :
+              '<?php echo ' . ('htmlentities(' . $line[self::HAML_CONTENT] . ')') . "; ?>" .
+              ($this->style == HamlRenderer::STYLE_EXPANDED ||
+              $this->style == HamlRenderer::STYLE_NESTED ? "\n" : ''));
+            break;
 		  default:
 		  	$content = $line[self::HAML_CONTENT];
 		    break;
