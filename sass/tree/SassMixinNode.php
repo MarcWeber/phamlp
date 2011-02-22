@@ -52,10 +52,10 @@ class SassMixinNode extends SassNode {
 	 * @param SassContext the context in which this node is parsed
 	 * @return array the parsed node
 	 */
-	public function parse($context) {
-		$mixin = $context->getMixin($this->name);
+	public function parse($pcontext) {
+		$mixin = $pcontext->getMixin($this->name);
 
-		$context = new SassContext($context);
+		$context = new SassContext($pcontext);
 		$argc = count($this->args);
 		$count = 0;
 		foreach ($mixin->args as $name=>$value) {
@@ -76,7 +76,7 @@ class SassMixinNode extends SassNode {
 			$children = array_merge($children, $child->parse($context));
 		} // foreach
 
-		$context->merge();
+		//$context->merge();
 		return $children;
 	}
 

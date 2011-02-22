@@ -39,6 +39,11 @@ $margin: 16px;
 
 @include test("body");
 
+@import "compass/utilities/lists/horizontal-list";
+ul#gallery{
+  @include horizontal-list(4px, left);
+}
+
 ';
 
 $sass = new SassParser(array(
