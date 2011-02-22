@@ -494,7 +494,8 @@ class SassParser {
 	 */
 	private function toTree($source) {
 		if ($this->syntax === SassFile::SASS) {
-			$this->source = explode("\n", $source);
+		    $source = str_replace(array("\r\n", "\n\r", "\r"), "\n", $source);
+            $this->source = explode("\n", $source);
 			$this->setIndentChar();
 		}
 		else {
