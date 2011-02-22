@@ -143,14 +143,9 @@ class SassScriptFunction {
 					break;
 				case '"':
 				case "'":
-					$arg .= $c;
-                    //while (($_c = $string[$strpos++]) !== $c) { $arg .= $_c; }
-
-					do {
-						$_c = $string[$strpos++];
-						$arg .= $_c;
-					} while ($_c !== $c);
-
+                    while (($_c = $string[$strpos++]) !== $c) {
+                        $arg .= $_c;
+                    }
 					break;
 				case ',':
 					if ($paren) {

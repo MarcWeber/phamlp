@@ -31,6 +31,14 @@ $margin: 16px;
   border-color: $blue;
 }
 
+@mixin test($test_arg) {
+  #{$test_arg} {
+    width: 900px;
+  }
+}
+
+@include test("body");
+
 ';
 
 $sass = new SassParser(array(
