@@ -107,7 +107,7 @@ class SassScriptFunction {
 		$paren = 1;
 		$strpos = strlen($match);
 		$strlen = strlen($subject);
-		
+
 		while($paren && $strpos < $strlen) {
 			$c = $subject[$strpos++];
 			
@@ -128,10 +128,10 @@ class SassScriptFunction {
 		$paren = 0;
 		$strpos = 0;
 		$strlen = strlen($string);
-		
+
 		while ($strpos < $strlen) {
 			$c = $string[$strpos++];
-			
+
 			switch ($c) {
 				case '(':
 					$paren += 1;
@@ -144,10 +144,13 @@ class SassScriptFunction {
 				case '"':
 				case "'":
 					$arg .= $c;
+                    //while (($_c = $string[$strpos++]) !== $c) { $arg .= $_c; }
+
 					do {
 						$_c = $string[$strpos++];
 						$arg .= $_c;
 					} while ($_c !== $c);
+
 					break;
 				case ',':
 					if ($paren) {
