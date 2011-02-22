@@ -95,7 +95,7 @@ class SassPropertyNode extends SassNode {
 	 */
 	public function parse($context) {
 	  $return = array();
-	 	if ($this->value) {
+	 	if ($this->value!=="") {
 	  	$node = clone $this;
 			$node->name = ($this->inNamespace() ? "{$this->namespace}-" : '') .
 				$this->interpolate($this->name, $context);
