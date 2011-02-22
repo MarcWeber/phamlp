@@ -658,7 +658,7 @@ class SassColour extends SassLiteral {
 			$this->hsl2rgb();
 		}
 		$component = round(abs($this->blue));
-		return ($component > 255 ? $component % 255 : $component);
+		return max(0, min(255, round($this->blue));;
 	}
 
 	/**
@@ -670,7 +670,7 @@ class SassColour extends SassLiteral {
 			$this->hsl2rgb();
 		}
 		$component = round(abs($this->green));
-		return ($component > 255 ? $component % 255 : $component);
+		return max(0, min(255, round($this->green));
 	}
 
 	/**
@@ -682,7 +682,7 @@ class SassColour extends SassLiteral {
 			$this->hsl2rgb();
 		}
 		$component = round(abs($this->red));
-		return ($component > 255 ? $component % 255 : $component);
+		return max(0, min(255, round($this->red));
 	}
 
 	/**
