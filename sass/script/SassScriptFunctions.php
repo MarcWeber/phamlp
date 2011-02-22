@@ -678,7 +678,7 @@ class SassScriptFunctions {
 	 */
 	public static function unitless() {
 		SassLiteral::assertType($number, 'SassNumber');
-		return new SassBoolean(!$number->hasUnits());
+		return new SassBoolean($number->isUnitless());
 	}
 	
 	/*
