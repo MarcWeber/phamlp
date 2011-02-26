@@ -16,33 +16,29 @@ require_once(dirname(__FILE__).'/../sass/SassParser.php');
 
 $source = '
 
-$blue: #3bbfce;
-$margin: 16px;
 
-.content-navigation {
-  border-color: $blue;
-  color:
-    darken($blue, 9%);
-}
-
-.border {
-  padding:0;
-  margin: $margin / 2;
-  border-color: $blue;
-}
-
-@mixin test($test_arg) {
-  #{$test_arg} {
+@mixin test-a($testsel) {
+  #{$testsel} {
     width: 900px;
   }
 }
+@include test-a("body");
 
-@include test("body");
 
-@import "compass/utilities/lists/horizontal-list";
-ul#gallery{
-  @include horizontal-list(4px, left);
+$var1: 4px;
+$var2: 3px;
+@mixin test-b($var) {
+  .galleria {
+    width: $var;
+  }
 }
+@include test-b($var1 unquote("/") $var2);
+
+
+@import "compass/css3/border-radius";
+
+.simple   { @include border-radius(4px, 4px); }
+
 
 ';
 

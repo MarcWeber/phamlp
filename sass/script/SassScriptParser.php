@@ -52,7 +52,20 @@ class SassScriptParser {
 	public function interpolate($string, $context) {
 		for ($i = 0, $n = preg_match_all(self::MATCH_INTERPOLATION, $string, $matches);
 				$i < $n; $i++) {
-			$matches[1][$i] = $this->evaluate($matches[1][$i], $context)->toString();
+			$var = $this->evaluate($matches[1][$i], $context)->toString();
+            if(preg_match('/^unquote\((["\'])(.*)\1\)$/', $var, $match)){
+                $val = $match[2];
+            }
+            else if($var == '""'){
+                $val = "";
+            }
+            else if(preg_match('/^(["\'])(.*)\1$/', $var, $match)){
+                $val = $match[2];
+            }
+            else {
+                $val = $var;
+            }
+            $matches[1][$i] = $val;
 		}
 	  return str_replace($matches[0], $matches[1], $string);
 	}
