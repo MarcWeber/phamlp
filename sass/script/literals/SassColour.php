@@ -452,17 +452,17 @@ class SassColour extends SassLiteral {
 			if (!$other->isUnitless()) {
 				throw new SassColourException('{what} must be a {type}', array('{what}'=>Phamlp::t('sass', 'Number'), '{type}'=>Phamlp::t('sass', 'unitless number')), SassScriptParser::$context->node);
 			}
-			$this->red   = $this->getRed()   % $other->value;
-			$this->green = $this->getGreen() % $other->value;
-			$this->blue  = $this->getBlue()  % $other->value;
+			$this->red   = fmod($this->getRed(), $other->value);
+			$this->green = fmod($this->getGreen(), $other->value);
+			$this->blue  = fmod($this->getBlue(), $other->value);
 		}
 		elseif (!$other instanceof SassColour) {
 			throw new SassColourException('{what} must be a {type}', array('{what}'=>'Argument', '{type}'=>'SassColour or SassNumber'), SassScriptParser::$context->node);
 		}
 		else {
-			$this->red   = $this->getRed()   % $other->getRed();
-			$this->green = $this->getGreen() % $other->getGreen();
-			$this->blue  = $this->getBlue()  % $other->getBlue();
+			$this->red   = fmod($this->getRed(), $other->getRed());
+			$this->green = fmod($this->getGreen(), $other->getGreen());
+			$this->blue  = fmod($this->getBlue(), $other->getBlue());
 		}
 		return $this;
 	}
@@ -768,7 +768,7 @@ class SassColour extends SassLiteral {
 	 * @uses hue2rgb()
 	 */
 	private function hsl2rgb() {
-		$h = ($this->hue % 360)/360;
+		$h = $this->hue/360;
 		$s = $this->saturation/100;
 		$l = $this->lightness/100;
 		
@@ -833,7 +833,7 @@ class SassColour extends SassLiteral {
 				$h = (60*($rgb[0] - $rgb[1])/$c) + 240;
 				break;
 		}
-		$this->hue = $h % 360;
+		$this->hue = fmod($h, 360);
 	}
 	
 	/**
