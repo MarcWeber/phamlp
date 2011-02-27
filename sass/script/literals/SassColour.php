@@ -824,16 +824,16 @@ class SassColour extends SassLiteral {
 				$h = 0;
 				break;
 			case $rgb[0]:
-				$h = (($rgb[1] - $rgb[2])/$c) % 6;
+				$h = (60*($rgb[1] - $rgb[2])/$c);
 				break;
 			case $rgb[1]:
-				$h = (($rgb[2] - $rgb[0])/$c) + 2;
+				$h = (60*($rgb[2] - $rgb[0])/$c) + 120;
 				break;
 			case $rgb[2]:
-				$h = (($rgb[0] - $rgb[1])/$c) + 4;
+				$h = (60*($rgb[0] - $rgb[1])/$c) + 240;
 				break;
 		}
-		$this->hue = $h * 60;
+		$this->hue = $h % 360;
 	}
 	
 	/**
