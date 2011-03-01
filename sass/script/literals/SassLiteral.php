@@ -69,7 +69,7 @@ abstract class SassLiteral {
 	 * @return boolean the boolean representation of the value of this
 	 */
 	public function toBoolean() {
-		return (boolean)$this->value;
+		return (boolean)$this->value||$this->value===null;
 	}
 
 	/**
