@@ -23,10 +23,6 @@ class SassIfNode extends SassNode {
 	const ELSE_IF = 1;
 	const ELSE_EXPRESSION = 2;
 	/**
-	 * @var boolean if node is if.
-	 */
-	private $isif;
-	/**
 	 * @var SassIfNode the next else node.
 	 */
 	private $else;
@@ -46,12 +42,10 @@ class SassIfNode extends SassNode {
 		if ($if) {
 			preg_match(self::MATCH_IF, $token->source, $matches);
 			$this->expression = $matches[SassIfNode::IF_EXPRESSION];
-            $this->isif = true;
 		}
 		else {
 			preg_match(self::MATCH_ELSE, $token->source, $matches);
 			$this->expression = (sizeof($matches)==1 ? null : $matches[SassIfNode::ELSE_EXPRESSION]);
-            $this->isif = false;
 		}
 	}
 
@@ -96,6 +90,6 @@ class SassIfNode extends SassNode {
 	 * or "else if" node
 	 */
 	private function isElse() {
-	  return !$this->isif;
+	  return ($this->expression=='');
 	}
 }
