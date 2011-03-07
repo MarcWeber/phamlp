@@ -1,0 +1,44 @@
+The hamlp parser is crap. 
+
+haml-lang.com and the test cases contain stuff like
+
+  #foo{ attr_name = arbitrary_code, other_attr_name = more_arbitarry_code}
+
+Because attrs are separated by , (another attr or \n must follow) and because arbitrary code can contain nested
+function calls such as foo(2,bar(3,4)) the only way to match this is using recursive regex [1] or using much PHP
+code. 
+
+However instead a clumsy "do it all at once regex" has been used which definitely can't get the job done.
+If you run the test suite test/haml/test.php you'll notice that the results are
+horrible for some use cases.
+
+So I'd not base any work on this parser. Rewrite it from scratch.
+
+Examples from the test case which are failing:
+
+
+  81: boolean attribute with XHTML
+  haml: %input(checked=true)
+  expected: <inputchecked>
+  got: <inputchecked=''>
+
+  82: boolean attribute with HTML
+  SUBJECT: checked=true)
+  haml: %input(checked=true)
+  expected: <inputchecked>
+  got: <inputchecked=''>
+
+
+That the original author did not use a test suite also says a lot. The test
+cases do exist. So the ony effort would have been using them.
+
+That's why I stop touching any of this code.
+
+[1] Example of a recursive regex which would match such arbitrary_code:
+  $strings = array('"at\"h")',"'ab\\'c'",'aoeunth(2,"onth"),', '"oentuh") + (2,3)}','foo bar + 2345,');
+  foreach ($strings as $s) {
+    preg_match('/("([^"\\\\]+|\\.)*"|\'([^\'\\\\]+|\\.)*\'|\(((?R)(,(?R))*)\)|\((?R)\)|{(?R)}|[^(){},]+)+/',$s, $m);
+    var_dump($m[0]);
+  }
+
+
