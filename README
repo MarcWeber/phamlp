@@ -1,4 +1,7 @@
 The hamlp parser is crap. 
+Rewrite can be found here: http://haml-to-php.com
+Its proprietary source, sorry. I have to make a living as well
+costs $20 only and is supported though.
 
 haml-lang.com and the test cases contain stuff like
 
