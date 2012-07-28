@@ -1055,7 +1055,7 @@ class HamlParser {
 						'<?php echo str_replace("\n", \'&#x000a\', ' . ($this->escapeHtml ?
 						'htmlentities(' . $line[self::HAML_CONTENT] . ')' :
 						$line[self::HAML_CONTENT]) .
-						"; ?>" .
+						"); ?>" .
 						($this->style == HamlRenderer::STYLE_EXPANDED ||
 							$this->style == HamlRenderer::STYLE_NESTED ? "\n" : ''));
 		    break;
